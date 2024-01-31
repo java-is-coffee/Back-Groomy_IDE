@@ -15,7 +15,7 @@ WORKDIR /app
 
 # 호스트 시스템의 빌드 결과물인 JAR 파일을 컨테이너의 작업 디렉토리로 복사합니다.
 # 여기서는 빌드된 JAR 파일 이름이 'app.jar'라고 가정합니다. 실제 파일 이름에 맞게 수정하세요.
-COPY build/libs/*.jar app.jar
+COPY --from=build /app/build/libs/Java-is-coffee-0.0.1-SNAPSHOT.jar app.jar
 
 # 컨테이너가 시작될 때 실행될 명령어를 정의합니다.
 # JAR 파일을 실행합니다.
