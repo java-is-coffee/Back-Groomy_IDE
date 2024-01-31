@@ -52,4 +52,5 @@ jobs:
             pwd
             ls
             docker pull koreaygj/groomy-ide:latest
-            docker-compose up
+            docker-compose down
+            docker-compose up -d
