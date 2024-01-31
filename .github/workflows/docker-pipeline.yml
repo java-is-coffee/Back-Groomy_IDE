@@ -40,6 +40,7 @@ jobs:
           script: |
             sudo yarn update && sudo yarn install -y docker.io
             sudo systemctl start docker
+            sudo systemctl enable docker
 
       - name: Pull and Deploy Docker Image on EC2
         uses: appleboy/ssh-action@master
