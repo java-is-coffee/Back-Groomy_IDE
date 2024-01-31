@@ -1,6 +1,11 @@
 # 빌드 스테이지
 FROM gradle:7.2-jdk17 AS build
 WORKDIR /app
+
+#  gradlew 스크립트와 gradle 폴더 복사
+COPY gradlew .
+COPY gradle gradle
+
 # 소스 코드와 Gradle 설정 파일을 이미지로 복사
 COPY src ./src
 COPY build.gradle .
