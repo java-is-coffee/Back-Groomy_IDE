@@ -51,6 +51,6 @@ jobs:
             cd /home/ec2-user/groomy-ide
             pwd
             ls
-            docker pull koreaygj/groomy-ide:latest
             docker-compose down
+            docker pull koreaygj/groomy-ide:latest
             docker-compose up -d
