@@ -13,15 +13,15 @@
 
 ### Development
 
-<img src="https://img.shields.io/badge/spring-000000.svg?style=for-the-badge&logo=spring&logoColor=#6DB33F"/> <img src="https://img.shields.io/badge/Spring Boot-000000.svg?style=for-the-badge&logo=Spring Boot&logoColor=#6DB33F"/> <img src="https://img.shields.io/badge/springsecurity-000000.svg?style=for-the-badge&logo=springsecurity&logoColor=#6DB33F"/>
+<img src="https://img.shields.io/badge/spring-000000.svg?style=for-the-badge&logo=spring&logoColor=#6DB33F"/> <img src="https://img.shields.io/badge/Spring Boot-000000.svg?style=for-the-badge&logo=Spring Boot&logoColor=#6DB33F"/> <img src="https://img.shields.io/badge/springsecurity-000000.svg?style=for-the-badge&logo=springsecurity&logoColor=#6DB33F"/> <img src="https://img.shields.io/badge/mysql-FFFFFF.svg?style=for-the-badge&logo=mysql&logoColor=#4479A1"/>
 
 ### Environment
 
-<img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> <img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=git&logoColor=white"> <img src="https://img.shields.io/badge/visual%20studio%20code-007ACC?style=for-the-badge&logo=visualstudiocode&logoColor=white">
+<img src="https://img.shields.io/badge/github-181717?style=for-the-badge&logo=github&logoColor=white"> <img src="https://img.shields.io/badge/git-F05032?style=for-the-badge&logo=git&logoColor=white"> <img src="https://img.shields.io/badge/intellijidea%20code-007ACC?style=for-the-badge&logo=intellijidea&logoColor=white">
 
 ### Deploy
 
-<img src="https://img.shields.io/badge/Amazon S3-569A31?style=for-the-badge&logo=Amazon S3&logoColor=white"> <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=for-the-badge&logo=GitHub Actions&logoColor=white">
+<img src="https://img.shields.io/badge/Amazon EC2-569A31?style=for-the-badge&logo=Amazon EC2&logoColor=white"> <img src="https://img.shields.io/badge/GitHub Actions-2088FF?style=for-the-badge&logo=GitHub Actions&logoColor=white">
 
 ## 구현 기능
 
