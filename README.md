@@ -93,5 +93,5 @@ PR 요청 시 빌드를 진행하도록 작성
 
 | 문경미  | 박상현 |  윤지호   | 
 | :--------: | :--------: | :------: |
-|     <img src="https://contrib.rocks/image?repo=nohsa97/nohsa97" />  |  <img src="https://contrib.rocks/image?repo=koreaygj/koreaygj" />    |<img src="https://contrib.rocks/image?repo=gooowoon/Netflex" /> | 
+|     <img src="https://contrib.rocks/image?repo=M-roaroa/M-roaroa" />  |  <img src="https://contrib.rocks/image?repo=cocohodo/cocohodo" />    |<img src="https://contrib.rocks/image?repo=j5i3h8o8/j5i3h8o8" /> | 
 | @M-roaroa  | @cocohodo |  @j5i3h8o8   | 
