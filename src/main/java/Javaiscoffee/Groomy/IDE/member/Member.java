@@ -75,7 +75,7 @@ public class Member implements UserDetails {
     }
 
     /**
-     * 비밀번호를 암호화
+     * 저장되어 있는 현재 비밀번호를 암호화
      * @param passwordEncoder 암호화 할 인코더 클래스
      * @return 변경된 멤버 Entity
      */

@@ -1,5 +1,6 @@
 package Javaiscoffee.Groomy.IDE.security;
 
+import Javaiscoffee.Groomy.IDE.member.Member;
 import Javaiscoffee.Groomy.IDE.response.MyResponse;
 import Javaiscoffee.Groomy.IDE.response.ResponseStatus;
 import Javaiscoffee.Groomy.IDE.response.Status;
