@@ -45,13 +45,13 @@ public class SecurityConfig {
                 //로그인과 회원가입은 모든 요청을 허가
                 .requestMatchers(new AntPathRequestMatcher("/api/member/login")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/member/register")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/member/register/email-check")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/member/refresh")).permitAll()
                 //그 외 나머지 요청은 전부 인증이 필요
                 .anyRequest().authenticated()
                 .and()
                 //JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행하겠다는 설정
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
-                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint());
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -70,15 +70,5 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration); // 모든 경로에 대해 위 설정 적용
         return source;
-    }
-
-    /**
-     * 포스트맨에서는 예외처리가 작동하지만
-     * 웹에서는 예외처리가 정상 작동하지 않아서 MyResponse가 응답가는 것이 아니라
-     * 401 예외가 출력되어 버리기 때문에 따로 필터로 처리하는 설정
-     */
-    @Bean
-    public JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint() {
-        return new JwtAuthenticationEntryPoint();
     }
 }

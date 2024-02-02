@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class LoginController {
     private final LoginService loginService;
+    private final JpaMemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
@@ -48,6 +49,12 @@ public class LoginController {
         log.info("tokenDto 내용", myResponse.getData());
 
         return ResponseEntity.ok(myResponse);
+    }
+
+    @PostMapping("/register/email-check")
+    public MyResponse<EmailCheckResultDto> emailCheck(@RequestBody EmailCheckDto emailCheckDto) {
+        log.info("이메일 체크 진입 = {}", emailCheckDto.getData().getEmail());
+        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), new EmailCheckResultDto().setDuplicated(memberRepository.existsByEmail(emailCheckDto.getData().getEmail())));
     }
 
 }
