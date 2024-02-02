@@ -2,9 +2,9 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "main", "develop" ]
+    branches: [ "main" ]
   pull-requests:
-    branches: [ "main", "develop" ]
+    branches: [ "main" ]
 
 jobs:
   build-and-push:
@@ -41,6 +41,21 @@ jobs:
             sudo yarn update && sudo yarn install -y docker.io
             sudo systemctl start docker
             sudo systemctl enable docker
+
+       - name: Set Environment Variables on EC2
+         uses: appleboy/ssh-action@master
+         with:
+           host: ${{ secrets.EC2_HOST }}
+           username: ${{ secrets.EC2_USERNAME }}
+           key: ${{ secrets.EC2_SSH_PRIVATE_KEY }}
+           script: |
+             echo 'export DATABASE_URL="${{ secrets.DATABASE_URL }}"' | sudo tee -a /etc/environment
+             echo 'export DATABASE_USERNAME="${{ secrets.DATABASE_USERNAME }}"' | sudo tee -a /etc/environment
+             echo 'export DATABASE_PASSWORD="${{ secrets.DATABASE_PASSWORD }}"' | sudo tee -a /etc/environment
+             echo 'export JWT_SECRET_TOKEN="${{ secrets.JWT_SECRET_TOKEN }}"' | sudo tee -a /etc/environment
+             # 적용을 위해 SSH 세션 내에서 환경 변수 로드
+             source /etc/environment
+
 
       - name: Pull and Deploy Docker Image on EC2
         uses: appleboy/ssh-action@master
