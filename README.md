@@ -7,7 +7,8 @@
 </p>
 
 ## 프로젝트 소개
-초보 개발자가 성장할 수 있는 web-IDE
+초보 개발자가 성장할 수 있는 web-IDE 백엔드 레포지토리
+백엔드 dns = http://groomy-ide.duckdns.org:8080/
 
 ## ⚙ Stacks
 
