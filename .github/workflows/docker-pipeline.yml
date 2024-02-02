@@ -52,7 +52,7 @@ jobs:
             echo 'export DATABASE_URL="${{ secrets.DATABASE_URL }}"' | sudo tee -a /etc/environment
             echo 'export DATABASE_USERNAME="${{ secrets.DATABASE_USERNAME }}"' | sudo tee -a /etc/environment
             echo 'export DATABASE_PASSWORD="${{ secrets.DATABASE_PASSWORD }}"' | sudo tee -a /etc/environment
-            echo 'export JWT_SECRET_TOKEN="${{ secrets.JWT_SECRET_TOKEN }}"' | sudo tee -a /etc/environment
+            echo 'export JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"' | sudo tee -a /etc/environment
             # 적용을 위해 SSH 세션 내에서 환경 변수 로드
             source /etc/environment
 
