@@ -14,9 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestController {
     private final JpaMemberRepository repository;
     @GetMapping("/test")
-    public Member test() {
-        Member member = new Member("tkrhkrkfn@naver.com", "aaaa", "박상현", "박박긁어");
-        repository.save(member);
-        return member;
+    public String test() {
+        return "success";
     }
 }

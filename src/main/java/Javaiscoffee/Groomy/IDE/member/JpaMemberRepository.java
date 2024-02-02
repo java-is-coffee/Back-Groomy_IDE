@@ -54,4 +54,11 @@ public class JpaMemberRepository implements MemberRepository {
         long count = query.getSingleResult();
         return count > 0;
     }
+
+    @Override
+    public Optional<Member> findByMemberId(String email) {
+        TypedQuery<Member> query = em.createQuery("SELECT m FROM Member m WHERE m.email = :email", Member.class);
+        query.setParameter("email", email);
+        return Optional.ofNullable(query.getSingleResult());
+    }
 }
