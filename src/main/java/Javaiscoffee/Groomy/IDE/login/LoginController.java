@@ -30,9 +30,6 @@ public class LoginController {
         log.info("로그인 요청");
         MyResponse<TokenDto> response = loginService.login(loginDto);
         //로그인 실패했을 경우 실패 Response 반환
-        if (ResponseStatus.LOGIN_FAILED.getCode().equals(response.getStatus().getCode())) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
-        }
         return ResponseEntity.ok(response);
     }
 
