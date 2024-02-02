@@ -2,9 +2,9 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "main", "develop" ]
-  pull-requests:
-    branches: [ "main", "develop" ]
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
 
 jobs:
   build-and-push:
@@ -67,5 +67,6 @@ jobs:
             cd /home/ec2-user/groomy-ide
             pwd
             ls
+            docker-compose down
             docker pull koreaygj/groomy-ide:latest
-            docker-compose up
+            docker-compose up -d
