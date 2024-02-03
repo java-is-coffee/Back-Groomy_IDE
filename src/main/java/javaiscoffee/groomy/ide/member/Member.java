@@ -2,6 +2,7 @@ package javaiscoffee.groomy.ide.member;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import javaiscoffee.groomy.ide.project.ProjectMember;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -18,24 +20,32 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
+@Table(name = "member")
 public class Member implements UserDetails {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
     private Long memberId;
 
-    @NotNull
+    @Column(nullable = false, unique = true, length = 255)
     private String email;
-    @NotNull @Setter
+    @Setter
+    @Column(nullable = false, length = 255)
     private String password;
-    @NotNull @Setter
+    @Setter
+    @Column(nullable = false, length = 255)
     private String name;
-    @NotNull @Setter
+    @Setter
+    @Column(nullable = false, length = 255)
     private String nickname;
-    @NotNull @Setter
+    @Setter
+    @Column(nullable = false)
     private Long helpNumber;
-    @NotNull @Setter
+    @Setter
+    @Column(nullable = false, length = 255)
     @Enumerated(EnumType.STRING)
     private MemberRole role;
+    @OneToMany(mappedBy = "member")
+    private Set<ProjectMember> projectMembers;
 
     //UserDetails를 위한 추가
     @Override
