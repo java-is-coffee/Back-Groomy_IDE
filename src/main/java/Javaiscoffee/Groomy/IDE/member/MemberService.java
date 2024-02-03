@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -24,13 +26,24 @@ public class MemberService {
      * 요구 데이터 : 정보를 조회할 이메일
      * 반환 데이터 : 이메일에 해당하는 MemberInformationDto
      */
-    public MyResponse<MemberInformationDto> getMemberInformation (String email) {
-        Member member = memberRepository.findByEmail(email).get();
-        MemberInformationDto memberInformationDto = new MemberInformationDto();
-        if (member != null) {
-            BeanUtils.copyProperties(member, memberInformationDto);
+    public MyResponse<MemberInformationDto> getMemberInformation(String email) {
+        Optional<Member> memberOptional = memberRepository.findByEmail(email);
+        if (memberOptional.isPresent()) {
+            Member member = memberOptional.get();
+            log.info("정보 조회하려고 찾은 멤버 = {}", member);
+
+            // MemberInformationDto의 내부 Data 객체를 생성하고 정보 복사
+            MemberInformationDto.Data memberData = new MemberInformationDto.Data();
+            BeanUtils.copyProperties(member, memberData);
+
+            // MemberInformationDto 객체 생성 및 내부 Data 객체 설정
+            MemberInformationDto memberInformationDto = new MemberInformationDto();
+            memberInformationDto.setData(memberData);
+            return new MyResponse<>(new Status(ResponseStatus.SUCCESS), memberInformationDto);
+        } else {
+            log.error("해당 이메일을 가진 멤버가 없습니다: {}", email);
+            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
         }
-        return new MyResponse(new Status(ResponseStatus.SUCCESS),memberInformationDto);
     }
 
     /**
