@@ -2,13 +2,18 @@ package javaiscoffee.groomy.ide.project;
 
 import jakarta.persistence.*;
 import javaiscoffee.groomy.ide.member.Member;
-import lombok.Getter;
+import lombok.*;
 
-
-@Getter
+/**
+ * 프로젝트 참가 인원을 저장하는 테이블
+ */
 @Entity
+@Getter @Setter
 @Table(name = "project_member")
+@AllArgsConstructor
+@NoArgsConstructor
 public class ProjectMember {
+    //복합키때문에 사용하는 클래스
     @EmbeddedId
     private ProjectMemberId id;
 
@@ -21,5 +26,11 @@ public class ProjectMember {
     private Member member;
     @Column(nullable = false)
     private Boolean participated;   //초대된 상태(false)인지 프로젝트에 참가했는지(true) 저장
+
+    public ProjectMember(Member projectCreator, Project createdProject, boolean participated) {
+        this.member = projectCreator;
+        this.project = createdProject;
+        this.participated = participated;
+    }
 }
 

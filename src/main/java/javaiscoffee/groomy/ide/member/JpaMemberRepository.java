@@ -55,9 +55,9 @@ public class JpaMemberRepository implements MemberRepository {
     }
 
     @Override
-    public Optional<Member> findByMemberId(String email) {
-        TypedQuery<Member> query = em.createQuery("SELECT m FROM Member m WHERE m.email = :email", Member.class);
-        query.setParameter("email", email);
+    public Optional<Member> findByMemberId(Long memberId) {
+        TypedQuery<Member> query = em.createQuery("SELECT m FROM Member m WHERE m.memberId = :memberId", Member.class);
+        query.setParameter("memberId", memberId);
         return Optional.ofNullable(query.getSingleResult());
     }
 }

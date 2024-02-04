@@ -19,7 +19,7 @@ public class Project {
     private Long projectId;
     @ManyToOne @Setter
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member;  // 프로젝트 생성자
+    private Member memberId;  // 프로젝트 생성자
     @Setter
     @Column(nullable = false, length = 255)
     private String projectName;
@@ -30,12 +30,13 @@ public class Project {
     @Column(nullable = false, length = 255)
     @Enumerated(EnumType.STRING)
     private ProjectLanguage language;   //프로젝트 언어
+    @Setter
     @Column(nullable = false)
     private LocalDate createdDate;  //생성날짜는 Setter 필요 없음
     @Setter
     @Column(nullable = false)
     private Boolean deleted;    //현재 댓글이 지워졌는지 남아있는지 표시
-    @Lob
+    @Lob @Setter
     @Column(nullable = false)
     private String projectPath; //프로젝트 접근 경로
     @OneToMany(mappedBy = "project")
