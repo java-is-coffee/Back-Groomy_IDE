@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 @Transactional
 public class JpaCommentRepository implements CommentRepository{
-    @PersistenceContext
+
     private final EntityManager em;
     public JpaCommentRepository(EntityManager em) {
         this.em = em;

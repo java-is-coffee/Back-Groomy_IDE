@@ -22,11 +22,11 @@ public class Comment {
     @Id @Column(name = "comment_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long commentId;
-    @NotNull @Setter @ManyToOne(fetch = FetchType.LAZY)
+    @Setter @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "origin_comment", referencedColumnName = "comment_id")
     private Comment originComment; //대댓글
 
-    @NotNull @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull @Setter @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")
     private Board board;
 
