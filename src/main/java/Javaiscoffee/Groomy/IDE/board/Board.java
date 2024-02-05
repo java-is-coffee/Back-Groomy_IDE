@@ -54,7 +54,7 @@ public class Board {
     @NotNull @Enumerated(EnumType.STRING)
     private BoardStatus boardStatus;
 
-    @NotNull @OneToMany(mappedBy = "comment")
+    @NotNull @OneToMany(mappedBy = "board")
     private List<Comment> comment = new ArrayList<>();
 
     // 게시글 조회 할 때 정상상태 게시글 조회 하는 메서드
