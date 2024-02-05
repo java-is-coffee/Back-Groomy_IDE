@@ -49,8 +49,7 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: koreaygj/groomy-ide:latest
-          build-args: |
-            JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
+          JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
 
       - name: Login to EC2 instance
         uses: appleboy/ssh-action@master
