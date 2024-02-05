@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.project;
 
+import jakarta.validation.constraints.Null;
 import javaiscoffee.groomy.ide.response.MyResponse;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
@@ -39,10 +40,16 @@ public class ProjectController {
         }
     }
 
-    @PatchMapping("/edit")
-    public MyResponse<ProjectCreateResponseDto> editProject(@AuthenticationPrincipal CustomUserDetails userDetails, ProjectCreateRequestDto requestDto) {
+    @PatchMapping("/edit/{projectId}")
+    public MyResponse<ProjectCreateResponseDto> editProject(@PathVariable(name = "projectId") Long projectId,@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectCreateRequestDto requestDto) {
         Long memberId = userDetails.getMemberId();
-        log.info("프로젝트 수정 memberId={}",memberId);
-        return null;
+        log.info("수정할 프로젝트 매핑 = {}",requestDto);
+        return projectService.editProject(projectId, memberId, requestDto);
+    }
+
+    @DeleteMapping("/delete/{projectId}")
+    public MyResponse<Null> deleteProject(@PathVariable(name = "projectId") Long projectId,@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        return projectService.deleteProject(memberId, projectId);
     }
 }
