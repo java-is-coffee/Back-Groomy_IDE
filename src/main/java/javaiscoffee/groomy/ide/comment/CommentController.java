@@ -1,11 +1,13 @@
 package javaiscoffee.groomy.ide.comment;
 
+import javaiscoffee.groomy.ide.board.Board;
 import javaiscoffee.groomy.ide.response.MyResponse;
 import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -17,7 +19,7 @@ public class CommentController {
 
     @PostMapping("/write/{boardId}")
     public MyResponse<Comment> writeComment(@RequestBody CommentDto commentDto) {
-        log.info("입력 받은 댓글 정보 = {}",commentDto);
+        log.info("입력 받은 댓글 정보 = {}", commentDto);
         return commentService.createComment(commentDto);
     }
 
@@ -38,8 +40,14 @@ public class CommentController {
         return commentService.deleteComment(commentId);
     }
 
-//    @GetMapping("board/{boardId}")
-//
+    @GetMapping("/board/{boardId}")
+    public MyResponse<List<Comment>> getCommentByBoardId(@PathVariable Long boardId) {
+        return commentService.getCommentByBoardId(boardId);
+    }
+    // 패스베리어블로 보드 아이디 가져오고
+    // 서비스에 주는데 ...
+
+
 //    @GetMapping("member/{memberId}")
 
 }

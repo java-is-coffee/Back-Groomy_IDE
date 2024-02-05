@@ -43,14 +43,14 @@ public class Comment {
     private int helpNumber;
     @NotNull
     private LocalDateTime createdTime;
-    @NotNull @Enumerated(EnumType.STRING)
+    @NotNull @Setter @Enumerated(EnumType.STRING)
     private CommentStatus commentStatus;
 
 
-    // 댓글 조회 할 때 정상상태 댓글 조회 하는 메서드
-    public boolean isActive() {
-        return commentStatus == CommentStatus.ACTIVE;
-    }
+//    // 댓글 조회 할 때 정상상태 댓글 조회 하는 메서드
+//    public boolean isActive() {
+//        return commentStatus == CommentStatus.ACTIVE;
+//    }
 
     // 저장 전 실행되는 메서드
     @PrePersist

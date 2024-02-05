@@ -40,23 +40,25 @@ public class JpaCommentRepository implements CommentRepository{
     }
 
     //D 소프트딜리트X
+    //소프트딜리트로 바꾸기
+    //쿼리문 작성할 때
+    //commentStatus 가 ACTIVE인 댓글만 + createdTime 오름차순으로 정렬한 결과값 반환
     public void deleteComment(Long commentId) {
         Comment comment = em.find(Comment.class, commentId);
-        if ((comment != null)) {
-            em.remove(comment);
-        }
+        comment.setCommentStatus(CommentStatus.DELETED);
     }
 
 
     @Override
-    public List<Comment> findByBoard(Board board) {
-        return em.createQuery("SELECT c FROM Comment c WHERE c.board = :board", Comment.class)
+    public List<Comment> findCommentByBoardId(Board board, CommentStatus status) {
+        return em.createQuery("SELECT c FROM Comment c WHERE c.board = :board AND c.commentStatus = :status ORDER BY c.createdTime ASC", Comment.class)
                 .setParameter("board", board)
+                .setParameter("status", status)
                 .getResultList();
     }
 
     @Override
-    public List<Comment> findByMember(Member member) {
+    public List<Comment> findCommentByMemberId(Member member) {
         return em.createQuery("SELECT c FROM Comment c WHERE c.member = :member", Comment.class)
                 .setParameter("member", member)
                 .getResultList();

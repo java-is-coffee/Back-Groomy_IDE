@@ -6,9 +6,9 @@ import javaiscoffee.groomy.ide.member.Member;
 import java.util.List;
 
 public interface CommentRepository {
-    List<Comment> findByBoard(Board board); //해당 게시판에 속한 댓글 조회
+    List<Comment> findCommentByBoardId(Board board, CommentStatus status); //해당 게시판에 속한 댓글 조회
 
-    List<Comment> findByMember(Member member);  //해당 사용자의 댓글 조회
+    List<Comment> findCommentByMemberId(Member member);  //해당 사용자의 댓글 조회
 
 }
 
