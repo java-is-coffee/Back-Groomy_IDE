@@ -25,20 +25,17 @@ public class MemberService {
      * 요구 데이터 : 정보를 조회할 이메일
      * 반환 데이터 : 이메일에 해당하는 MemberInformationDto
      */
-    public MyResponse<MemberInformationDto> getMemberInformation(String email) {
+    public MyResponse<MemberInformationResponseDto> getMemberInformation(String email) {
         Optional<Member> memberOptional = memberRepository.findByEmail(email);
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
             log.info("정보 조회하려고 찾은 멤버 = {}", member);
 
             // MemberInformationDto의 내부 Data 객체를 생성하고 정보 복사
-            MemberInformationDto.Data memberData = new MemberInformationDto.Data();
-            BeanUtils.copyProperties(member, memberData);
+            MemberInformationResponseDto responseDto = new MemberInformationResponseDto();
+            BeanUtils.copyProperties(member, responseDto);
 
-            // MemberInformationDto 객체 생성 및 내부 Data 객체 설정
-            MemberInformationDto memberInformationDto = new MemberInformationDto();
-            memberInformationDto.setData(memberData);
-            return new MyResponse<>(new Status(ResponseStatus.SUCCESS), memberInformationDto);
+            return new MyResponse<>(new Status(ResponseStatus.SUCCESS), responseDto);
         } else {
             log.error("해당 이메일을 가진 멤버가 없습니다: {}", email);
             return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));

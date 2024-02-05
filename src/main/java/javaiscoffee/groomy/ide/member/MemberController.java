@@ -23,7 +23,7 @@ public class MemberController {
      * 반환 데이터 : 토큰값에 해당하는 멤버 정보를 담은 MyResponse
      */
     @GetMapping("/my")
-    public MyResponse<MemberInformationDto> getMyProfile(@AuthenticationPrincipal UserDetails userDetails) {
+    public MyResponse<MemberInformationResponseDto> getMyProfile(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails != null) {
             String email = userDetails.getUsername();
             log.info("내 정보를 확인하려는 email = {}", email);

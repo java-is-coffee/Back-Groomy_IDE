@@ -4,6 +4,7 @@ public enum ResponseStatus {
     SUCCESS("200", "성공"),
     REGISTER_DUPLICATED("301","중복된 이메일이 존재합니다."),
     LOGIN_FAILED("302","로그인에 실패했습니다."),
+    INPUT_ERROR("303", "입력값이 잘못되었습니다."),
     REGISTER_FAILED("400", "회원가입에 실패하였습니다."),
     UNAUTHORIZED("401","유효하지 않은 토큰입니다."),
     FORBIDDEN("403", "권한이 없습니다."),
