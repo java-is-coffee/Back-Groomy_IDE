@@ -22,6 +22,9 @@ jobs:
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
           # 테스트 할 때 필요한 다른 필요한 환경 변수를 여기에 추가하면 됩니다.
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+      
       - name: Run Tests
         run: ./gradlew test
 
