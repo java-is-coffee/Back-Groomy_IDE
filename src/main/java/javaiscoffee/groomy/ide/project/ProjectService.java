@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.project;
 
+import jakarta.validation.constraints.Null;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.response.MyResponse;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -28,7 +30,7 @@ public class ProjectService {
      */
     public MyResponse<ProjectCreateResponseDto> createProject(Long memberId, ProjectCreateRequestDto requestDto) {
         //토큰에서 멤버ID를 얻은 값과 요청받은 생성자 멤버ID를 비교해서 틀리면 Error Response 반환
-        if(memberId != requestDto.getData().getMemberId()) {
+        if(!Objects.equals(memberId, requestDto.getData().getMemberId())) {
             return new MyResponse<>(new Status(ResponseStatus.FORBIDDEN));
         }
 
@@ -72,10 +74,47 @@ public class ProjectService {
         return new MyResponse<>(new Status(ResponseStatus.SUCCESS), projectRepository.getProjectList(memberId));
     }
 
-    public MyResponse<ProjectCreateResponseDto> editProject(Long memberId, ProjectCreateRequestDto requestDto) {
-        if(memberId != requestDto.getData().getMemberId()) {
+    public MyResponse<ProjectCreateResponseDto> editProject(Long projectId,Long memberId, ProjectCreateRequestDto requestDto) {
+
+        Project oldProject = projectRepository.getProjectByProjectId(projectId);
+        //프로젝트를 찾을 수 없는 경우 에러 코드 반환
+        if(oldProject == null) {
+            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+        }
+
+        //프로젝트 생성자와 토큰의 memberId가 다른 경우 에러 코드 반환
+        if(!Objects.equals(memberId, oldProject.getMemberId().getMemberId())) {
             return new MyResponse<>(new Status(ResponseStatus.FORBIDDEN));
         }
-        return null;
+
+        //프로젝트 정보 수정
+        ProjectCreateRequestDto.Data data = requestDto.getData();
+        oldProject.setProjectName(data.getProjectName());
+        oldProject.setDescription(data.getDescription());
+
+        //응답 객체 매핑
+        Project updatedProject = projectRepository.update(oldProject);
+        ProjectCreateResponseDto responseDto = new ProjectCreateResponseDto();
+        BeanUtils.copyProperties(updatedProject, responseDto);
+        responseDto.setMemberId(memberId); // memberId만 설정
+        return new MyResponse<>(new Status(ResponseStatus.SUCCESS),responseDto);
+    }
+
+    public MyResponse<Null> deleteProject(Long memberId, Long projectId) {
+        Project oldProject = projectRepository.getProjectByProjectId(projectId);
+        //프로젝트를 찾을 수 없는 경우 에러 코드 반환
+        if(oldProject == null) {
+            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+        }
+
+        //프로젝트 생성자와 토큰의 memberId가 다른 경우 에러 코드 반환
+        if(!Objects.equals(memberId, oldProject.getMemberId().getMemberId())) {
+            return new MyResponse<>(new Status(ResponseStatus.FORBIDDEN));
+        }
+        //삭제 실패하면 에러 코드 반환
+        if(!projectRepository.delete(oldProject)) {
+            return new MyResponse<>(new Status(ResponseStatus.ERROR));
+        }
+        return new MyResponse<>(new Status(ResponseStatus.SUCCESS));
     }
 }

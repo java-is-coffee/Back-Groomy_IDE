@@ -23,7 +23,6 @@ public class JpaProjectRepository {
         try {
             em.persist(newProject);
             em.flush(); // ID를 즉시 할당받기 위해 호출
-
             // 저장된 프로젝트를 반환
             return newProject;
         } catch (PersistenceException e) {
@@ -81,7 +80,26 @@ public class JpaProjectRepository {
     /**
      * 프로젝트 정보 수정
      */
-    public Project update() {
-        return null;
+    public Project update(Project editedProject) {
+        em.persist(editedProject);
+        return editedProject;
+    }
+
+    /**
+     * 프로젝트 소프트 딜리트 처리
+     */
+    public boolean delete(Project project) {
+        try {
+            project.setDeleted(true); // 소프트 삭제
+            em.merge(project);
+            return true;
+        } catch (Exception e) {
+            // 예외 발생 시 삭제 실패 처리
+            return false;
+        }
+    }
+
+    public Project getProjectByProjectId(Long projectId) {
+        return em.find(Project.class, projectId);
     }
 }
