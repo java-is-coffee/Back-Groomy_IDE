@@ -1,5 +1,5 @@
 # 빌드 시점에 사용할 환경 변수 ARG 정의
-ARG JWT_SECRET_KEY=${JWT_SECRET_KEY}
+ARG JWT_SECRET_KEY
 
 # 빌드 스테이지
 FROM gradle:7.2-jdk17 AS build
@@ -16,6 +16,7 @@ COPY settings.gradle .
 
 # 런타임에 사용할 환경 변수 ENV 설정
 ENV JWT_SECRET_KEY=$JWT_SECRET_KEY
+RUN echo "JWT_SECRET_KEY=${JWT_SECRET_KEY}"
 
 # 애플리케이션 빌드
 RUN chmod +x ./gradlew
