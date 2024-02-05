@@ -1,16 +1,19 @@
-package javaiscoffee.groomy.ide.comment;
+package javaiscoffee.groomy.ide.board;
 
 import lombok.Data;
+import lombok.ToString;
 
 @Data
-public class CommentDto {
+@ToString
+public class RequestBoardDto {
     private Data data;
+
     @lombok.Data
     public static class Data{
-        private Long boardId;
         private Long memberId;
         private String nickname;
+        private String title;
         private String content;
-        private Long originComment;
+        private boolean isCompleted;
     }
 }

@@ -16,14 +16,15 @@ import java.util.Optional;
 public class JpaBoardRepository implements BoardRepository {
     @PersistenceContext
     private final EntityManager em;
+
     public JpaBoardRepository(EntityManager em) {
         this.em = em;
     }
 
-
     // C
     public Board saveBoard(Board board) {
         em.persist(board);
+        em.flush();
         return board;
     }
 
@@ -39,11 +40,8 @@ public class JpaBoardRepository implements BoardRepository {
     }
 
     //D
-    public void deleteBoard(Long boardId) {
-        Board board = em.find(Board.class, boardId);
-        if ((board != null)) {
-            em.remove(board);
-        }
+    public void deleteBoard(Board deletedBoard) {
+        em.merge(deletedBoard);
     }
 
     @Override

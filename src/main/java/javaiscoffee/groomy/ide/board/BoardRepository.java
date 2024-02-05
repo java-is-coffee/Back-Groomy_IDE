@@ -9,7 +9,7 @@ public interface BoardRepository {
     public Board saveBoard(Board board);
     public Optional<Board> findByBoardId(Long BoardId);
     public Board updateBoard(Board updatedBoard);
-    public void deleteBoard(Long boardId);
+    public void deleteBoard(Board deletedBoard);
     List<Board> findByMember(Member member);  //해당 사용자의 게시글 조회
 
 }

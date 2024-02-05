@@ -10,6 +10,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,17 +26,32 @@ public class BoardService {
     /**
      * 게시글 작성
      *
-     * @param boardDto
+     * @param requestBoardDto
      * @return
      */
-    public MyResponse<Board> createBoard(BoardDto boardDto) {
+    public MyResponse<ResponseBoardDto> createBoard(RequestBoardDto requestBoardDto) {
         Board newBoard = new Board();
-        BeanUtils.copyProperties(boardDto.getData(),newBoard);
-        Member creatorMember = memberRepository.findByMemberId(boardDto.getData().getMemberId()).get();
+        BeanUtils.copyProperties(requestBoardDto.getData(), newBoard);
+        Member creatorMember = memberRepository.findByMemberId(requestBoardDto.getData().getMemberId()).get();
         newBoard.setMember(creatorMember);
-        log.info("입력 받은 게시글 정보 = {}",boardDto);
-        log.info("새로 저장할 게시글 = {}",newBoard);
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), boardRepository.saveBoard(newBoard));
+        Board savedBoard = boardRepository.saveBoard(newBoard);
+
+        ResponseBoardDto responseBoardDto = new ResponseBoardDto(
+                savedBoard.getBoardId(),
+                savedBoard.getMember().getMemberId(),
+                savedBoard.getNickname(),
+                savedBoard.getTitle(),
+                savedBoard.getContent(),
+                savedBoard.getCreatedTime(),
+                savedBoard.getViewNumber(),
+                savedBoard.getCommentNumber(),
+                savedBoard.getScrapNumber(),
+                savedBoard.getHelpNumber(),
+                savedBoard.getBoardStatus(),
+                savedBoard.isCompleted()
+        );
+
+        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), responseBoardDto);
     }
 
     /**
@@ -44,18 +60,54 @@ public class BoardService {
      * @param boardId
      * @return
      */
-    public MyResponse<Optional<Board>> getBoardById(Long boardId) {
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), boardRepository.findByBoardId(boardId));
+    public MyResponse<ResponseBoardDto> getBoardById(Long boardId) {
+        Board findBoard = boardRepository.findByBoardId(boardId).get();
+
+        ResponseBoardDto responseBoardDto = new ResponseBoardDto(
+                findBoard.getBoardId(),
+                findBoard.getMember().getMemberId(),
+                findBoard.getNickname(),
+                findBoard.getTitle(),
+                findBoard.getContent(),
+                findBoard.getCreatedTime(),
+                findBoard.getViewNumber(),
+                findBoard.getCommentNumber(),
+                findBoard.getScrapNumber(),
+                findBoard.getHelpNumber(),
+                findBoard.getBoardStatus(),
+                findBoard.isCompleted()
+        );
+
+        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), responseBoardDto);
     }
 
     /**
      * 게시글 수정
      *
-     * @param editedBoard
+     * @param requestBoardDto
      * @return
      */
-    public MyResponse<Board> editBoard(Board editedBoard) {
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), boardRepository.updateBoard(editedBoard));
+    public MyResponse<ResponseBoardDto> editBoard(@RequestBody RequestBoardDto requestBoardDto, Long boardId) {
+        Board findBoard = boardRepository.findByBoardId(boardId).get();
+        BeanUtils.copyProperties(requestBoardDto.getData(), findBoard);
+        Board editedBoard = boardRepository.updateBoard(findBoard);
+
+        ResponseBoardDto responseBoardDto = new ResponseBoardDto(
+                editedBoard.getBoardId(),
+                editedBoard.getMember().getMemberId(),
+                editedBoard.getNickname(),
+                editedBoard.getTitle(),
+                editedBoard.getContent(),
+                editedBoard.getCreatedTime(),
+                editedBoard.getViewNumber(),
+                editedBoard.getCommentNumber(),
+                editedBoard.getScrapNumber(),
+                editedBoard.getHelpNumber(),
+                editedBoard.getBoardStatus(),
+                editedBoard.isCompleted()
+        );
+
+        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), responseBoardDto);
     }
 
     /**
@@ -65,8 +117,17 @@ public class BoardService {
      * @return
      */
     public MyResponse<Null> deleteBoard(Long boardId) {
-        boardRepository.deleteBoard(boardId);
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS));
+        Optional<Board> deletedBoardOptional = boardRepository.findByBoardId(boardId);
+
+        if(deletedBoardOptional.isPresent()) {
+            Board deletedBoard = deletedBoardOptional.get();
+            deletedBoard.setBoardStatus(BoardStatus.DELETE);
+            boardRepository.deleteBoard(deletedBoard);
+
+            return new MyResponse<>(new Status(ResponseStatus.SUCCESS));
+        } else {
+            return new MyResponse<>(new Status(ResponseStatus.FORBIDDEN));
+        }
     }
 
     /**

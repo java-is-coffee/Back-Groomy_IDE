@@ -51,7 +51,7 @@ public class Board {
     @NotNull @Setter @Column(name = "is_completed")
     private boolean isCompleted;
 
-    @NotNull @Enumerated(EnumType.STRING)
+    @NotNull @Setter @Enumerated(EnumType.STRING)
     private BoardStatus boardStatus;
 
     @NotNull @OneToMany(mappedBy = "board")

@@ -7,7 +7,7 @@ public class Status {
         this.responseStatus = responseStatus;
     }
 
-    public String getCode() {
+    public Integer getCode() {
         return responseStatus.getCode();
     }
     public String getMessage() {
