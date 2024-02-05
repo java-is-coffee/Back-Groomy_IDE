@@ -42,6 +42,7 @@ public class JwtTokenProvider {
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim("auth", authorities)
+                .claim("memberId", ((CustomUserDetails)authentication.getPrincipal()).getMemberId()) // memberId 정보 추가
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -96,8 +97,15 @@ public class JwtTokenProvider {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-        // UserDetails 객체를 만들어서 Authentication 리턴
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        // 클레임에서 memberId 추출
+        Long memberId = claims.get("memberId", Long.class); // 여기서는 claims에서 "memberId" 클레임을 Long 타입으로 추출합니다.
+
+        // CustomUserDetails 객체를 만들어서 Authentication 리턴
+        CustomUserDetails principal = new CustomUserDetails();
+        principal.setUsername(claims.getSubject()); // 이메일(혹은 사용자명) 설정
+        principal.setAuthorities(authorities); // 권한 설정
+        principal.setMemberId(memberId); // memberId 설정
+
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 

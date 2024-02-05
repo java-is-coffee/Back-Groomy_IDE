@@ -47,6 +47,12 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "member")
     private Set<ProjectMember> projectMembers;
 
+    @PrePersist
+    public void PrePersist() {
+        this.helpNumber = 0L;
+        this.role = MemberRole.USER;
+    }
+
     //UserDetails를 위한 추가
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

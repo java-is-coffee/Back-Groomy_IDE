@@ -21,8 +21,6 @@ public class JpaMemberRepository implements MemberRepository {
 
     @Override
     public void save(Member member) {
-        member.setHelpNumber(0L);
-        member.setRole(MemberRole.USER);
         em.persist(member);
     }
 

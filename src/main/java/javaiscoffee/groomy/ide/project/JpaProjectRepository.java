@@ -77,4 +77,11 @@ public class JpaProjectRepository {
 
         return projectList;
     }
+
+    /**
+     * 프로젝트 정보 수정
+     */
+    public Project update() {
+        return null;
+    }
 }

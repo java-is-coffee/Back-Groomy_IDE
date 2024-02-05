@@ -30,7 +30,7 @@ public class Project {
     @Column(nullable = false, length = 255)
     @Enumerated(EnumType.STRING)
     private ProjectLanguage language;   //프로젝트 언어
-    @Setter
+
     @Column(nullable = false)
     private LocalDate createdDate;  //생성날짜는 Setter 필요 없음
     @Setter
@@ -41,4 +41,13 @@ public class Project {
     private String projectPath; //프로젝트 접근 경로
     @OneToMany(mappedBy = "project")
     private Set<ProjectMember> projectMembers;
+
+    /**
+     * 저장되기 전에 미리 수행되는 메서드
+     */
+    @PrePersist
+    public void PrePersist() {
+        this.createdDate = LocalDate.now();
+        this.deleted = false;
+    }
 }
