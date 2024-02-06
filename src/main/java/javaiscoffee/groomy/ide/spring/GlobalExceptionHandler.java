@@ -11,6 +11,33 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+/**
+ * 추가해야 할 수도 있는 파라미터 관련 예외
+ * 파라미터 입력값과 관련하여 발생할 수 있는 예외는 다음과 같습니다:
+ *
+ * BindException: 바인딩 실패시 발생하는 예외입니다. 예를 들어, 요청 파라미터를 모델에 바인딩하는 과정에서 타입 불일치 등으로 인해 발생할 수 있습니다.
+ *
+ * TypeMismatchException: 요청 파라미터의 타입이 메서드 파라미터 타입과 일치하지 않을 때 발생하는 예외입니다.
+ *
+ * ConversionNotSupportedException: 지정된 타입으로 변환할 수 없는 경우 발생하는 예외입니다.
+ *
+ * HttpMediaTypeNotSupportedException: 클라이언트가 요청에서 지원하지 않는 Content-Type을 사용한 경우 발생합니다.
+ *
+ * HttpMediaTypeNotAcceptableException: 클라이언트가 Accept 헤더를 통해 서버가 반환할 수 없는 미디어 타입을 요청한 경우 발생합니다.
+ *
+ * MissingServletRequestPartException: 멀티파트 요청에서 특정 파트가 누락되었을 때 발생합니다.
+ *
+ * ServletRequestBindingException: 일반적인 요청 바인딩 실패에 대한 예외입니다.
+ *
+ * MethodArgumentTypeMismatchException: 메서드 인자의 타입이 올바르지 않을 경우 발생하는 예외입니다.
+ *
+ * MissingPathVariableException: URI 템플릿 변수가 누락된 경우 발생하는 예외입니다.
+ *
+ * ConstraintViolationException: Bean Validation API를 사용할 때 제약 조건 위반시 발생하는 예외입니다.
+ *
+ * UnsatisfiedServletRequestParameterException: 요청 매핑 조건을 만족하지 못할 때 발생하는 예외입니다.
+ */
+
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
