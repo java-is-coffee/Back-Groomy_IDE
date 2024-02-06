@@ -2,14 +2,9 @@ package javaiscoffee.groomy.ide.board;
 
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
-import javaiscoffee.groomy.ide.response.MyResponse;
-import javaiscoffee.groomy.ide.response.ResponseStatus;
-import javaiscoffee.groomy.ide.response.Status;
-import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 

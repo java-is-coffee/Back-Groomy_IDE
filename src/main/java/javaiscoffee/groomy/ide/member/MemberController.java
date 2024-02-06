@@ -23,7 +23,7 @@ public class MemberController {
     /**
      * 내 정보 조회할 때 사용하는 API
      * 요구 데이터 : 토큰값에서 뽑아낸 UserDetails
-     * 반환 데이터 : 토큰값에 해당하는 멤버 정보를 담은 MyResponse
+     * 반환 데이터 : 토큰값에 해당하는 멤버 정보를 담은 Response
      */
     @GetMapping("/my")
     public ResponseEntity<?> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -43,7 +43,7 @@ public class MemberController {
     /**
      * 마이페이지에서 정보 수정할 때 쓰는 API
      * 요구 데이터 : 토큰값에서 뽑아낸 UserDetails + 패스워드 제외 나머지 수정할 데이터를 포함한 멤버 정보 전체
-     * 반환 데이터 : 수정된 정보를 포함한 MyResponse
+     * 반환 데이터 : 수정된 정보를 포함한 Response
      */
     @PatchMapping("/my/edit")
     public ResponseEntity<?> editMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody MemberInformationDto memberInformationDto) {
@@ -58,7 +58,7 @@ public class MemberController {
     /**
      * 마이페이지에서 비밀번호 수정할 때 쓰는 API
      * 요구 데이터 : 패스워드와 토큰
-     * 반환 데이터 : 성공했다는 status만 가지고 있는 MyResponse
+     * 반환 데이터 : 성공했다는 status만 가지고 있는 Response
      */
     @PatchMapping("/my/edit/reset-password")
     public ResponseEntity<?> resetPassword(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody PasswordResetDto passwordResetDto) {
@@ -70,5 +70,16 @@ public class MemberController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
         }
         return ResponseEntity.ok(null);
+    }
+
+    /**
+     * 프로젝트 초대에서 이메일로 멤버 조회해서 초대할 때 사용하는 API
+     * 요구 데이터 : 토큰과 이메일값만 사용가능
+     * 반환 데이터 : memberId,memberName,memberEmail을 반환
+     */
+    @PostMapping("/findByEmail")
+    public ResponseEntity<?> findMemberByEmail(@RequestBody MemberInformationDto requestDto) {
+        FindMemberByEmailResponseDto findMember = memberService.findMemberByEmail(requestDto.getData().getEmail());
+        return ResponseEntity.ok(findMember);
     }
 }

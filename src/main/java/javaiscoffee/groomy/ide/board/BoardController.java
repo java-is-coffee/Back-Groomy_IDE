@@ -1,7 +1,5 @@
 package javaiscoffee.groomy.ide.board;
 
-import jakarta.validation.constraints.Null;
-import javaiscoffee.groomy.ide.response.MyResponse;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
