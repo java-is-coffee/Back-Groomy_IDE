@@ -1,5 +1,7 @@
 package javaiscoffee.groomy.ide.member;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import javaiscoffee.groomy.ide.comment.Comment;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import javaiscoffee.groomy.ide.project.ProjectMember;
@@ -19,7 +21,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = {"comment", "board"})
 @Table(name = "member")
 public class Member implements UserDetails {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,12 +48,21 @@ public class Member implements UserDetails {
     private MemberRole role;
     @OneToMany(mappedBy = "member")
     private Set<ProjectMember> projectMembers;
+    @NotNull @OneToMany(mappedBy = "member")
+    @Builder.Default
+    @JsonManagedReference
+    private List<Comment> board = new ArrayList<>();
+    @NotNull @OneToMany(mappedBy = "member")
+    @Builder.Default
+    @JsonManagedReference
+    private List<Comment> comment = new ArrayList<>();
 
     @PrePersist
     public void PrePersist() {
         this.helpNumber = 0L;
         this.role = MemberRole.USER;
     }
+
 
     //UserDetails를 위한 추가
     @Override

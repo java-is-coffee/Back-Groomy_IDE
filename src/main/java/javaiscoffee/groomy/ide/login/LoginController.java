@@ -10,6 +10,7 @@ import javaiscoffee.groomy.ide.security.TokenDto;
 import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,6 +28,9 @@ public class LoginController {
         log.info("로그인 요청");
         MyResponse<TokenDto> response = loginService.login(loginDto);
         //로그인 실패했을 경우 실패 Response 반환
+        if (ResponseStatus.LOGIN_FAILED.getCode().equals(response.getStatus().getCode())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
+        }
         return ResponseEntity.ok(response);
     }
 
