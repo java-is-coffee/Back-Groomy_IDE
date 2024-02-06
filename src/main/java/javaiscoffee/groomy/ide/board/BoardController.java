@@ -25,7 +25,7 @@ public class BoardController {
         return boardService.getBoardById(boardId);
     }
 
-    @PutMapping("/edit/{boardId}")
+    @PatchMapping("/edit/{boardId}")
     public MyResponse<ResponseBoardDto> editBoard(@RequestBody RequestBoardDto requestBoardDto, @PathVariable Long boardId) {
         return boardService.editBoard(requestBoardDto, boardId);
     }
