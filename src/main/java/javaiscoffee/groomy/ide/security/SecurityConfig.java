@@ -1,6 +1,8 @@
 package javaiscoffee.groomy.ide.security;
 
 
+import Javaiscoffee.Groomy.IDE.security.JwtAuthenticationFilter;
+import Javaiscoffee.Groomy.IDE.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +15,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @EnableWebSecurity
 @Configuration
@@ -24,6 +29,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors().and()
                 .httpBasic().disable()
                 //rest api이므로 basic auth 및 csrf 보안을 사용하지 않는다는 설정
                 .csrf().disable()
@@ -34,6 +40,7 @@ public class SecurityConfig {
                 //로그인과 회원가입은 모든 요청을 허가
                 .requestMatchers(new AntPathRequestMatcher("/api/member/login")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/member/register")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/member/register/email-check")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/member/refresh")).permitAll()
                 //그 외 나머지 요청은 전부 인증이 필요
                 .anyRequest().authenticated()
@@ -48,4 +55,15 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.addAllowedOriginPattern("*"); // 모든 출처 허용, 특정 출처로 제한할 수 있음
+        configuration.addAllowedMethod("*"); // 모든 HTTP 메서드 허용
+        configuration.addAllowedHeader("*"); // 모든 헤더 허용
+        configuration.setAllowCredentials(true); // 쿠키 허용
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration); // 모든 경로에 대해 위 설정 적용
+        return source;
+    }
 }

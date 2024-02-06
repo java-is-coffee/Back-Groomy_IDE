@@ -4,10 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class GroomyIdeApplicationTests {
+public class GroomyIdeApplicationTest {
 
-	@Test
-	public void contextLoads() {
-	}
+    @Test
+    public void test() {
+
+    }
 
 }

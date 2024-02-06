@@ -2,9 +2,9 @@ name: Build and Push Docker Image
 
 on:
   push:
-    branches: [ "main", "develop" ]
-  pull-requests:
-    branches: [ "main", "develop" ]
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
 
 jobs:
   build-and-push:
@@ -52,7 +52,7 @@ jobs:
             echo 'export DATABASE_URL="${{ secrets.DATABASE_URL }}"' | sudo tee -a /etc/environment
             echo 'export DATABASE_USERNAME="${{ secrets.DATABASE_USERNAME }}"' | sudo tee -a /etc/environment
             echo 'export DATABASE_PASSWORD="${{ secrets.DATABASE_PASSWORD }}"' | sudo tee -a /etc/environment
-            echo 'export JWT_SECRET_TOKEN="${{ secrets.JWT_SECRET_TOKEN }}"' | sudo tee -a /etc/environment
+            echo 'export JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"' | sudo tee -a /etc/environment
             # 적용을 위해 SSH 세션 내에서 환경 변수 로드
             source /etc/environment
 
@@ -67,5 +67,6 @@ jobs:
             cd /home/ec2-user/groomy-ide
             pwd
             ls
+            docker-compose down
             docker pull koreaygj/groomy-ide:latest
-            docker-compose up
+            docker-compose up -d

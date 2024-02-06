@@ -1,14 +1,18 @@
 package javaiscoffee.groomy.ide.login;
 
-import javaiscoffee.groomy.ide.response.MyResponse;
-import javaiscoffee.groomy.ide.response.ResponseStatus;
-import javaiscoffee.groomy.ide.security.JwtTokenProvider;
-import javaiscoffee.groomy.ide.security.RefreshTokenDto;
-import javaiscoffee.groomy.ide.security.TokenDto;
+import Javaiscoffee.Groomy.IDE.member.JpaMemberRepository;
+import Javaiscoffee.Groomy.IDE.member.Member;
+import Javaiscoffee.Groomy.IDE.member.MemberRepository;
+import Javaiscoffee.Groomy.IDE.member.MemberRole;
+import Javaiscoffee.Groomy.IDE.response.MyResponse;
+import Javaiscoffee.Groomy.IDE.response.ResponseStatus;
+import Javaiscoffee.Groomy.IDE.response.Status;
+import Javaiscoffee.Groomy.IDE.security.JwtTokenProvider;
+import Javaiscoffee.Groomy.IDE.security.RefreshTokenDto;
+import Javaiscoffee.Groomy.IDE.security.TokenDto;
 import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class LoginController {
     private final LoginService loginService;
+    private final JpaMemberRepository memberRepository;
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
@@ -46,6 +51,12 @@ public class LoginController {
         log.info("tokenDto 내용", myResponse.getData());
 
         return ResponseEntity.ok(myResponse);
+    }
+
+    @PostMapping("/register/email-check")
+    public MyResponse<EmailCheckResultDto> emailCheck(@RequestBody EmailCheckDto emailCheckDto) {
+        log.info("이메일 체크 진입 = {}", emailCheckDto.getData().getEmail());
+        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), new EmailCheckResultDto().setDuplicated(memberRepository.existsByEmail(emailCheckDto.getData().getEmail())));
     }
 
 }
