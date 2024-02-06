@@ -3,14 +3,20 @@ package javaiscoffee.groomy.ide.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import javaiscoffee.groomy.ide.member.JpaMemberRepository;
+import javaiscoffee.groomy.ide.member.Member;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -23,10 +29,12 @@ import java.util.stream.Collectors;
 @Component
 public class JwtTokenProvider {
     private final Key key;
+    private final JpaMemberRepository memberRepository;
 
-    public JwtTokenProvider(@Value("${jwt.secret}")String secretKey) {
+    public JwtTokenProvider(@Value("${jwt.secret}")String secretKey, JpaMemberRepository memberRepository) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
+        this.memberRepository = memberRepository;
     }
 
     //유저 정보를 가지고 있는 AccessToken, RefreshToken을 생성하는 메서드
@@ -49,6 +57,7 @@ public class JwtTokenProvider {
 
         //Refresh Token 생성 1주일
         String refreshToken = Jwts.builder()
+                .claim("memberId", ((CustomUserDetails)authentication.getPrincipal()).getMemberId())
                 .setExpiration(new Date(now + (1000 * 60 * 60 * 24 * 7)))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -68,15 +77,25 @@ public class JwtTokenProvider {
                 .build()
                 .parseClaimsJws(refreshToken)
                 .getBody();
+        Long memberId = claims.get("memberId", Long.class);
 
-        String username = claims.getSubject(); // 사용자 이름(이메일 또는 ID) 추출
+        log.info("토큰 재발급하는 memberId = {}", memberId);
+
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new MemberNotFoundException("유저를 찾을 수 없습니다."));
+
+        // 사용자 정보에서 권한 가져오기
+        String authorities = member.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
         // 새로운 AccessToken 생성
         long now = (new Date().getTime());
         Date accessTokenExpiresIn = new Date(now + (1000 * 60 * 30)); // 30분 후 만료
         // 새로운 AccessToken 반환
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(member.getUsername())
+                .claim("auth", authorities)
+                .claim("memberId", member.getMemberId())
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
