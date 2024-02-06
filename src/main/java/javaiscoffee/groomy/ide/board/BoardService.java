@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -136,15 +137,32 @@ public class BoardService {
      * @param paging
      * @return
      */
-    public List<Board> getBoardByPaging(Long paging) {
+    public List<ResponseBoardDto> getBoardByPaging(int paging) {
+        List<Board> boardList = boardRepository.findBoardByPaging(paging, 10, BoardStatus.ACTIVE);
+        List<ResponseBoardDto> responseBoardDtoList = new ArrayList<>();
 
+        for(int i = 0; i < boardList.size(); i++) {
+            Board boardListIndex = boardList.get(i);
 
+            ResponseBoardDto responseBoardDto = new ResponseBoardDto(
+                    boardListIndex.getBoardId(),
+                    boardListIndex.getMember().getMemberId(),
+                    boardListIndex.getNickname(),
+                    boardListIndex.getTitle(),
+                    boardListIndex.getContent(),
+                    boardListIndex.getCreatedTime(),
+                    boardListIndex.getViewNumber(),
+                    boardListIndex.getCommentNumber(),
+                    boardListIndex.getScrapNumber(),
+                    boardListIndex.getHelpNumber(),
+                    boardListIndex.getBoardStatus(),
+                    boardListIndex.isCompleted()
+            );
 
+            responseBoardDtoList.add(responseBoardDto);
+        }
 
-
-
-        return null;
-//        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), boardRepository.findBoardByBoardId(member));
+        return responseBoardDtoList;
     }
 
     /**

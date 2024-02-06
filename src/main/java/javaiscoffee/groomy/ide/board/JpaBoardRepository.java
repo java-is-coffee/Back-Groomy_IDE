@@ -47,6 +47,15 @@ public class JpaBoardRepository implements BoardRepository {
     }
 
     @Override
+    public List<Board> findBoardByPaging(int paging, int pagingNumber, BoardStatus status) {
+        return em.createQuery("SELECT b FROM Board b WHERE b.boardStatus = :status ORDER BY b.createdTime DESC", Board.class)
+                .setParameter("status",status)
+                .setFirstResult((paging - 1) * pagingNumber)
+                .setMaxResults(pagingNumber)
+                .getResultList();
+    }
+
+    @Override
     public List<Board> findBoardByBoardId(BoardStatus status) {
         return em.createQuery("SELECT b FROM Board b WHERE b.boardStatus = :status ORDER BY b.createdTime ASC", Board.class)
                 .setParameter("status", status)

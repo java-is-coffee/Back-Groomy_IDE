@@ -56,9 +56,9 @@ public class BoardController {
     }
 
     @GetMapping("/{paging}")
-    public ResponseEntity<?> getBoardByPaging(@PathVariable Long paging) {
+    public ResponseEntity<?> getBoardByPaging(@PathVariable int paging) {
         //임시로 작성 수정 필요
-        List<Board> boardByPaging = boardService.getBoardByPaging(paging);
+        List<ResponseBoardDto> boardByPaging = boardService.getBoardByPaging(paging);
         return ResponseEntity.ok(boardByPaging);
     }
 }
