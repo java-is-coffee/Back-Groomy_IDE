@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.comment;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import javaiscoffee.groomy.ide.board.Board;
 import javaiscoffee.groomy.ide.member.Member;
 import jakarta.persistence.*;
@@ -26,12 +27,16 @@ public class Comment {
     @JoinColumn(name = "origin_comment", referencedColumnName = "comment_id")
     private Comment originComment; //대댓글
 
-    @NotNull @Setter @ManyToOne(fetch = FetchType.LAZY)
+    @NotNull
+    @Setter
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")
+    @JsonBackReference
     private Board board;
 
     @NotNull @Setter @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
+    @JsonBackReference
     private Member member;
 
 

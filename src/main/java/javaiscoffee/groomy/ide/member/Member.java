@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.member;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import javaiscoffee.groomy.ide.comment.Comment;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -18,7 +19,6 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
 public class Member implements UserDetails {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -39,6 +39,8 @@ public class Member implements UserDetails {
     private MemberRole role;
 
     @NotNull @OneToMany(mappedBy = "member")
+    @Builder.Default
+    @JsonManagedReference
     private List<Comment> comment = new ArrayList<>();
 
     //UserDetails를 위한 추가

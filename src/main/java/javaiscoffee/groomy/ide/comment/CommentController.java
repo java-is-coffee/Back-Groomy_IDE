@@ -25,13 +25,14 @@ public class CommentController {
 
     @GetMapping("/comments/{commentId}")
     public MyResponse<Optional<Comment>> getCommentById(@PathVariable Long commentId) {
+        log.info("commentId = {}", commentId);
         return commentService.getCommentById(commentId);
     }
 
 
-    @PutMapping("/edit/{commentId}")
-    public MyResponse<Comment> editComment(@RequestBody Comment editedComment) {
-        return commentService.editComment(editedComment);
+    @PatchMapping("/comments/edit/{commentId}")
+    public MyResponse<Comment> editComment(@RequestBody CommentEditRequestDto requestDto, @PathVariable Long commentId) {
+        return commentService.editComment(requestDto, commentId);
     }
 
 
