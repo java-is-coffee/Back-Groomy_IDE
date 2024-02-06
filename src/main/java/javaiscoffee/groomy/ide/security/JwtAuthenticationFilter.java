@@ -52,7 +52,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             //access token이 잘못되어서 검사 실패했을 경우
             MyResponse<Object> myResponse = new MyResponse<>(new Status(ResponseStatus.UNAUTHORIZED), null);
 
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setStatus(HttpServletResponse.SC_OK);
             response.setContentType("application/json;charset=UTF-8");
 
             // ObjectMapper를 사용하여 MyResponse 객체를 JSON으로 변환
