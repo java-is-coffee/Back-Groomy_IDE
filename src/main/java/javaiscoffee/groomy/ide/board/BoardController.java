@@ -2,8 +2,12 @@ package javaiscoffee.groomy.ide.board;
 
 import jakarta.validation.constraints.Null;
 import javaiscoffee.groomy.ide.response.MyResponse;
+import javaiscoffee.groomy.ide.response.ResponseStatus;
+import javaiscoffee.groomy.ide.response.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,28 +21,45 @@ public class BoardController {
     private final BoardService boardService;
 
     @PostMapping("/write")
-    public MyResponse<ResponseBoardDto> createBoard(@RequestBody RequestBoardDto requestBoardDto) {
-        return boardService.createBoard(requestBoardDto);
+    public ResponseEntity<?> createBoard(@RequestBody RequestBoardDto requestBoardDto) {
+        ResponseBoardDto createdBoard = boardService.createBoard(requestBoardDto);
+        if(createdBoard == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
+        }
+        return ResponseEntity.ok(createdBoard);
     }
 
     @GetMapping("/content/{boardId}")
-    public MyResponse<ResponseBoardDto> getBoardById(@PathVariable Long boardId) {
-        return boardService.getBoardById(boardId);
+    public ResponseEntity<?> getBoardById(@PathVariable Long boardId) {
+        ResponseBoardDto findedBoard = boardService.getBoardById(boardId);
+        if(findedBoard == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+        return ResponseEntity.ok(findedBoard);
     }
 
     @PatchMapping("/edit/{boardId}")
-    public MyResponse<ResponseBoardDto> editBoard(@RequestBody RequestBoardDto requestBoardDto, @PathVariable Long boardId) {
-        return boardService.editBoard(requestBoardDto, boardId);
+    public ResponseEntity<?> editBoard(@RequestBody RequestBoardDto requestBoardDto, @PathVariable Long boardId) {
+        ResponseBoardDto editedBoard = boardService.editBoard(requestBoardDto, boardId);
+        if(editedBoard == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
+        }
+        return ResponseEntity.ok(editedBoard);
     }
 
     @DeleteMapping("/delete/{boardId}")
-    public MyResponse<Null> deleteBoard(@PathVariable Long boardId) {
-        return boardService.deleteBoard(boardId);
+    public ResponseEntity<?> deleteBoard(@PathVariable Long boardId) {
+        if(!boardService.deleteBoard(boardId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+        return ResponseEntity.ok(null);
     }
 
     @GetMapping("/{paging}")
-    public MyResponse<List<ResponseListBoardDto>> getBoardByPaging(@PathVariable Long paging) {
-        return boardService.getBoardByPaging(paging);
+    public ResponseEntity<?> getBoardByPaging(@PathVariable Long paging) {
+        //임시로 작성 수정 필요
+        List<Board> boardByPaging = boardService.getBoardByPaging(paging);
+        return ResponseEntity.ok(boardByPaging);
     }
 }
 

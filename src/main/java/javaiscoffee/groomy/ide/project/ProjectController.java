@@ -7,6 +7,8 @@ import javaiscoffee.groomy.ide.response.Status;
 import javaiscoffee.groomy.ide.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,37 +21,36 @@ import java.util.List;
 public class ProjectController {
     private final ProjectService projectService;
     @PostMapping("/create")
-    public MyResponse<ProjectCreateResponseDto> createProject(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectCreateRequestDto projectCreateRequestDto) {
-        if (userDetails != null) {
-            Long memberId = userDetails.getMemberId();
-            return projectService.createProject(memberId, projectCreateRequestDto);
-        } else {
-            // userDetails가 null인 경우의 처리
-            log.error("인증된 사용자가 없음");
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+    public ResponseEntity<?> createProject(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectCreateRequestDto projectCreateRequestDto) {
+        Long memberId = userDetails.getMemberId();
+        ProjectCreateResponseDto savedProject = projectService.createProject(memberId, projectCreateRequestDto);
+        if(savedProject == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
         }
+        return ResponseEntity.ok(savedProject);
     }
     @GetMapping("/list")
-    public MyResponse<List<ProjectCreateResponseDto>> getProjectList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        if (userDetails != null) {
-            return projectService.getProjectList(userDetails.getMemberId());
-        } else {
-            // userDetails가 null인 경우의 처리
-            log.error("인증된 사용자가 없음");
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
-        }
+    public ResponseEntity<?> getProjectList(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(projectService.getProjectList(userDetails.getMemberId()));
     }
 
     @PatchMapping("/edit/{projectId}")
-    public MyResponse<ProjectCreateResponseDto> editProject(@PathVariable(name = "projectId") Long projectId,@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectCreateRequestDto requestDto) {
+    public ResponseEntity<?> editProject(@PathVariable(name = "projectId") Long projectId,@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectCreateRequestDto requestDto) {
         Long memberId = userDetails.getMemberId();
         log.info("수정할 프로젝트 매핑 = {}",requestDto);
-        return projectService.editProject(projectId, memberId, requestDto);
+        ProjectCreateResponseDto editedProject = projectService.editProject(projectId, memberId, requestDto);
+        if (editedProject == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
+        }
+        return ResponseEntity.ok(editedProject);
     }
 
     @DeleteMapping("/delete/{projectId}")
-    public MyResponse<Null> deleteProject(@PathVariable(name = "projectId") Long projectId,@AuthenticationPrincipal CustomUserDetails userDetails) {
+    public ResponseEntity<?> deleteProject(@PathVariable(name = "projectId") Long projectId,@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMemberId();
-        return projectService.deleteProject(memberId, projectId);
+        if (!projectService.deleteProject(memberId, projectId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+        return ResponseEntity.ok(null);
     }
 }

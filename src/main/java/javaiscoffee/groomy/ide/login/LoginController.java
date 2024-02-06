@@ -25,12 +25,12 @@ public class LoginController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
         log.info("로그인 요청");
-        TokenDto response = loginService.login(loginDto);
+        TokenDto tokenDto = loginService.login(loginDto);
         //로그인 실패했을 경우 실패 Response 반환
-        if (response == null) {
+        if (tokenDto == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
         }
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(tokenDto);
     }
 
     @PostMapping("/register")

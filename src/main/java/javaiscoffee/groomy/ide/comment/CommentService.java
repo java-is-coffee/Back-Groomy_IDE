@@ -30,14 +30,14 @@ public class CommentService {
      * @param commentDto
      * @return 작성한 댓글
      */
-    public MyResponse<Comment> createComment(CommentDto commentDto) {
+    public Comment createComment(CommentDto commentDto) {
         Comment newComment = new Comment();
         BeanUtils.copyProperties(commentDto.getData(), newComment);
         Member creatorMember = memberRepository.findByMemberId(commentDto.getData().getMemberId()).get();
         Board board = boardRepository.findByBoardId(commentDto.getData().getBoardId()).get();
         //댓글이 삭제된 경우 NOT_FOUND, null 반환
         if (newComment.getCommentStatus() == CommentStatus.DELETED) {
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND), null);
+            return null;
         }
         // 대댓글인 경우
         if (commentDto.getData().getOriginComment() != null) {
@@ -54,7 +54,7 @@ public class CommentService {
         log.info("입력 받은 댓글 정보 = {}",commentDto);
         log.info("새로 저장할 댓글 = {}",newComment);
 //        log.info("저장할 댓글의 board 정보 = {}",board);
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), commentRepository.saveComment(newComment));
+        return commentRepository.saveComment(newComment);
     }
 
     /**
@@ -62,9 +62,13 @@ public class CommentService {
      * @param commentId
      * @return commentId 댓글 조회
      */
-    public MyResponse<Optional<Comment>> getCommentById(Long commentId) {
+    public Comment getCommentById(Long commentId) {
         Comment getComment = commentRepository.findByCommentId(commentId).get();
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), commentRepository.findByCommentId(commentId));
+        Optional<Comment> findedComment = commentRepository.findByCommentId(commentId);
+        if(findedComment.isEmpty()) {
+            return null;
+        }
+        return findedComment.get();
     }
 
     /**
@@ -72,11 +76,11 @@ public class CommentService {
      * @param requestDto
      * @return nickname, content만 바꿔서 덮어씌운 old 반환
      */
-    public MyResponse<Comment> editComment(CommentEditRequestDto requestDto, Long commentId) {
+    public Comment editComment(CommentEditRequestDto requestDto, Long commentId) {
         //기존 댓글 조회 후 없을 경우 에러 반환
         Optional<Comment> oldComment = commentRepository.findByCommentId(commentId);
         if(oldComment.isEmpty()) {
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+            return null;
         }
         Comment old = oldComment.get();
         BeanUtils.copyProperties(commentId,old);
@@ -85,7 +89,7 @@ public class CommentService {
         old.setContent(requestDto.getData().getContent());
         log.info("수정된 댓글 = {}",old);
         // commentId로 기존 댓글 조회
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), commentRepository.updateComment(old));
+        return commentRepository.updateComment(old);
     }
 
 
@@ -95,10 +99,10 @@ public class CommentService {
      * @param commentId
      * @return Null 값, 성공 메세지
      */
-    public MyResponse<Null> deleteComment(Long commentId) {
+    public Boolean deleteComment(Long commentId) {
         commentRepository.deleteComment(commentId);
         log.info("댓글 삭제 완료 = {}", commentId);
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS));
+        return true;
     }
 
     /**
@@ -106,11 +110,11 @@ public class CommentService {
      * @param boardId
      * @return CommentStatus가 ACTIVE인 모든 댓글 리스트로 반환
      */
-    public MyResponse<List<Comment>> getCommentByBoardId(Long boardId) {
+    public List<Comment> getCommentByBoardId(Long boardId) {
         Board getBoard = boardRepository.findByBoardId(boardId).get();
         List<Comment> commentList = commentRepository.findCommentByBoardId(getBoard, CommentStatus.ACTIVE);
         log.info("해당 게시판에 딸린 모든 댓글들 = {}", commentList);
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), commentList);
+        return commentList;
     }
 
     /**
@@ -118,11 +122,11 @@ public class CommentService {
      * @param memberId
      * @return CommentStatus가 ACTIVE인 모든 댓글 리스트로 반환
      */
-    public MyResponse<List<Comment>> getCommentByMemberId(Long memberId) {
+    public List<Comment> getCommentByMemberId(Long memberId) {
         Member getMember = memberRepository.findByMemberId(memberId).get();
         List<Comment> commentList = commentRepository.findCommentByMemberId(getMember, CommentStatus.ACTIVE);
         log.info("해당 사용자가 작성한 모든 댓글들 = {}", commentList);
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), commentList);
+        return commentList;
     }
 
 }

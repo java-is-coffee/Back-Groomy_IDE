@@ -28,10 +28,10 @@ public class ProjectService {
      * 요구 데이터 : 프로젝트 생성에 필요한 정보가 담긴 ProjectCreateRequestDto 객체를 포함한 응답 객체
      * 반환 데이터 : 프로젝트 생성 정보가 담긴 ProjectCreateResponseDto 객체를 포함한 응답 객체
      */
-    public MyResponse<ProjectCreateResponseDto> createProject(Long memberId, ProjectCreateRequestDto requestDto) {
+    public ProjectCreateResponseDto createProject(Long memberId, ProjectCreateRequestDto requestDto) {
         //토큰에서 멤버ID를 얻은 값과 요청받은 생성자 멤버ID를 비교해서 틀리면 Error Response 반환
         if(!Objects.equals(memberId, requestDto.getData().getMemberId())) {
-            return new MyResponse<>(new Status(ResponseStatus.FORBIDDEN));
+            return null;
         }
 
         //Dto에서 newProject 객체로 정보 복사
@@ -42,7 +42,7 @@ public class ProjectService {
         Optional<Member> member = memberRepository.findByMemberId(requestDto.getData().getMemberId());
         if (member.isEmpty()) {
             log.error("프로젝트 생성자를 찾을 수 없습니다. {}", requestDto.getData().getMemberId());
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+            return null;
         }
         //생성자가 있으므로 저장
         Member projectCreator = member.get();
@@ -54,7 +54,7 @@ public class ProjectService {
         // 생성이 안되었으면 null Response 반환
         Project createdProject = projectRepository.save(newProject);
         if(createdProject==null) {
-            return new MyResponse<>(new Status(ResponseStatus.ERROR));
+            return null;
         }
         log.info("new project = {}", newProject);
 
@@ -67,24 +67,24 @@ public class ProjectService {
         ProjectCreateResponseDto responseDto = new ProjectCreateResponseDto();
         BeanUtils.copyProperties(newProject, responseDto);
         responseDto.setMemberId(projectCreator.getMemberId()); // memberId만 설정
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS),responseDto);
+        return responseDto;
     }
 
-    public MyResponse<List<ProjectCreateResponseDto>> getProjectList(Long memberId) {
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), projectRepository.getProjectList(memberId));
+    public List<ProjectCreateResponseDto> getProjectList(Long memberId) {
+        return projectRepository.getProjectList(memberId);
     }
 
-    public MyResponse<ProjectCreateResponseDto> editProject(Long projectId,Long memberId, ProjectCreateRequestDto requestDto) {
+    public ProjectCreateResponseDto editProject(Long projectId,Long memberId, ProjectCreateRequestDto requestDto) {
 
         Project oldProject = projectRepository.getProjectByProjectId(projectId);
         //프로젝트를 찾을 수 없는 경우 에러 코드 반환
         if(oldProject == null) {
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+            return null;
         }
 
         //프로젝트 생성자와 토큰의 memberId가 다른 경우 에러 코드 반환
         if(!Objects.equals(memberId, oldProject.getMemberId().getMemberId())) {
-            return new MyResponse<>(new Status(ResponseStatus.FORBIDDEN));
+            return null;
         }
 
         //프로젝트 정보 수정
@@ -97,24 +97,24 @@ public class ProjectService {
         ProjectCreateResponseDto responseDto = new ProjectCreateResponseDto();
         BeanUtils.copyProperties(updatedProject, responseDto);
         responseDto.setMemberId(memberId); // memberId만 설정
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS),responseDto);
+        return responseDto;
     }
 
-    public MyResponse<Null> deleteProject(Long memberId, Long projectId) {
+    public Boolean deleteProject(Long memberId, Long projectId) {
         Project oldProject = projectRepository.getProjectByProjectId(projectId);
         //프로젝트를 찾을 수 없는 경우 에러 코드 반환
         if(oldProject == null) {
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+            return false;
         }
 
         //프로젝트 생성자와 토큰의 memberId가 다른 경우 에러 코드 반환
         if(!Objects.equals(memberId, oldProject.getMemberId().getMemberId())) {
-            return new MyResponse<>(new Status(ResponseStatus.FORBIDDEN));
+            return false;
         }
         //삭제 실패하면 에러 코드 반환
         if(!projectRepository.delete(oldProject)) {
-            return new MyResponse<>(new Status(ResponseStatus.ERROR));
+            return false;
         }
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS));
+        return true;
     }
 }

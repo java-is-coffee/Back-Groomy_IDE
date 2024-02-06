@@ -4,8 +4,11 @@ import javaiscoffee.groomy.ide.response.MyResponse;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
 import jakarta.validation.constraints.Null;
+import javaiscoffee.groomy.ide.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -23,16 +26,17 @@ public class MemberController {
      * 반환 데이터 : 토큰값에 해당하는 멤버 정보를 담은 MyResponse
      */
     @GetMapping("/my")
-    public MyResponse<MemberInformationResponseDto> getMyProfile(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<?> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails != null) {
             String email = userDetails.getUsername();
             log.info("내 정보를 확인하려는 email = {}", email);
             // 여기서 email 변수를 사용하여 필요한 로직을 수행
-            return memberService.getMemberInformation(email);
+            MemberInformationResponseDto memberInformation = memberService.getMemberInformation(email);
+            return ResponseEntity.ok(memberInformation);
         } else {
             // userDetails가 null인 경우의 처리
             log.error("인증된 사용자가 없음");
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
         }
     }
 
@@ -42,18 +46,13 @@ public class MemberController {
      * 반환 데이터 : 수정된 정보를 포함한 MyResponse
      */
     @PatchMapping("/my/edit")
-    public MyResponse<MemberInformationDto> editMyProfile(@AuthenticationPrincipal UserDetails userDetails, @RequestBody MemberInformationDto memberInformationDto) {
-        if (userDetails != null) {
-            String email = userDetails.getUsername();
-            log.info("내 정보를 확인하려는 email = {}", email);
-            log.info("수정하려는 정보 = {}",memberInformationDto);
-            // 여기서 email 변수를 사용하여 필요한 로직을 수행
-            return memberService.updateMemberInformation(email, memberInformationDto);
-        } else {
-            // userDetails가 null인 경우의 처리
-            log.error("인증된 사용자가 없음");
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
-        }
+    public ResponseEntity<?> editMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody MemberInformationDto memberInformationDto) {
+        String email = userDetails.getUsername();
+        log.info("내 정보를 확인하려는 email = {}", email);
+        log.info("수정하려는 정보 = {}",memberInformationDto);
+        // 여기서 email 변수를 사용하여 필요한 로직을 수행
+        MemberInformationResponseDto memberInformation = memberService.updateMemberInformation(email, memberInformationDto);
+        return ResponseEntity.ok(memberInformation);
     }
 
     /**
@@ -62,17 +61,14 @@ public class MemberController {
      * 반환 데이터 : 성공했다는 status만 가지고 있는 MyResponse
      */
     @PatchMapping("/my/edit/reset-password")
-    public MyResponse<Null> resetPassword(@AuthenticationPrincipal UserDetails userDetails, @RequestBody PasswordResetDto passwordResetDto) {
-        if (userDetails != null) {
-            String email = userDetails.getUsername();
-            log.info("비밀번호 재설정하려는 email = {}", email);
-            // 여기서 email 변수를 사용하여 필요한 로직을 수행
-            String newPassword = passwordResetDto.getData().getPassword();
-            return memberService.resetPassword(email, newPassword);
-        } else {
-            // userDetails가 null인 경우의 처리
-            log.error("인증된 사용자가 없음");
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+    public ResponseEntity<?> resetPassword(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody PasswordResetDto passwordResetDto) {
+        String email = userDetails.getUsername();
+        log.info("비밀번호 재설정하려는 email = {}", email);
+        // 여기서 email 변수를 사용하여 필요한 로직을 수행
+        String newPassword = passwordResetDto.getData().getPassword();
+        if (!memberService.resetPassword(email, newPassword)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
         }
+        return ResponseEntity.ok(null);
     }
 }

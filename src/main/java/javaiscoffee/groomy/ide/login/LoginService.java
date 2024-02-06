@@ -66,6 +66,7 @@ public class LoginService {
         //중복이 없으면 회원가입 진행
         Member newMember = new Member(data.getEmail(), data.getPassword(), data.getName(), data.getNickname(),0L, MemberRole.USER);
         newMember.hashPassword(bCryptPasswordEncoder);
+        log.info("save하려는 멤버 = {}",newMember);
         memberRepository.save(newMember);
         Optional<Member> savedMember = memberRepository.findByEmail(newMember.getEmail());
         if(savedMember.isPresent()) {

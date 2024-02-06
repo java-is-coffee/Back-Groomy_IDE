@@ -25,7 +25,7 @@ public class MemberService {
      * 요구 데이터 : 정보를 조회할 이메일
      * 반환 데이터 : 이메일에 해당하는 MemberInformationDto
      */
-    public MyResponse<MemberInformationResponseDto> getMemberInformation(String email) {
+    public MemberInformationResponseDto getMemberInformation(String email) {
         Optional<Member> memberOptional = memberRepository.findByEmail(email);
         if (memberOptional.isPresent()) {
             Member member = memberOptional.get();
@@ -35,10 +35,10 @@ public class MemberService {
             MemberInformationResponseDto responseDto = new MemberInformationResponseDto();
             BeanUtils.copyProperties(member, responseDto);
 
-            return new MyResponse<>(new Status(ResponseStatus.SUCCESS), responseDto);
+            return responseDto;
         } else {
             log.error("해당 이메일을 가진 멤버가 없습니다: {}", email);
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+            return null;
         }
     }
 
@@ -48,13 +48,13 @@ public class MemberService {
      * 반환 데이터 : 받은 정보로 수정된 MemberInformationDto
      */
     @Transactional
-    public MyResponse<MemberInformationDto> updateMemberInformation(String email, MemberInformationDto memberInformationDto) {
+    public MemberInformationResponseDto updateMemberInformation(String email, MemberInformationDto memberInformationDto) {
         Member member = memberRepository.findByEmail(email).get();
 
         //멤버 조회 실패했을 경우 (포스트맨으로 다르게 보내는 경우 등)
         if(member == null || member.getMemberId() != memberInformationDto.getData().getMemberId()
         || !member.getEmail().equals(memberInformationDto.getData().getEmail())) {
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+            return null;
         }
 
         //멤버 정보 수정
@@ -62,14 +62,12 @@ public class MemberService {
         member.setNickname(memberInformationDto.getData().getNickname());
 
         //새로운 멤버로 response 생성
-        MemberInformationDto updatedDto = new MemberInformationDto();
-        MemberInformationDto.Data updatedData = new MemberInformationDto.Data();
-        BeanUtils.copyProperties(member, updatedData); // 멤버 정보를 Data 객체에 복사
-        updatedDto.setData(updatedData); // Data 객체를 updatedDto에 설정
+        MemberInformationResponseDto updatedDto = new MemberInformationResponseDto();
+        BeanUtils.copyProperties(member, updatedDto); // 멤버 정보를 Data 객체에 복사
 
         log.info("수정된 멤버 정보 = {}",updatedDto);
 
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), updatedDto);
+        return updatedDto;
     }
 
     /**
@@ -78,12 +76,12 @@ public class MemberService {
      * 반환 데이터 : 성공했다는 status만 가지고 있는 MyResponse
      */
     @Transactional
-    public MyResponse<Null> resetPassword(String email, String password) {
+    public Boolean resetPassword(String email, String password) {
         Member member = memberRepository.findByEmail(email).get();
 
         //멤버 조회 실패했을 경우 (포스트맨으로 다르게 보내는 경우 등)
         if(member == null) {
-            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND));
+            return false;
         }
 
         log.info("입력받은 비밀번호 = {}",password);
@@ -93,6 +91,6 @@ public class MemberService {
 
         log.info("변경된 비밀번호를 담은 멤버 = {}",member);
 
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS));
+        return true;
     }
 }

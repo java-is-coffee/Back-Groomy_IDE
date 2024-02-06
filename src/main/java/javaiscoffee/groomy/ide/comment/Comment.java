@@ -1,6 +1,9 @@
 package javaiscoffee.groomy.ide.comment;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import javaiscoffee.groomy.ide.board.Board;
 import javaiscoffee.groomy.ide.member.Member;
 import jakarta.persistence.*;
@@ -18,13 +21,14 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = "member")
+@ToString(exclude = {"member"})
 public class Comment {
     @Id @Column(name = "comment_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long commentId;
     @Setter @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "origin_comment", referencedColumnName = "comment_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Comment originComment; //대댓글
 
     @NotNull

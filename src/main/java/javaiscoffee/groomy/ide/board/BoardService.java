@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -29,7 +30,7 @@ public class BoardService {
      * @param requestBoardDto
      * @return
      */
-    public MyResponse<ResponseBoardDto> createBoard(RequestBoardDto requestBoardDto) {
+    public ResponseBoardDto createBoard(RequestBoardDto requestBoardDto) {
         Board newBoard = new Board();
         BeanUtils.copyProperties(requestBoardDto.getData(), newBoard);
         Member creatorMember = memberRepository.findByMemberId(requestBoardDto.getData().getMemberId()).get();
@@ -51,7 +52,7 @@ public class BoardService {
                 savedBoard.isCompleted()
         );
 
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), responseBoardDto);
+        return responseBoardDto;
     }
 
     /**
@@ -60,7 +61,7 @@ public class BoardService {
      * @param boardId
      * @return
      */
-    public MyResponse<ResponseBoardDto> getBoardById(Long boardId) {
+    public ResponseBoardDto getBoardById(Long boardId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
 
         ResponseBoardDto responseBoardDto = new ResponseBoardDto(
@@ -78,7 +79,7 @@ public class BoardService {
                 findBoard.isCompleted()
         );
 
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), responseBoardDto);
+        return responseBoardDto;
     }
 
     /**
@@ -87,7 +88,7 @@ public class BoardService {
      * @param requestBoardDto
      * @return
      */
-    public MyResponse<ResponseBoardDto> editBoard(@RequestBody RequestBoardDto requestBoardDto, Long boardId) {
+    public ResponseBoardDto editBoard(@RequestBody RequestBoardDto requestBoardDto, Long boardId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
         BeanUtils.copyProperties(requestBoardDto.getData(), findBoard);
         Board editedBoard = boardRepository.updateBoard(findBoard);
@@ -107,7 +108,7 @@ public class BoardService {
                 editedBoard.isCompleted()
         );
 
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), responseBoardDto);
+        return responseBoardDto;
     }
 
     /**
@@ -116,7 +117,7 @@ public class BoardService {
      * @param boardId
      * @return
      */
-    public MyResponse<Null> deleteBoard(Long boardId) {
+    public Boolean deleteBoard(Long boardId) {
         Optional<Board> deletedBoardOptional = boardRepository.findByBoardId(boardId);
 
         if(deletedBoardOptional.isPresent()) {
@@ -124,9 +125,9 @@ public class BoardService {
             deletedBoard.setBoardStatus(BoardStatus.DELETE);
             boardRepository.deleteBoard(deletedBoard);
 
-            return new MyResponse<>(new Status(ResponseStatus.SUCCESS));
+            return true;
         } else {
-            return new MyResponse<>(new Status(ResponseStatus.FORBIDDEN));
+            return false;
         }
     }
 
@@ -135,7 +136,7 @@ public class BoardService {
      * @param paging
      * @return
      */
-    public MyResponse<List<ResponseListBoardDto>> getBoardByPaging(Long paging) {
+    public List<Board> getBoardByPaging(Long paging) {
 
 
 
@@ -151,8 +152,8 @@ public class BoardService {
      * @param member
      * @return
      */
-    public MyResponse<List<Board>> getBoardByMemberMemberId(Member member) {
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), boardRepository.findBoardByMemberId(member));
+    public List<Board> getBoardByMemberMemberId(Member member) {
+        return boardRepository.findBoardByMemberId(member);
     }
 
 }
