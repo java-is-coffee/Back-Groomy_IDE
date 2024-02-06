@@ -57,9 +57,14 @@ public class BoardController {
 
     @GetMapping("/{paging}")
     public ResponseEntity<?> getBoardByPaging(@PathVariable int paging) {
-        //임시로 작성 수정 필요
         List<ResponseBoardDto> boardByPaging = boardService.getBoardByPaging(paging);
         return ResponseEntity.ok(boardByPaging);
+    }
+
+    @GetMapping("/page-number")
+    public ResponseEntity<?> getBoardPageNumber() {
+        int boardPageNumber = boardService.getBoardPageNumber();
+        return ResponseEntity.ok(boardPageNumber);
     }
 }
 

@@ -135,7 +135,7 @@ public class BoardService {
     }
 
     /**
-     * 사용자가 작성한 모든 게시글 조회
+     * 게시판 리스트 확인
      * @param paging
      * @return
      */
@@ -165,6 +165,19 @@ public class BoardService {
         }
 
         return responseBoardDtoList;
+    }
+
+    /**
+     * 게시판 페이지 갯수 확인
+     * @param
+     * @return
+     */
+    public int getBoardPageNumber() {
+        if(boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) % 10 == 0) {
+            return boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) / 10;
+        } else {
+            return (boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) / 10) + 1;
+        }
     }
 
     /**
