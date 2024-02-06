@@ -1,8 +1,5 @@
 package javaiscoffee.groomy.ide.comment;
 
-import javaiscoffee.groomy.ide.board.Board;
-import javaiscoffee.groomy.ide.response.MyResponse;
-import jakarta.validation.constraints.Null;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
 import lombok.RequiredArgsConstructor;
@@ -10,9 +7,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @RestController
