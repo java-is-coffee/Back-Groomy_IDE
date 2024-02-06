@@ -64,20 +64,22 @@ public class BoardService {
      */
     public ResponseBoardDto getBoardById(Long boardId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
+        findBoard.setViewNumber(findBoard.getViewNumber() + 1);
+        Board updatedFindBoard = boardRepository.updateBoard(findBoard);
 
         ResponseBoardDto responseBoardDto = new ResponseBoardDto(
-                findBoard.getBoardId(),
-                findBoard.getMember().getMemberId(),
-                findBoard.getNickname(),
-                findBoard.getTitle(),
-                findBoard.getContent(),
-                findBoard.getCreatedTime(),
-                findBoard.getViewNumber(),
-                findBoard.getCommentNumber(),
-                findBoard.getScrapNumber(),
-                findBoard.getHelpNumber(),
-                findBoard.getBoardStatus(),
-                findBoard.isCompleted()
+                updatedFindBoard.getBoardId(),
+                updatedFindBoard.getMember().getMemberId(),
+                updatedFindBoard.getNickname(),
+                updatedFindBoard.getTitle(),
+                updatedFindBoard.getContent(),
+                updatedFindBoard.getCreatedTime(),
+                updatedFindBoard.getViewNumber(),
+                updatedFindBoard.getCommentNumber(),
+                updatedFindBoard.getScrapNumber(),
+                updatedFindBoard.getHelpNumber(),
+                updatedFindBoard.getBoardStatus(),
+                updatedFindBoard.isCompleted()
         );
 
         return responseBoardDto;
@@ -173,6 +175,5 @@ public class BoardService {
     public List<Board> getBoardByMemberMemberId(Member member) {
         return boardRepository.findBoardByMemberId(member);
     }
-
 }
 //비즈니스로직
