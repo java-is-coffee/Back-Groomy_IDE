@@ -28,15 +28,20 @@ public class CommentService {
     /**
      * 댓글 작성
      * @param commentDto
-     * @return
+     * @return 작성한 댓글
      */
     public MyResponse<Comment> createComment(CommentDto commentDto) {
         Comment newComment = new Comment();
         BeanUtils.copyProperties(commentDto.getData(), newComment);
         Member creatorMember = memberRepository.findByMemberId(commentDto.getData().getMemberId()).get();
         Board board = boardRepository.findByBoardId(commentDto.getData().getBoardId()).get();
+        //댓글이 삭제된 경우 NOT_FOUND, null 반환
+        if (newComment.getCommentStatus() == CommentStatus.DELETED) {
+            return new MyResponse<>(new Status(ResponseStatus.NOT_FOUND), null);
+        }
         // 대댓글인 경우
         if (commentDto.getData().getOriginComment() != null) {
+            //대댓글 값 받아오는데, 값이 있을 수도 없을 수도 있어서 .orElse(null) 작성해줌
             Comment originCommentEntity = commentRepository.findByCommentId(commentDto.getData().getOriginComment()).orElse(null);
 
             if (originCommentEntity != null) {
@@ -55,7 +60,7 @@ public class CommentService {
     /**
      * 댓글 조회
      * @param commentId
-     * @return
+     * @return commentId 댓글 조회
      */
     public MyResponse<Optional<Comment>> getCommentById(Long commentId) {
         Comment getComment = commentRepository.findByCommentId(commentId).get();
@@ -65,7 +70,7 @@ public class CommentService {
     /**
      * 댓글 수정
      * @param requestDto
-     * @return
+     * @return nickname, content만 바꿔서 덮어씌운 old 반환
      */
     public MyResponse<Comment> editComment(CommentEditRequestDto requestDto, Long commentId) {
         //기존 댓글 조회 후 없을 경우 에러 반환
@@ -82,8 +87,6 @@ public class CommentService {
         // commentId로 기존 댓글 조회
         return new MyResponse<>(new Status(ResponseStatus.SUCCESS), commentRepository.updateComment(old));
     }
-    //커멘트 가져오고
-    //가져온 거에서 nickname, content만 바꿔서 덮어씌우기
 
 
 
@@ -92,7 +95,6 @@ public class CommentService {
      * @param commentId
      * @return Null 값, 성공 메세지
      */
-    //commentStatus 가 ACTIVE인 댓글만 + createdTime 오름차순으로 정렬한 결과값 반환
     public MyResponse<Null> deleteComment(Long commentId) {
         commentRepository.deleteComment(commentId);
         log.info("댓글 삭제 완료 = {}", commentId);
@@ -102,7 +104,7 @@ public class CommentService {
     /**
      * 게시판에 딸린 모든 댓글 조회
      * @param boardId
-     * @return 모든 댓글 리스트로 반환
+     * @return CommentStatus가 ACTIVE인 모든 댓글 리스트로 반환
      */
     public MyResponse<List<Comment>> getCommentByBoardId(Long boardId) {
         Board getBoard = boardRepository.findByBoardId(boardId).get();
@@ -113,12 +115,19 @@ public class CommentService {
 
     /**
      * 사용자가 작성한 모든 댓글 조회
-     * @param member
-     * @return
+     * @param memberId
+     * @return CommentStatus가 ACTIVE인 모든 댓글 리스트로 반환
      */
-    public MyResponse<List<Comment>> getCommentByMemberId(Member member) {
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), commentRepository.findCommentByMemberId(member));
+    public MyResponse<List<Comment>> getCommentByMemberId(Long memberId) {
+        Member getMember = memberRepository.findByMemberId(memberId).get();
+        List<Comment> commentList = commentRepository.findCommentByMemberId(getMember, CommentStatus.ACTIVE);
+        log.info("해당 사용자가 작성한 모든 댓글들 = {}", commentList);
+        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), commentList);
     }
 
 }
-//비즈니스로직
+
+//대댓글
+//멤버아이디로 조회하는거 마무리
+// 예외처리 ㄱ
+// 검증은 상현님꺼랑 합치고

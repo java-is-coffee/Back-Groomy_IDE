@@ -39,16 +39,13 @@ public class JpaCommentRepository implements CommentRepository{
         return updatedComment;
     }
 
-    //D 소프트딜리트X
-    //소프트딜리트로 바꾸기
-    //쿼리문 작성할 때
-    //commentStatus 가 ACTIVE인 댓글만 + createdTime 오름차순으로 정렬한 결과값 반환
+    //소프트딜리트로
     public void deleteComment(Long commentId) {
         Comment comment = em.find(Comment.class, commentId);
         comment.setCommentStatus(CommentStatus.DELETED);
     }
 
-
+    //commentStatus 가 ACTIVE인 댓글만 + createdTime 오름차순으로 정렬한 결과값 반환
     @Override
     public List<Comment> findCommentByBoardId(Board board, CommentStatus status) {
         return em.createQuery("SELECT c FROM Comment c WHERE c.board = :board AND c.commentStatus = :status ORDER BY c.createdTime ASC", Comment.class)
@@ -58,9 +55,12 @@ public class JpaCommentRepository implements CommentRepository{
     }
 
     @Override
-    public List<Comment> findCommentByMemberId(Member member) {
-        return em.createQuery("SELECT c FROM Comment c WHERE c.member = :member", Comment.class)
+    public List<Comment> findCommentByMemberId(Member member, CommentStatus status) {
+        return em.createQuery("SELECT c FROM Comment c WHERE c.member = :member AND c.commentStatus = :status ORDER BY c.createdTime ASC", Comment.class)
                 .setParameter("member", member)
+                .setParameter("status", status)
                 .getResultList();
     }
+
+
 }

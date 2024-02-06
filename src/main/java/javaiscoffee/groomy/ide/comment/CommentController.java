@@ -13,17 +13,17 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/comments")
+@RequestMapping("/api")
 public class CommentController {
     private final CommentService commentService;
 
-    @PostMapping("/write/{boardId}")
+    @PostMapping("/comments/write/{boardId}")
     public MyResponse<Comment> writeComment(@RequestBody CommentDto commentDto) {
         log.info("입력 받은 댓글 정보 = {}", commentDto);
         return commentService.createComment(commentDto);
     }
 
-    @GetMapping("/{commentId}")
+    @GetMapping("/comments/{commentId}")
     public MyResponse<Optional<Comment>> getCommentById(@PathVariable Long commentId) {
         return commentService.getCommentById(commentId);
     }
@@ -35,21 +35,28 @@ public class CommentController {
     }
 
 
-    @DeleteMapping("/delete/{commentId}")
+    @DeleteMapping("/comments/delete/{commentId}")
     public MyResponse<Null> deleteCommentById(@PathVariable Long commentId) {
         return commentService.deleteComment(commentId);
     }
 
-    @GetMapping("/board/{boardId}")
+    @GetMapping("/comments/board/{boardId}")
     public MyResponse<List<Comment>> getCommentByBoardId(@PathVariable Long boardId) {
         return commentService.getCommentByBoardId(boardId);
     }
-    // 패스베리어블로 보드 아이디 가져오고
-    // 서비스에 주는데 ...
 
 
-//    @GetMapping("member/{memberId}")
+    @GetMapping("/comments/member/{memberId}")
+    public MyResponse<List<Comment>> getCommentByMemberId(@PathVariable Long memberId) {
+        return commentService.getCommentByMemberId(memberId);
+    }
+
+    //대댓글 API
+    @PostMapping("/inner-comment/write/{boardId}/{commentId}")
+    public MyResponse<Comment> writeOriginComment(@RequestBody CommentDto commentDto) {
+        log.info("입력 받은 대댓글 정보 = {}", commentDto);
+        return commentService.createComment(commentDto);
+    }
 
 }
 
-//그냥 컨트롤러로 요청 들어오면 해당 하는 댓글은 무조건 삭제 수정하도록

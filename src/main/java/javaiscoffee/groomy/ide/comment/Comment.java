@@ -47,11 +47,6 @@ public class Comment {
     private CommentStatus commentStatus;
 
 
-//    // 댓글 조회 할 때 정상상태 댓글 조회 하는 메서드
-//    public boolean isActive() {
-//        return commentStatus == CommentStatus.ACTIVE;
-//    }
-
     // 저장 전 실행되는 메서드
     @PrePersist
     public void PrePersist() {
