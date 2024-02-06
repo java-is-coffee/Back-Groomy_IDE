@@ -4,9 +4,11 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Table;
 import jakarta.persistence.TypedQuery;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -57,5 +59,12 @@ public class JpaMemberRepository implements MemberRepository {
         TypedQuery<Member> query = em.createQuery("SELECT m FROM Member m WHERE m.memberId = :memberId", Member.class);
         query.setParameter("memberId", memberId);
         return Optional.ofNullable(query.getSingleResult());
+    }
+
+    public List<Member> findInvitedMembers (List<Long> invitedMemberIds) {
+        return em.createQuery(
+                        "SELECT m FROM Member m JOIN FETCH m.projectMembers pm JOIN FETCH pm.project WHERE m.memberId IN :invitedMemberIds", Member.class)
+                .setParameter("invitedMemberIds", invitedMemberIds)
+                .getResultList();
     }
 }

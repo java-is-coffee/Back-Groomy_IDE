@@ -93,4 +93,14 @@ public class MemberService {
 
         return true;
     }
+
+    public FindMemberByEmailResponseDto findMemberByEmail(String email) {
+        Optional<Member> optionalMember = memberRepository.findByEmail(email);
+        if(optionalMember.isEmpty()) {
+            return null;
+        }
+        FindMemberByEmailResponseDto responseDto = new FindMemberByEmailResponseDto();
+        BeanUtils.copyProperties(optionalMember.get(),responseDto);
+        return responseDto;
+    }
 }
