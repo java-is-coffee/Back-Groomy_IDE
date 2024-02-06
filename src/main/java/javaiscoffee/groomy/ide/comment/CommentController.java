@@ -2,10 +2,12 @@ package javaiscoffee.groomy.ide.comment;
 
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
+import javaiscoffee.groomy.ide.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
@@ -16,13 +18,25 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/comment/write/{boardId}")
-    public ResponseEntity<?> writeComment(@RequestBody CommentDto commentDto) {
+    public ResponseEntity<?> writeComment(@RequestBody CommentDto commentDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        String email = userDetails.getUsername();
         log.info("입력 받은 댓글 정보 = {}", commentDto);
         Comment savedComment = commentService.createComment(commentDto);
+//        if (savedComment == null) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
+//        }
+//        return ResponseEntity.ok(savedComment);
+
+        //댓글 = null 에러 반환
         if (savedComment == null) {
+            log.info("댓글 정보 = {}", commentDto);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
+        } else {
+            //대댓글이면
+            log.info("댓글 정보 = {}", commentDto);
+            return ResponseEntity.ok(savedComment);
         }
-        return ResponseEntity.ok(savedComment);
     }
 
     @GetMapping("/comment/{commentId}")
@@ -60,21 +74,21 @@ public class CommentController {
     }
 
 
-    @GetMapping("/comments/member/{memberId}")
+    @GetMapping("/comment/member/{memberId}")
     public ResponseEntity<?> getCommentByMemberId(@PathVariable Long memberId) {
         return ResponseEntity.ok(commentService.getCommentByMemberId(memberId));
     }
 
-    //대댓글 API
-    @PostMapping("/inner-comment/write/{boardId}/{commentId}")
-    public ResponseEntity<?> writeOriginComment(@RequestBody CommentDto commentDto) {
-        log.info("입력 받은 대댓글 정보 = {}", commentDto);
-        Comment savedComment = commentService.createComment(commentDto);
-        if (savedComment == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
-        }
-        return ResponseEntity.ok(savedComment);
-    }
+//    //대댓글 API
+//    @PostMapping("/inner-comment/write/{boardId}/{commentId}")
+//    public ResponseEntity<?> writeOriginComment(@RequestBody CommentDto commentDto) {
+//        log.info("입력 받은 대댓글 정보 = {}", commentDto);
+//        Comment savedComment = commentService.createComment(commentDto);
+//        if (savedComment == null) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
+//        }
+//        return ResponseEntity.ok(savedComment);
+//    }
 
 }
 

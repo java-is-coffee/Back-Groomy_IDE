@@ -36,8 +36,8 @@ public class JpaCommentRepository implements CommentRepository{
 
 
     //R
-    public Optional<Comment> findByCommentId(Long commentId) {
-        return Optional.ofNullable(em.find(Comment.class, commentId));
+    public Comment findByCommentId(Long commentId) {
+        return em.find(Comment.class, commentId);
     }
 
     //U
@@ -46,7 +46,7 @@ public class JpaCommentRepository implements CommentRepository{
         return updatedComment;
     }
 
-    //소프트딜리트로
+    //소프트딜리트, 재사용 가능
     public void deleteComment(Long commentId) {
         Comment comment = em.find(Comment.class, commentId);
         comment.setCommentStatus(CommentStatus.DELETED);
@@ -55,6 +55,7 @@ public class JpaCommentRepository implements CommentRepository{
         query.setParameter("boardId", board.getBoardId()); // :boardId 매개변수에 boardId 값으로 설정
         query.executeUpdate(); // DB에서 댓글 수 업데이트
     }
+    //boolean 타입으로 해서 서비스에서 false면 에러 보내고, true면 처리
 
     //commentStatus 가 ACTIVE인 댓글만 + createdTime 오름차순으로 정렬한 결과값 반환
     @Override

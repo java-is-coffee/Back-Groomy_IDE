@@ -1,6 +1,7 @@
 package javaiscoffee.groomy.ide.board;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import javaiscoffee.groomy.ide.comment.Comment;
 import javaiscoffee.groomy.ide.member.Member;
 import jakarta.persistence.*;
@@ -57,6 +58,7 @@ public class Board {
     private BoardStatus boardStatus;
 
     @NotNull @OneToMany(mappedBy = "board")
+    @JsonManagedReference
     private List<Comment> comment = new ArrayList<>();
 
     // 게시글 조회 할 때 정상상태 게시글 조회 하는 메서드

@@ -1,9 +1,6 @@
 package javaiscoffee.groomy.ide.comment;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.*;
 import javaiscoffee.groomy.ide.board.Board;
 import javaiscoffee.groomy.ide.member.Member;
 import jakarta.persistence.*;
@@ -22,13 +19,16 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = {"member"})
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "commentId"
+)
 public class Comment {
     @Id @Column(name = "comment_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long commentId;
     @Setter @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "origin_comment", referencedColumnName = "comment_id")
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Comment originComment; //대댓글
 
     @NotNull
@@ -67,6 +67,21 @@ public class Comment {
         this.createdTime = LocalDateTime.now();
         this.commentStatus = CommentStatus.ACTIVE;
         this.helpNumber = 0;
+    }
+
+    @JsonProperty("boardId")
+    public Long getBoardId() {
+        return board != null ? board.getBoardId() : null;
+    }
+
+    @JsonProperty("memberId")
+    public Long getMemberId() {
+        return member != null ? member.getMemberId() : null;
+    }
+
+    @JsonProperty("originComment")
+    public Long getOriginComment() {
+        return originComment != null ? originComment.getCommentId() : null;
     }
 
 
