@@ -35,7 +35,7 @@ public class LoginService {
      * 3. 검증이 정상적으로 통과되었다면 인증된 Authentication 객체를 기반으로 JWT 토큰을 생성한다.
      */
     @Transactional
-    public MyResponse<TokenDto> login(LoginDto loginDto) {
+    public TokenDto login(LoginDto loginDto) {
         log.info("로그인 검사 시작 loginDto={}",loginDto);
         // 1. Login ID/PW 를 기반으로 Authentication 객체 생성
         // 이때 authentication 는 인증 여부를 확인하는 authenticated 값이 false
@@ -49,38 +49,39 @@ public class LoginService {
 
             TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
             log.info("로그인 성공, tokenDto={}", tokenDto);
-            return new MyResponse<>(new Status(ResponseStatus.SUCCESS), tokenDto);
+            return tokenDto;
         } catch (Exception e) {
             log.error("로그인 실패: {}", e.getMessage());
-            return new MyResponse<>(new Status(ResponseStatus.LOGIN_FAILED), null);
+            return null;
         }
     }
 
-    public MyResponse<Null> register(RegisterDto registerDto) {
+    public Member register(RegisterDto registerDto) {
         RegisterDto.Data data = registerDto.getData();
         //이미 중복된 이메일이 존재
         if(memberRepository.findByEmail(data.getEmail()).isPresent()) {
             log.info("중복 회원가입 실패 처리");
-            return new MyResponse<>(new Status(ResponseStatus.REGISTER_DUPLICATED));
+            return null;
         }
         //중복이 없으면 회원가입 진행
         Member newMember = new Member(data.getEmail(), data.getPassword(), data.getName(), data.getNickname(),0L, MemberRole.USER);
         newMember.hashPassword(bCryptPasswordEncoder);
+        log.info("save하려는 멤버 = {}",newMember);
         memberRepository.save(newMember);
-        Optional<Member> saveMember = memberRepository.findByEmail(newMember.getEmail());
-        if(saveMember.isPresent()) {
-            log.info("회원가입 성공 = {}",saveMember.get());
-            return new MyResponse<>(new Status(ResponseStatus.SUCCESS));
+        Optional<Member> savedMember = memberRepository.findByEmail(newMember.getEmail());
+        if(savedMember.isPresent()) {
+            log.info("회원가입 성공 = {}",savedMember.get());
+            return savedMember.get();
         }
-        return new MyResponse<>(new Status(ResponseStatus.REGISTER_FAILED));
+        return null;
     }
 
-    public MyResponse<TokenDto> refresh(String refreshToken) {
+    public TokenDto refresh(String refreshToken) {
         try {
             // refreshToken 유효성 검증
             if (!jwtTokenProvider.validateToken(refreshToken)) {
                 // 유효하지 않은 경우, 적절한 응답 반환
-                return new MyResponse<>(new Status(ResponseStatus.UNAUTHORIZED));
+                return null;
             }
 
             // 새로운 AccessToken 생성
@@ -88,11 +89,11 @@ public class LoginService {
 
             // 새로운 토큰과 함께 응답 반환
             TokenDto tokenDto = new TokenDto("Bearer", newAccessToken, refreshToken);
-            return new MyResponse<>(new Status(ResponseStatus.SUCCESS), tokenDto);
+            return tokenDto;
         } catch (JwtException | IllegalArgumentException e) {
             // 토큰 파싱 실패 또는 유효하지 않은 토큰으로 인한 예외 처리
             log.error("토큰 갱신 실패: {}", e.getMessage());
-            return new MyResponse<>(new Status(ResponseStatus.UNAUTHORIZED));
+            return null;
         }
     }
 }

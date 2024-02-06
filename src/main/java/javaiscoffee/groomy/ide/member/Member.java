@@ -1,6 +1,7 @@
 package javaiscoffee.groomy.ide.member;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import javaiscoffee.groomy.ide.board.Board;
 import javaiscoffee.groomy.ide.comment.Comment;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -18,7 +19,6 @@ import java.util.Set;
 
 @Entity
 @Getter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString(exclude = {"comment", "board"})
@@ -49,11 +49,9 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "member")
     private Set<ProjectMember> projectMembers;
     @NotNull @OneToMany(mappedBy = "member")
-    @Builder.Default
     @JsonManagedReference
-    private List<Comment> board = new ArrayList<>();
+    private List<Board> board = new ArrayList<>();
     @NotNull @OneToMany(mappedBy = "member")
-    @Builder.Default
     @JsonManagedReference
     private List<Comment> comment = new ArrayList<>();
 

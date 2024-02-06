@@ -3,8 +3,12 @@ package javaiscoffee.groomy.ide.comment;
 import javaiscoffee.groomy.ide.board.Board;
 import javaiscoffee.groomy.ide.response.MyResponse;
 import jakarta.validation.constraints.Null;
+import javaiscoffee.groomy.ide.response.ResponseStatus;
+import javaiscoffee.groomy.ide.response.Status;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,45 +22,64 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/comments/write/{boardId}")
-    public MyResponse<Comment> writeComment(@RequestBody CommentDto commentDto) {
+    public ResponseEntity<?> writeComment(@RequestBody CommentDto commentDto) {
         log.info("입력 받은 댓글 정보 = {}", commentDto);
-        return commentService.createComment(commentDto);
+        Comment savedComment = commentService.createComment(commentDto);
+        if (savedComment == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
+        }
+        return ResponseEntity.ok(savedComment);
     }
 
     @GetMapping("/comments/{commentId}")
-    public MyResponse<Optional<Comment>> getCommentById(@PathVariable Long commentId) {
+    public ResponseEntity<?> getCommentById(@PathVariable Long commentId) {
         log.info("commentId = {}", commentId);
-        return commentService.getCommentById(commentId);
+        Comment findedComment = commentService.getCommentById(commentId);
+        if (findedComment == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+        return ResponseEntity.ok(findedComment);
     }
 
 
     @PatchMapping("/comments/edit/{commentId}")
-    public MyResponse<Comment> editComment(@RequestBody CommentEditRequestDto requestDto, @PathVariable Long commentId) {
-        return commentService.editComment(requestDto, commentId);
+    public ResponseEntity<?> editComment(@RequestBody CommentEditRequestDto requestDto, @PathVariable Long commentId) {
+        Comment editedComment = commentService.editComment(requestDto, commentId);
+        if (editedComment == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
+        }
+        return ResponseEntity.ok(editedComment);
     }
 
 
     @DeleteMapping("/comments/delete/{commentId}")
-    public MyResponse<Null> deleteCommentById(@PathVariable Long commentId) {
-        return commentService.deleteComment(commentId);
+    public ResponseEntity<?> deleteCommentById(@PathVariable Long commentId) {
+        if(!commentService.deleteComment(commentId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+        return ResponseEntity.ok(null);
     }
 
     @GetMapping("/comments/board/{boardId}")
-    public MyResponse<List<Comment>> getCommentByBoardId(@PathVariable Long boardId) {
-        return commentService.getCommentByBoardId(boardId);
+    public ResponseEntity<?> getCommentByBoardId(@PathVariable Long boardId) {
+        return ResponseEntity.ok(commentService.getCommentByBoardId(boardId));
     }
 
 
     @GetMapping("/comments/member/{memberId}")
-    public MyResponse<List<Comment>> getCommentByMemberId(@PathVariable Long memberId) {
-        return commentService.getCommentByMemberId(memberId);
+    public ResponseEntity<?> getCommentByMemberId(@PathVariable Long memberId) {
+        return ResponseEntity.ok(commentService.getCommentByMemberId(memberId));
     }
 
     //대댓글 API
     @PostMapping("/inner-comment/write/{boardId}/{commentId}")
-    public MyResponse<Comment> writeOriginComment(@RequestBody CommentDto commentDto) {
+    public ResponseEntity<?> writeOriginComment(@RequestBody CommentDto commentDto) {
         log.info("입력 받은 대댓글 정보 = {}", commentDto);
-        return commentService.createComment(commentDto);
+        Comment savedComment = commentService.createComment(commentDto);
+        if (savedComment == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
+        }
+        return ResponseEntity.ok(savedComment);
     }
 
 }
