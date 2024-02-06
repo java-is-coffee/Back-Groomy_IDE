@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 public class CommentController {
     private final CommentService commentService;
 
-    @PostMapping("/comments/write/{boardId}")
+    @PostMapping("/comment/write/{boardId}")
     public ResponseEntity<?> writeComment(@RequestBody CommentDto commentDto) {
         log.info("입력 받은 댓글 정보 = {}", commentDto);
         Comment savedComment = commentService.createComment(commentDto);
@@ -25,7 +25,7 @@ public class CommentController {
         return ResponseEntity.ok(savedComment);
     }
 
-    @GetMapping("/comments/{commentId}")
+    @GetMapping("/comment/{commentId}")
     public ResponseEntity<?> getCommentById(@PathVariable Long commentId) {
         log.info("commentId = {}", commentId);
         Comment findedComment = commentService.getCommentById(commentId);
@@ -36,7 +36,7 @@ public class CommentController {
     }
 
 
-    @PatchMapping("/comments/edit/{commentId}")
+    @PatchMapping("/comment/edit/{commentId}")
     public ResponseEntity<?> editComment(@RequestBody CommentEditRequestDto requestDto, @PathVariable Long commentId) {
         Comment editedComment = commentService.editComment(requestDto, commentId);
         if (editedComment == null) {
@@ -46,7 +46,7 @@ public class CommentController {
     }
 
 
-    @DeleteMapping("/comments/delete/{commentId}")
+    @DeleteMapping("/comment/delete/{commentId}")
     public ResponseEntity<?> deleteCommentById(@PathVariable Long commentId) {
         if(!commentService.deleteComment(commentId)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
@@ -54,7 +54,7 @@ public class CommentController {
         return ResponseEntity.ok(null);
     }
 
-    @GetMapping("/comments/board/{boardId}")
+    @GetMapping("/comment/board/{boardId}")
     public ResponseEntity<?> getCommentByBoardId(@PathVariable Long boardId) {
         return ResponseEntity.ok(commentService.getCommentByBoardId(boardId));
     }

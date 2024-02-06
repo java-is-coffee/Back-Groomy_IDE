@@ -1,5 +1,7 @@
 package javaiscoffee.groomy.ide.comment;
 
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import javaiscoffee.groomy.ide.board.Board;
 import javaiscoffee.groomy.ide.member.Member;
 import jakarta.persistence.EntityManager;
@@ -25,8 +27,13 @@ public class JpaCommentRepository implements CommentRepository{
     // C
     public Comment saveComment(Comment comment) {
         em.persist(comment);
+        Board board = comment.getBoard(); //댓글에서 게시글 가져오고 +1 하는 쿼리 생성
+        Query query = em.createQuery("UPDATE Board b SET b.commentNumber = b.commentNumber + 1 WHERE b.boardId = :boardId");
+        query.setParameter("boardId", board.getBoardId()); // :boardId 매개변수에 boardId 값으로 설정
+        query.executeUpdate(); // DB에서 댓글 수 업데이트
         return comment;
     }
+
 
     //R
     public Optional<Comment> findByCommentId(Long commentId) {
@@ -43,6 +50,10 @@ public class JpaCommentRepository implements CommentRepository{
     public void deleteComment(Long commentId) {
         Comment comment = em.find(Comment.class, commentId);
         comment.setCommentStatus(CommentStatus.DELETED);
+        Board board = comment.getBoard(); //댓글에서 게시글 가져오고 -1 하는 쿼리 생성
+        Query query = em.createQuery("UPDATE Board b SET b.commentNumber = b.commentNumber - 1 WHERE b.boardId = :boardId");
+        query.setParameter("boardId", board.getBoardId()); // :boardId 매개변수에 boardId 값으로 설정
+        query.executeUpdate(); // DB에서 댓글 수 업데이트
     }
 
     //commentStatus 가 ACTIVE인 댓글만 + createdTime 오름차순으로 정렬한 결과값 반환
