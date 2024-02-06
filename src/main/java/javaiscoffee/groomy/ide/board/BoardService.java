@@ -132,11 +132,27 @@ public class BoardService {
 
     /**
      * 사용자가 작성한 모든 게시글 조회
+     * @param paging
+     * @return
+     */
+    public MyResponse<List<ResponseListBoardDto>> getBoardByPaging(Long paging) {
+
+
+
+
+
+
+        return null;
+//        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), boardRepository.findBoardByBoardId(member));
+    }
+
+    /**
+     * 사용자가 작성한 모든 게시글 조회
      * @param member
      * @return
      */
-    public MyResponse<List<Board>> getBoardByMember(Member member) {
-        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), boardRepository.findByMember(member));
+    public MyResponse<List<Board>> getBoardByMemberMemberId(Member member) {
+        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), boardRepository.findBoardByMemberId(member));
     }
 
 }

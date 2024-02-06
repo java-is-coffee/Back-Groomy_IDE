@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -33,6 +34,11 @@ public class BoardController {
     @DeleteMapping("/delete/{boardId}")
     public MyResponse<Null> deleteBoard(@PathVariable Long boardId) {
         return boardService.deleteBoard(boardId);
+    }
+
+    @GetMapping("/{paging}")
+    public MyResponse<List<ResponseListBoardDto>> getBoardByPaging(@PathVariable Long paging) {
+        return boardService.getBoardByPaging(paging);
     }
 }
 

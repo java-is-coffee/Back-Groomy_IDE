@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.board;
 
+import javaiscoffee.groomy.ide.comment.CommentStatus;
 import javaiscoffee.groomy.ide.member.Member;
 
 import java.util.List;
@@ -10,7 +11,8 @@ public interface BoardRepository {
     public Optional<Board> findByBoardId(Long BoardId);
     public Board updateBoard(Board updatedBoard);
     public void deleteBoard(Board deletedBoard);
-    List<Board> findByMember(Member member);  //해당 사용자의 게시글 조회
+    public List<Board> findBoardByBoardId(BoardStatus status);
+    List<Board> findBoardByMemberId(Member member);  //해당 사용자의 게시글 조회
 
 }
 

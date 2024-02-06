@@ -1,5 +1,7 @@
 package javaiscoffee.groomy.ide.board;
 
+import javaiscoffee.groomy.ide.comment.Comment;
+import javaiscoffee.groomy.ide.comment.CommentStatus;
 import javaiscoffee.groomy.ide.member.Member;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -45,7 +47,14 @@ public class JpaBoardRepository implements BoardRepository {
     }
 
     @Override
-    public List<Board> findByMember(Member member) {
+    public List<Board> findBoardByBoardId(BoardStatus status) {
+        return em.createQuery("SELECT b FROM Board b WHERE b.boardStatus = :status ORDER BY b.createdTime ASC", Board.class)
+                .setParameter("status", status)
+                .getResultList();
+    }
+
+    @Override
+    public List<Board> findBoardByMemberId(Member member) {
         return em.createQuery("SELECT b FROM Board b WHERE b.member = :member", Board.class)
                 .setParameter("member", member)
                 .getResultList();
