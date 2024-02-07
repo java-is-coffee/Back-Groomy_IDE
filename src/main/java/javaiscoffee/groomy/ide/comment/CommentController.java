@@ -23,14 +23,9 @@ public class CommentController {
         String email = userDetails.getUsername();
         log.info("입력 받은 댓글 정보 = {}", commentDto);
         Comment savedComment = commentService.createComment(commentDto);
-//        if (savedComment == null) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
-//        }
-//        return ResponseEntity.ok(savedComment);
 
         //댓글 = null 에러 반환
         if (savedComment == null) {
-            log.info("댓글 정보 = {}", commentDto);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
         } else {
             return ResponseEntity.ok(savedComment);

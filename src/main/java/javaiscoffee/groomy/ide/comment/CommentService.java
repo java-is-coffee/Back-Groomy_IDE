@@ -52,9 +52,7 @@ public class CommentService {
         newComment.setBoard(board);
         log.info("입력 받은 댓글 정보 = {}",commentDto);
         log.info("새로 저장할 댓글 = {}",newComment);
-        Comment savedComment = commentRepository.saveComment(newComment);
-        log.info("저장된 Comment",savedComment);
-        return savedComment;
+        return commentRepository.saveComment(newComment);
     }
 
     /**
@@ -64,9 +62,6 @@ public class CommentService {
      */
     public Comment getCommentById(Long commentId) {
         Comment findedComment = commentRepository.findByCommentId(commentId);
-        if(findedComment == null) {
-            return null;
-        }
         return findedComment;
     }
 
@@ -81,14 +76,10 @@ public class CommentService {
         if(oldComment == null) {
             return null;
         }
-        Comment old = oldComment;
-        BeanUtils.copyProperties(commentId,old);
-
-        old.setNickname(requestDto.getData().getNickname());
-        old.setContent(requestDto.getData().getContent());
-        log.info("수정된 댓글 = {}",old);
-        // commentId로 기존 댓글 조회
-        return commentRepository.updateComment(old);
+        oldComment.setNickname(requestDto.getData().getNickname());
+        oldComment.setContent(requestDto.getData().getContent());
+        log.info("수정된 댓글 = {}",oldComment);
+        return commentRepository.updateComment(oldComment);
     }
 
 
