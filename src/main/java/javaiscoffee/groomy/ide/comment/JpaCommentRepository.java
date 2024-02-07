@@ -23,7 +23,6 @@ public class JpaCommentRepository implements CommentRepository{
         this.em = em;
     }
 
-
     // C
     public Comment saveComment(Comment comment) {
         em.persist(comment);
@@ -33,7 +32,6 @@ public class JpaCommentRepository implements CommentRepository{
         query.executeUpdate(); // DB에서 댓글 수 업데이트
         return comment;
     }
-
 
     //R
     public Comment findByCommentId(Long commentId) {
@@ -55,9 +53,7 @@ public class JpaCommentRepository implements CommentRepository{
         query.setParameter("boardId", board.getBoardId()); // :boardId 매개변수에 boardId 값으로 설정
         query.executeUpdate(); // DB에서 댓글 수 업데이트
     }
-    //boolean 타입으로 해서 서비스에서 false면 에러 보내고, true면 처리
 
-    //commentStatus 가 ACTIVE인 댓글만 + createdTime 오름차순으로 정렬한 결과값 반환
     @Override
     public List<Comment> findCommentByBoardId(Board board, CommentStatus status) {
         return em.createQuery("SELECT c FROM Comment c WHERE c.board = :board AND c.commentStatus = :status ORDER BY c.createdTime ASC", Comment.class)

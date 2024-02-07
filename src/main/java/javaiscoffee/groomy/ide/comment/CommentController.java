@@ -33,8 +33,6 @@ public class CommentController {
             log.info("댓글 정보 = {}", commentDto);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
         } else {
-            //대댓글이면
-            log.info("댓글 정보 = {}", commentDto);
             return ResponseEntity.ok(savedComment);
         }
     }
@@ -79,16 +77,6 @@ public class CommentController {
         return ResponseEntity.ok(commentService.getCommentByMemberId(memberId));
     }
 
-//    //대댓글 API
-//    @PostMapping("/inner-comment/write/{boardId}/{commentId}")
-//    public ResponseEntity<?> writeOriginComment(@RequestBody CommentDto commentDto) {
-//        log.info("입력 받은 대댓글 정보 = {}", commentDto);
-//        Comment savedComment = commentService.createComment(commentDto);
-//        if (savedComment == null) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
-//        }
-//        return ResponseEntity.ok(savedComment);
-//    }
 
 }
 

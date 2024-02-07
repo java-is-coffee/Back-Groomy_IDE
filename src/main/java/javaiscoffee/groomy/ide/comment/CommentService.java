@@ -63,7 +63,6 @@ public class CommentService {
      * @return commentId 댓글 조회
      */
     public Comment getCommentById(Long commentId) {
-//        Comment getComment = commentRepository.findByCommentId(commentId).get();
         Comment findedComment = commentRepository.findByCommentId(commentId);
         if(findedComment == null) {
             return null;
@@ -104,6 +103,7 @@ public class CommentService {
         log.info("댓글 삭제 완료 = {}", commentId);
         return true;
     }
+    //성공 true, 실패하면 false , 컨트롤러에서 메세지 보내는거
 
     /**
      * 게시판에 딸린 모든 댓글 조회
@@ -130,8 +130,3 @@ public class CommentService {
     }
 
 }
-
-//대댓글
-//멤버아이디로 조회하는거 마무리
-// 예외처리 ㄱ
-// 검증은 상현님꺼랑 합치고
