@@ -3,6 +3,7 @@ package javaiscoffee.groomy.ide.project;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
+import javaiscoffee.groomy.ide.member.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -47,34 +48,32 @@ public class JpaProjectRepository {
             return false;
         }
     }
+    /**
+     * 프로젝트 초대 수락하기
+     * 요구 데이터 : Member와 Proejct
+     * 반환 데이터 : 성공하면 true, 실패하면 false
+     */
+    public boolean acceptProject(ProjectMemberId projectMemberId) {
+        try {
+            ProjectMember projectMember = em.find(ProjectMember.class, projectMemberId);
+            projectMember.setParticipated(true);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
     /**
      * 참가하고 있는 프로젝트 리스트 반환
-     * 요구 데이터 : 참가하고 있는 멤버의 memberId
+     * 요구 데이터 : 참가하고 있는 멤버의 memberId, 참가하고 있는 프로젝트 반환은 true, 초대받은 프로젝트 반환은 false
      * 반환 데이터 : 멤버가 참가하고 있는 프로젝트들이 담긴 ArrayList
      */
-    public List<ProjectCreateResponseDto> getProjectList(Long memberId) {
-        String jpql = "SELECT p FROM Project p JOIN p.projectMembers pm WHERE pm.member.memberId = :memberId AND pm.participated = TRUE AND p.deleted = false";
-        TypedQuery<Project> query = em.createQuery(jpql, Project.class);
+    public List<Project> getProjectList(Long memberId, boolean participated) {
+        String jpql = "SELECT p FROM Project p JOIN p.projectMembers pm WHERE pm.member.memberId = :memberId AND pm.participated = :participated AND p.deleted = false";
+        TypedQuery<Project> query = em.createQuery(jpql, Project.class).setParameter("participated",participated);
         query.setParameter("memberId", memberId);
 
-        List<Project> projects = query.getResultList();
-
-        // 조회된 프로젝트를 ProjectCreateResponseDto로 변환
-        List<ProjectCreateResponseDto> projectList = projects.stream().map(project -> {
-            ProjectCreateResponseDto dto = new ProjectCreateResponseDto();
-            dto.setProjectId(project.getProjectId());
-            dto.setMemberId(memberId);
-            dto.setProjectName(project.getProjectName());
-            dto.setDescription(project.getDescription());
-            dto.setLanguage(project.getLanguage());
-            dto.setCreatedDate(project.getCreatedDate());
-            dto.setDeleted(project.getDeleted());
-            dto.setProjectPath(project.getProjectPath());
-            return dto;
-        }).collect(Collectors.toList());
-
-        return projectList;
+        return query.getResultList();
     }
 
     /**
