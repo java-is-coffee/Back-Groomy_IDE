@@ -172,7 +172,7 @@ public class BoardService {
      * @param
      * @return
      */
-    public int getBoardPageNumber() {
+    public long getBoardPageNumber() {
         if(boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) % 10 == 0) {
             return boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) / 10;
         } else {

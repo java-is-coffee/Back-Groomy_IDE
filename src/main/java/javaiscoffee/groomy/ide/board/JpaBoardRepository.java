@@ -56,11 +56,10 @@ public class JpaBoardRepository implements BoardRepository {
     }
 
     @Override
-    public int countBoardsByStatus(BoardStatus status) {
+    public long countBoardsByStatus(BoardStatus status) {
         return em.createQuery("SELECT COUNT(b) FROM Board b WHERE b.boardStatus = :status", Long.class)
                 .setParameter("status", status)
-                .getSingleResult()
-                .intValue();
+                .getSingleResult();
     }
 
 

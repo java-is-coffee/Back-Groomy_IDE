@@ -63,7 +63,7 @@ public class BoardController {
 
     @GetMapping("/page-number")
     public ResponseEntity<?> getBoardPageNumber() {
-        int boardPageNumber = boardService.getBoardPageNumber();
+        long boardPageNumber = boardService.getBoardPageNumber();
         return ResponseEntity.ok(boardPageNumber);
     }
 }

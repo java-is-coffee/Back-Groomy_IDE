@@ -14,7 +14,7 @@ public interface BoardRepository {
     public List<Board> findBoardByBoardId(BoardStatus status);
     public List<Board> findBoardByPaging(int paging, int pagingNumber, BoardStatus status);
     List<Board> findBoardByMemberId(Member member);  //해당 사용자의 게시글 조회
-    public int countBoardsByStatus(BoardStatus status);
+    public long countBoardsByStatus(BoardStatus status);
 }
 
 
