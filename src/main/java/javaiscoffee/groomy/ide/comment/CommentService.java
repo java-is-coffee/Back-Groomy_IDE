@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,31 +31,30 @@ public class CommentService {
      * @param commentDto
      * @return 작성한 댓글
      */
-    public Comment createComment(CommentDto commentDto) {
+    public ResponseCommentDto createComment(CommentDto commentDto) {
         Comment newComment = new Comment();
         BeanUtils.copyProperties(commentDto.getData(), newComment);
         Member creatorMember = memberRepository.findByMemberId(commentDto.getData().getMemberId()).get();
         Board board = boardRepository.findByBoardId(commentDto.getData().getBoardId()).get();
-        //댓글이 삭제된 경우 NOT_FOUND, null 반환
-        if (newComment.getCommentStatus() == CommentStatus.DELETED) {
-            return null;
-        }
-        // 대댓글인 경우
-        if (commentDto.getData().getOriginComment() != null) {
-            //대댓글 값 받아오는데, 값이 있을 수도 없을 수도 있어서 .orElse(null) 작성해줌
-            Comment originCommentEntity = commentRepository.findByCommentId(commentDto.getData().getOriginComment()).orElse(null);
 
-            if (originCommentEntity != null) {
-                newComment.setOriginComment(originCommentEntity);
+        Comment originComment = null;
+        //Dto에서 가져온 대댓글이 null이 아니면
+        if (commentDto.getData().getOriginComment() != null) {
+            //레포지토리에 있는 대댓글 값 가져옴
+            originComment = commentRepository.findByCommentId(commentDto.getData().getOriginComment());
+            //대댓글 null, 댓글이 DELETE 일 때
+            if (originComment == null || originComment.getCommentStatus() == CommentStatus.DELETED) {
+                return null;
             }
+            //댓글에 대댓글 값 넣어줌
+            newComment.setOriginComment(originComment);
         }
-        //null이면 삭제니까 대댓글 등록하면 안돼서 return 마이리스폰스 에러 코드 전송
         newComment.setMember(creatorMember);
         newComment.setBoard(board);
         log.info("입력 받은 댓글 정보 = {}",commentDto);
         log.info("새로 저장할 댓글 = {}",newComment);
-//        log.info("저장할 댓글의 board 정보 = {}",board);
-        return commentRepository.saveComment(newComment);
+        Comment savedComment = commentRepository.saveComment(newComment);
+        return toResponseCommentDto(savedComment);
     }
 
     /**
@@ -62,13 +62,9 @@ public class CommentService {
      * @param commentId
      * @return commentId 댓글 조회
      */
-    public Comment getCommentById(Long commentId) {
-        Comment getComment = commentRepository.findByCommentId(commentId).get();
-        Optional<Comment> findedComment = commentRepository.findByCommentId(commentId);
-        if(findedComment.isEmpty()) {
-            return null;
-        }
-        return findedComment.get();
+    public ResponseCommentDto getCommentById(Long commentId) {
+        Comment findedComment = commentRepository.findByCommentId(commentId);
+        return toResponseCommentDto(findedComment);
     }
 
     /**
@@ -76,45 +72,44 @@ public class CommentService {
      * @param requestDto
      * @return nickname, content만 바꿔서 덮어씌운 old 반환
      */
-    public Comment editComment(CommentEditRequestDto requestDto, Long commentId) {
+    public ResponseCommentDto editComment(CommentEditRequestDto requestDto, Long commentId) {
         //기존 댓글 조회 후 없을 경우 에러 반환
-        Optional<Comment> oldComment = commentRepository.findByCommentId(commentId);
-        if(oldComment.isEmpty()) {
+        Comment oldComment = commentRepository.findByCommentId(commentId);
+        if(oldComment == null) {
             return null;
         }
-        Comment old = oldComment.get();
-        BeanUtils.copyProperties(commentId,old);
-
-        old.setNickname(requestDto.getData().getNickname());
-        old.setContent(requestDto.getData().getContent());
-        log.info("수정된 댓글 = {}",old);
-        // commentId로 기존 댓글 조회
-        return commentRepository.updateComment(old);
+        oldComment.setNickname(requestDto.getData().getNickname());
+        oldComment.setContent(requestDto.getData().getContent());
+        log.info("수정된 댓글 = {}",oldComment);
+        Comment updatedComment = commentRepository.updateComment(oldComment);
+        return toResponseCommentDto(updatedComment);
     }
 
 
 
     /**
-     * 소프트 딜리트로 구현할 것
+     * 소프트 딜리트
      * @param commentId
-     * @return Null 값, 성공 메세지
+     * @return
      */
     public Boolean deleteComment(Long commentId) {
         commentRepository.deleteComment(commentId);
+
         log.info("댓글 삭제 완료 = {}", commentId);
         return true;
     }
+
 
     /**
      * 게시판에 딸린 모든 댓글 조회
      * @param boardId
      * @return CommentStatus가 ACTIVE인 모든 댓글 리스트로 반환
      */
-    public List<Comment> getCommentByBoardId(Long boardId) {
+    public List<ResponseCommentDto> getCommentByBoardId(Long boardId) {
         Board getBoard = boardRepository.findByBoardId(boardId).get();
         List<Comment> commentList = commentRepository.findCommentByBoardId(getBoard, CommentStatus.ACTIVE);
         log.info("해당 게시판에 딸린 모든 댓글들 = {}", commentList);
-        return commentList;
+        return toResponseCommentDtoList(commentList);
     }
 
     /**
@@ -122,16 +117,49 @@ public class CommentService {
      * @param memberId
      * @return CommentStatus가 ACTIVE인 모든 댓글 리스트로 반환
      */
-    public List<Comment> getCommentByMemberId(Long memberId) {
+    public List<ResponseCommentDto> getCommentByMemberId(Long memberId) {
         Member getMember = memberRepository.findByMemberId(memberId).get();
         List<Comment> commentList = commentRepository.findCommentByMemberId(getMember, CommentStatus.ACTIVE);
         log.info("해당 사용자가 작성한 모든 댓글들 = {}", commentList);
-        return commentList;
+        return toResponseCommentDtoList(commentList);
     }
 
-}
+    // Comment 객체를 ResponseCommentDto로 매핑하는 메서드
+    public static ResponseCommentDto toResponseCommentDto(Comment comment) {
+        if (comment == null) {
+            return null; // 주어진 Comment가 null인 경우, null 반환
+        }
 
-//대댓글
-//멤버아이디로 조회하는거 마무리
-// 예외처리 ㄱ
-// 검증은 상현님꺼랑 합치고
+        ResponseCommentDto responseCommentDto = new ResponseCommentDto();
+
+        responseCommentDto.setBoardId(comment.getBoard() != null ? comment.getBoard().getBoardId() : null);
+        responseCommentDto.setMemberId(comment.getMember() != null ? comment.getMember().getMemberId() : null);
+        responseCommentDto.setNickname(comment.getNickname());
+        responseCommentDto.setContent(comment.getContent());
+        responseCommentDto.setOriginComment(comment.getOriginComment() != null ? comment.getOriginComment() : null);
+        responseCommentDto.setCommentId(comment.getCommentId());
+        responseCommentDto.setHelpNumber(comment.getHelpNumber());
+        responseCommentDto.setCreatedTime(comment.getCreatedTime());
+        responseCommentDto.setCommentStatus(comment.getCommentStatus());
+
+        return responseCommentDto;
+    }
+
+    // Comment 객체 리스트를 ResponseCommentDto객체 리스트로 매핑하는 메서드
+    public static List<ResponseCommentDto> toResponseCommentDtoList(List<Comment> comments) {
+        if (comments == null) {
+            return null; // 주어진 Comment 리스트가 null인 경우, null 반환
+        }
+
+        List<ResponseCommentDto> responseCommentDtoList = new ArrayList<>();
+
+        for (Comment comment : comments) {
+            ResponseCommentDto responseCommentDto = toResponseCommentDto(comment);
+            responseCommentDtoList.add(responseCommentDto);
+        }
+
+        return responseCommentDtoList;
+    }
+
+
+}
