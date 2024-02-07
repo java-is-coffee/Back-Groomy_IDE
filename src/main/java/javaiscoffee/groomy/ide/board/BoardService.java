@@ -31,29 +31,20 @@ public class BoardService {
      * @param requestBoardDto
      * @return
      */
-    public ResponseBoardDto createBoard(RequestBoardDto requestBoardDto) {
+    public ResponseBoardDto createBoard(RequestBoardDto requestBoardDto, Long memberId) {
         Board newBoard = new Board();
         BeanUtils.copyProperties(requestBoardDto.getData(), newBoard);
-        Member creatorMember = memberRepository.findByMemberId(requestBoardDto.getData().getMemberId()).get();
-        newBoard.setMember(creatorMember);
-        Board savedBoard = boardRepository.saveBoard(newBoard);
+        Member creatorMember = memberRepository.findByMemberId(memberId).get();
 
-        ResponseBoardDto responseBoardDto = new ResponseBoardDto(
-                savedBoard.getBoardId(),
-                savedBoard.getMember().getMemberId(),
-                savedBoard.getNickname(),
-                savedBoard.getTitle(),
-                savedBoard.getContent(),
-                savedBoard.getCreatedTime(),
-                savedBoard.getViewNumber(),
-                savedBoard.getCommentNumber(),
-                savedBoard.getScrapNumber(),
-                savedBoard.getHelpNumber(),
-                savedBoard.getBoardStatus(),
-                savedBoard.isCompleted()
-        );
+        if(memberId == requestBoardDto.getData().getMemberId() && creatorMember != null) {
+            newBoard.setMember(creatorMember);
+            Board savedBoard = boardRepository.saveBoard(newBoard);
+            ResponseBoardDto responseBoardDto = responseBoardDto(savedBoard);
 
-        return responseBoardDto;
+            return responseBoardDto;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -64,25 +55,17 @@ public class BoardService {
      */
     public ResponseBoardDto getBoardById(Long boardId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
-        findBoard.setViewNumber(findBoard.getViewNumber() + 1);
-        Board updatedFindBoard = boardRepository.updateBoard(findBoard);
 
-        ResponseBoardDto responseBoardDto = new ResponseBoardDto(
-                updatedFindBoard.getBoardId(),
-                updatedFindBoard.getMember().getMemberId(),
-                updatedFindBoard.getNickname(),
-                updatedFindBoard.getTitle(),
-                updatedFindBoard.getContent(),
-                updatedFindBoard.getCreatedTime(),
-                updatedFindBoard.getViewNumber(),
-                updatedFindBoard.getCommentNumber(),
-                updatedFindBoard.getScrapNumber(),
-                updatedFindBoard.getHelpNumber(),
-                updatedFindBoard.getBoardStatus(),
-                updatedFindBoard.isCompleted()
-        );
+        if(findBoard != null && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
+            findBoard.setViewNumber(findBoard.getViewNumber() + 1);
+            Board updatedFindBoard = boardRepository.updateBoard(findBoard);
 
-        return responseBoardDto;
+            ResponseBoardDto responseBoardDto = responseBoardDto(updatedFindBoard);
+
+            return responseBoardDto;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -91,27 +74,20 @@ public class BoardService {
      * @param requestBoardDto
      * @return
      */
-    public ResponseBoardDto editBoard(@RequestBody RequestBoardDto requestBoardDto, Long boardId) {
+    public ResponseBoardDto editBoard(@RequestBody RequestBoardDto requestBoardDto, Long boardId, Long memberId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
-        BeanUtils.copyProperties(requestBoardDto.getData(), findBoard);
-        Board editedBoard = boardRepository.updateBoard(findBoard);
+        Member member = memberRepository.findByMemberId(memberId).get();
 
-        ResponseBoardDto responseBoardDto = new ResponseBoardDto(
-                editedBoard.getBoardId(),
-                editedBoard.getMember().getMemberId(),
-                editedBoard.getNickname(),
-                editedBoard.getTitle(),
-                editedBoard.getContent(),
-                editedBoard.getCreatedTime(),
-                editedBoard.getViewNumber(),
-                editedBoard.getCommentNumber(),
-                editedBoard.getScrapNumber(),
-                editedBoard.getHelpNumber(),
-                editedBoard.getBoardStatus(),
-                editedBoard.isCompleted()
-        );
+        if(member != null && member.getMemberId() == findBoard.getMember().getMemberId() &&
+                findBoard != null && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
+            BeanUtils.copyProperties(requestBoardDto.getData(), findBoard);
+            Board editedBoard = boardRepository.updateBoard(findBoard);
+            ResponseBoardDto responseBoardDto = responseBoardDto(editedBoard);
 
-        return responseBoardDto;
+            return responseBoardDto;
+        } else {
+            return null;
+        }
     }
 
     /**
@@ -120,15 +96,21 @@ public class BoardService {
      * @param boardId
      * @return
      */
-    public Boolean deleteBoard(Long boardId) {
-        Optional<Board> deletedBoardOptional = boardRepository.findByBoardId(boardId);
+    public Boolean deleteBoard(Long boardId, Long memberId) {
+        Optional<Board> findBoardOptional = boardRepository.findByBoardId(boardId);
+        Member member = memberRepository.findByMemberId(memberId).get();
 
-        if(deletedBoardOptional.isPresent()) {
-            Board deletedBoard = deletedBoardOptional.get();
-            deletedBoard.setBoardStatus(BoardStatus.DELETE);
-            boardRepository.deleteBoard(deletedBoard);
+        if(member != null && findBoardOptional.isPresent()) {
+            Board findBoard = findBoardOptional.get();
 
-            return true;
+            if(member == findBoard.getMember() && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
+                findBoard.setBoardStatus(BoardStatus.DELETE);
+                boardRepository.deleteBoard(findBoard);
+
+                return true;
+            } else {
+                return false;
+            }
         } else {
             return false;
         }
@@ -141,30 +123,20 @@ public class BoardService {
      */
     public List<ResponseBoardDto> getBoardByPaging(int paging) {
         List<Board> boardList = boardRepository.findBoardByPaging(paging, 10, BoardStatus.ACTIVE);
-        List<ResponseBoardDto> responseBoardDtoList = new ArrayList<>();
 
-        for(int i = 0; i < boardList.size(); i++) {
-            Board boardListIndex = boardList.get(i);
+        if(!boardList.isEmpty()) {
+            List<ResponseBoardDto> responseBoardDtoList = new ArrayList<>();
 
-            ResponseBoardDto responseBoardDto = new ResponseBoardDto(
-                    boardListIndex.getBoardId(),
-                    boardListIndex.getMember().getMemberId(),
-                    boardListIndex.getNickname(),
-                    boardListIndex.getTitle(),
-                    boardListIndex.getContent(),
-                    boardListIndex.getCreatedTime(),
-                    boardListIndex.getViewNumber(),
-                    boardListIndex.getCommentNumber(),
-                    boardListIndex.getScrapNumber(),
-                    boardListIndex.getHelpNumber(),
-                    boardListIndex.getBoardStatus(),
-                    boardListIndex.isCompleted()
-            );
+            for(int i = 0; i < boardList.size(); i++) {
+                Board boardListIndex = boardList.get(i);
+                ResponseBoardDto responseBoardDto = responseBoardDto(boardListIndex);
+                responseBoardDtoList.add(responseBoardDto);
+            }
 
-            responseBoardDtoList.add(responseBoardDto);
+            return responseBoardDtoList;
+        } else {
+            return null;
         }
-
-        return responseBoardDtoList;
     }
 
     /**
@@ -183,6 +155,23 @@ public class BoardService {
      */
     public List<Board> getBoardByMemberMemberId(Member member) {
         return boardRepository.findBoardByMemberId(member);
+    }
+
+    public ResponseBoardDto responseBoardDto(Board board) {
+        return new ResponseBoardDto(
+                board.getBoardId(),
+                board.getMember().getMemberId(),
+                board.getNickname(),
+                board.getTitle(),
+                board.getContent(),
+                board.getCreatedTime(),
+                board.getViewNumber(),
+                board.getCommentNumber(),
+                board.getScrapNumber(),
+                board.getHelpNumber(),
+                board.getBoardStatus(),
+                board.isCompleted()
+        );
     }
 }
 //비즈니스로직
