@@ -22,7 +22,7 @@ public class CommentController {
         Long memberId = userDetails.getMemberId();
         String email = userDetails.getUsername();
         log.info("입력 받은 댓글 정보 = {}", commentDto);
-        Comment savedComment = commentService.createComment(commentDto);
+        ResponseCommentDto savedComment = commentService.createComment(commentDto);
 
         //댓글 = null 에러 반환
         if (savedComment == null) {

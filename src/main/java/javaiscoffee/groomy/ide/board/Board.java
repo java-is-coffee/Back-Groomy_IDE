@@ -1,7 +1,9 @@
 package javaiscoffee.groomy.ide.board;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import javaiscoffee.groomy.ide.comment.Comment;
 import javaiscoffee.groomy.ide.member.Member;
 import jakarta.persistence.*;
@@ -18,6 +20,10 @@ import java.util.List;
 @ToString(exclude = {"member", "comment"})
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "boardId"
+)
 public class Board {
     @Id @Column(name = "board_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -55,7 +61,6 @@ public class Board {
     private BoardStatus boardStatus;
 
     @NotNull @OneToMany(mappedBy = "board")
-    @JsonManagedReference
     private List<Comment> comment = new ArrayList<>();
 
     // 게시글 조회 할 때 정상상태 게시글 조회 하는 메서드

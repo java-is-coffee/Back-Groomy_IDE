@@ -31,12 +31,10 @@ public class Comment {
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "board_id")
-    @JsonBackReference
     private Board board;
 
     @NotNull @Setter @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id")
-    @JsonBackReference
     private Member member;
 
 

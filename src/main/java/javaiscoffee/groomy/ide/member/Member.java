@@ -1,6 +1,8 @@
 package javaiscoffee.groomy.ide.member;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import javaiscoffee.groomy.ide.board.Board;
 import javaiscoffee.groomy.ide.comment.Comment;
 import jakarta.persistence.*;
@@ -23,6 +25,10 @@ import java.util.Set;
 @AllArgsConstructor
 @ToString(exclude = {"comment", "board"})
 @Table(name = "member")
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "memberId"
+)
 public class Member implements UserDetails {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -49,10 +55,9 @@ public class Member implements UserDetails {
     @OneToMany(mappedBy = "member")
     private Set<ProjectMember> projectMembers;
     @NotNull @OneToMany(mappedBy = "member")
-    @JsonManagedReference
     private List<Board> board = new ArrayList<>();
+
     @NotNull @OneToMany(mappedBy = "member")
-    @JsonManagedReference
     private List<Comment> comment = new ArrayList<>();
 
     @PrePersist

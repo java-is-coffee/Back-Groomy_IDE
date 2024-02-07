@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,7 +31,7 @@ public class CommentService {
      * @param commentDto
      * @return 작성한 댓글
      */
-    public Comment createComment(CommentDto commentDto) {
+    public ResponseCommentDto createComment(CommentDto commentDto) {
         Comment newComment = new Comment();
         BeanUtils.copyProperties(commentDto.getData(), newComment);
         Member creatorMember = memberRepository.findByMemberId(commentDto.getData().getMemberId()).get();
@@ -52,7 +53,8 @@ public class CommentService {
         newComment.setBoard(board);
         log.info("입력 받은 댓글 정보 = {}",commentDto);
         log.info("새로 저장할 댓글 = {}",newComment);
-        return commentRepository.saveComment(newComment);
+        Comment savedComment = commentRepository.saveComment(newComment);
+        return toResponseCommentDto(savedComment);
     }
 
     /**
@@ -119,7 +121,45 @@ public class CommentService {
         Member getMember = memberRepository.findByMemberId(memberId).get();
         List<Comment> commentList = commentRepository.findCommentByMemberId(getMember, CommentStatus.ACTIVE);
         log.info("해당 사용자가 작성한 모든 댓글들 = {}", commentList);
-        return commentList;
+        return toResponseCommentDtoList(commentList);
     }
+
+    // Comment 객체를 ResponseCommentDto로 매핑하는 메서드
+    public static ResponseCommentDto toResponseCommentDto(Comment comment) {
+        if (comment == null) {
+            return null; // 주어진 Comment가 null인 경우, null 반환
+        }
+
+        ResponseCommentDto responseCommentDto = new ResponseCommentDto();
+
+        responseCommentDto.setBoardId(comment.getBoard() != null ? comment.getBoard().getBoardId() : null);
+        responseCommentDto.setMemberId(comment.getMember() != null ? comment.getMember().getMemberId() : null);
+        responseCommentDto.setNickname(comment.getNickname());
+        responseCommentDto.setContent(comment.getContent());
+        responseCommentDto.setOriginComment(comment.getOriginComment() != null ? comment.getOriginComment() : null);
+        responseCommentDto.setCommentId(comment.getCommentId());
+        responseCommentDto.setHelpNumber(comment.getHelpNumber());
+        responseCommentDto.setCreatedTime(comment.getCreatedTime());
+        responseCommentDto.setCommentStatus(comment.getCommentStatus());
+
+        return responseCommentDto;
+    }
+
+    // Comment 객체 리스트를 ResponseCommentDto객체 리스트로 매핑하는 메서드
+    public static List<ResponseCommentDto> toResponseCommentDtoList(List<Comment> comments) {
+        if (comments == null) {
+            return null; // 주어진 Comment 리스트가 null인 경우, null 반환
+        }
+
+        List<ResponseCommentDto> responseCommentDtoList = new ArrayList<>();
+
+        for (Comment comment : comments) {
+            ResponseCommentDto responseCommentDto = toResponseCommentDto(comment);
+            responseCommentDtoList.add(responseCommentDto);
+        }
+
+        return responseCommentDtoList;
+    }
+
 
 }
