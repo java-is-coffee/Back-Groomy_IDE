@@ -35,7 +35,7 @@ public class CommentController {
     @GetMapping("/comment/{commentId}")
     public ResponseEntity<?> getCommentById(@PathVariable Long commentId) {
         log.info("commentId = {}", commentId);
-        Comment findedComment = commentService.getCommentById(commentId);
+        ResponseCommentDto findedComment = commentService.getCommentById(commentId);
         if (findedComment == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
         }
@@ -45,12 +45,13 @@ public class CommentController {
 
     @PatchMapping("/comment/edit/{commentId}")
     public ResponseEntity<?> editComment(@RequestBody CommentEditRequestDto requestDto, @PathVariable Long commentId) {
-        Comment editedComment = commentService.editComment(requestDto, commentId);
+        ResponseCommentDto editedComment = commentService.editComment(requestDto, commentId);
         if (editedComment == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.INPUT_ERROR));
         }
         return ResponseEntity.ok(editedComment);
     }
+    //입력값이 잘못되었습니다 에러 뜸
 
 
     @DeleteMapping("/comment/delete/{commentId}")
@@ -60,6 +61,7 @@ public class CommentController {
         }
         return ResponseEntity.ok(null);
     }
+    // 컨트롤러에서 메세지 보내는거
 
     @GetMapping("/comment/board/{boardId}")
     public ResponseEntity<?> getCommentByBoardId(@PathVariable Long boardId) {

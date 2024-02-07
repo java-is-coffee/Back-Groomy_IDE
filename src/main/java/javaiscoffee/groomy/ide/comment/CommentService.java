@@ -60,9 +60,9 @@ public class CommentService {
      * @param commentId
      * @return commentId 댓글 조회
      */
-    public Comment getCommentById(Long commentId) {
+    public ResponseCommentDto getCommentById(Long commentId) {
         Comment findedComment = commentRepository.findByCommentId(commentId);
-        return findedComment;
+        return toResponseCommentDto(findedComment);
     }
 
     /**
@@ -70,7 +70,7 @@ public class CommentService {
      * @param requestDto
      * @return nickname, content만 바꿔서 덮어씌운 old 반환
      */
-    public Comment editComment(CommentEditRequestDto requestDto, Long commentId) {
+    public ResponseCommentDto editComment(CommentEditRequestDto requestDto, Long commentId) {
         //기존 댓글 조회 후 없을 경우 에러 반환
         Comment oldComment = commentRepository.findByCommentId(commentId);
         if(oldComment == null) {
@@ -79,7 +79,8 @@ public class CommentService {
         oldComment.setNickname(requestDto.getData().getNickname());
         oldComment.setContent(requestDto.getData().getContent());
         log.info("수정된 댓글 = {}",oldComment);
-        return commentRepository.updateComment(oldComment);
+        Comment updatedComment = commentRepository.updateComment(oldComment);
+        return toResponseCommentDto(updatedComment);
     }
 
 
@@ -87,25 +88,26 @@ public class CommentService {
     /**
      * 소프트 딜리트
      * @param commentId
-     * @return Null 값, 성공 메세지
+     * @return
      */
     public Boolean deleteComment(Long commentId) {
         commentRepository.deleteComment(commentId);
+
         log.info("댓글 삭제 완료 = {}", commentId);
         return true;
     }
-    //성공 true, 실패하면 false , 컨트롤러에서 메세지 보내는거
+
 
     /**
      * 게시판에 딸린 모든 댓글 조회
      * @param boardId
      * @return CommentStatus가 ACTIVE인 모든 댓글 리스트로 반환
      */
-    public List<Comment> getCommentByBoardId(Long boardId) {
+    public List<ResponseCommentDto> getCommentByBoardId(Long boardId) {
         Board getBoard = boardRepository.findByBoardId(boardId).get();
         List<Comment> commentList = commentRepository.findCommentByBoardId(getBoard, CommentStatus.ACTIVE);
         log.info("해당 게시판에 딸린 모든 댓글들 = {}", commentList);
-        return commentList;
+        return toResponseCommentDtoList(commentList);
     }
 
     /**
@@ -113,7 +115,7 @@ public class CommentService {
      * @param memberId
      * @return CommentStatus가 ACTIVE인 모든 댓글 리스트로 반환
      */
-    public List<Comment> getCommentByMemberId(Long memberId) {
+    public List<ResponseCommentDto> getCommentByMemberId(Long memberId) {
         Member getMember = memberRepository.findByMemberId(memberId).get();
         List<Comment> commentList = commentRepository.findCommentByMemberId(getMember, CommentStatus.ACTIVE);
         log.info("해당 사용자가 작성한 모든 댓글들 = {}", commentList);
