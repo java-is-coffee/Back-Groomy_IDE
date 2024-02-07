@@ -77,6 +77,19 @@ public class JpaProjectRepository {
     }
 
     /**
+     * 해당 유저가 프로젝트에 참가하고 있는지 확인
+     * 요구 데이터 : projectMemberId
+     * 반환 데이터 : 참가하고 있으면 true, 아니면 false
+     */
+    public boolean isParticipated(ProjectMemberId projectMemberId) {
+        ProjectMember projectMember = em.find(ProjectMember.class, projectMemberId);
+        if(projectMember == null || projectMember.getParticipated() == false) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 프로젝트 정보 수정
      */
     public Project update(Project editedProject) {

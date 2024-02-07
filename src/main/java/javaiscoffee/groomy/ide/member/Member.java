@@ -1,12 +1,12 @@
 package javaiscoffee.groomy.ide.member;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import javaiscoffee.groomy.ide.board.Board;
 import javaiscoffee.groomy.ide.comment.Comment;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
+import javaiscoffee.groomy.ide.chat.ProjectChat;
 import javaiscoffee.groomy.ide.project.ProjectMember;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -59,6 +59,9 @@ public class Member implements UserDetails {
 
     @NotNull @OneToMany(mappedBy = "member")
     private List<Comment> comment = new ArrayList<>();
+
+    @NotNull @OneToMany(mappedBy = "member")
+    private List<ProjectChat> projectChat = new ArrayList<>();
 
     @PrePersist
     public void PrePersist() {
