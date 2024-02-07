@@ -8,6 +8,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,20 +59,22 @@ public class BoardService {
      */
     public ResponseBoardDto getBoardById(Long boardId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
+        findBoard.setViewNumber(findBoard.getViewNumber() + 1);
+        Board updatedFindBoard = boardRepository.updateBoard(findBoard);
 
         ResponseBoardDto responseBoardDto = new ResponseBoardDto(
-                findBoard.getBoardId(),
-                findBoard.getMember().getMemberId(),
-                findBoard.getNickname(),
-                findBoard.getTitle(),
-                findBoard.getContent(),
-                findBoard.getCreatedTime(),
-                findBoard.getViewNumber(),
-                findBoard.getCommentNumber(),
-                findBoard.getScrapNumber(),
-                findBoard.getHelpNumber(),
-                findBoard.getBoardStatus(),
-                findBoard.isCompleted()
+                updatedFindBoard.getBoardId(),
+                updatedFindBoard.getMember().getMemberId(),
+                updatedFindBoard.getNickname(),
+                updatedFindBoard.getTitle(),
+                updatedFindBoard.getContent(),
+                updatedFindBoard.getCreatedTime(),
+                updatedFindBoard.getViewNumber(),
+                updatedFindBoard.getCommentNumber(),
+                updatedFindBoard.getScrapNumber(),
+                updatedFindBoard.getHelpNumber(),
+                updatedFindBoard.getBoardStatus(),
+                updatedFindBoard.isCompleted()
         );
 
         return responseBoardDto;
@@ -127,19 +130,45 @@ public class BoardService {
     }
 
     /**
-     * 사용자가 작성한 모든 게시글 조회
+     * 게시판 리스트 확인
      * @param paging
      * @return
      */
-    public List<Board> getBoardByPaging(Long paging) {
+    public List<ResponseBoardDto> getBoardByPaging(int paging) {
+        List<Board> boardList = boardRepository.findBoardByPaging(paging, 10, BoardStatus.ACTIVE);
+        List<ResponseBoardDto> responseBoardDtoList = new ArrayList<>();
 
+        for(int i = 0; i < boardList.size(); i++) {
+            Board boardListIndex = boardList.get(i);
 
+            ResponseBoardDto responseBoardDto = new ResponseBoardDto(
+                    boardListIndex.getBoardId(),
+                    boardListIndex.getMember().getMemberId(),
+                    boardListIndex.getNickname(),
+                    boardListIndex.getTitle(),
+                    boardListIndex.getContent(),
+                    boardListIndex.getCreatedTime(),
+                    boardListIndex.getViewNumber(),
+                    boardListIndex.getCommentNumber(),
+                    boardListIndex.getScrapNumber(),
+                    boardListIndex.getHelpNumber(),
+                    boardListIndex.getBoardStatus(),
+                    boardListIndex.isCompleted()
+            );
 
+            responseBoardDtoList.add(responseBoardDto);
+        }
 
+        return responseBoardDtoList;
+    }
 
-
-        return null;
-//        return new MyResponse<>(new Status(ResponseStatus.SUCCESS), boardRepository.findBoardByBoardId(member));
+    /**
+     * 게시판 페이지 갯수 확인
+     * @param
+     * @return
+     */
+    public long getBoardPageNumber() {
+        return (long)Math.ceil(boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) / (double)10);
     }
 
     /**
@@ -150,6 +179,5 @@ public class BoardService {
     public List<Board> getBoardByMemberMemberId(Member member) {
         return boardRepository.findBoardByMemberId(member);
     }
-
 }
 //비즈니스로직
