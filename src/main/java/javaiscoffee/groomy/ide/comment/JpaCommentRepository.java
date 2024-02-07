@@ -56,7 +56,7 @@ public class JpaCommentRepository implements CommentRepository{
 
     @Override
     public List<Comment> findCommentByBoardId(Board board, CommentStatus status) {
-        return em.createQuery("SELECT c FROM Comment c WHERE c.board = :board AND c.commentStatus = :status ORDER BY c.createdTime ASC", Comment.class)
+        return em.createQuery("SELECT c FROM Comment c WHERE (c.board = :board AND c.commentStatus = :status AND c.originComment is not null) OR (c.board = :board AND c.originComment is null) ORDER BY c.createdTime ASC", Comment.class)
                 .setParameter("board", board)
                 .setParameter("status", status)
                 .getResultList();

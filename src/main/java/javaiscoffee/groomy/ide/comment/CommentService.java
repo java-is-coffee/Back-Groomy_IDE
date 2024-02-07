@@ -182,9 +182,18 @@ public class CommentService {
         ResponseCommentDto responseCommentDto = new ResponseCommentDto();
 
         responseCommentDto.setBoardId(comment.getBoard() != null ? comment.getBoard().getBoardId() : null);
-        responseCommentDto.setMemberId(comment.getMember() != null ? comment.getMember().getMemberId() : null);
-        responseCommentDto.setNickname(comment.getNickname());
-        responseCommentDto.setContent(comment.getContent());
+        //삭제된 원댓글일 때
+        if(comment.getCommentStatus() == CommentStatus.DELETED) {
+            responseCommentDto.setMemberId(null);
+            responseCommentDto.setNickname("알 수 없음");
+            responseCommentDto.setContent("삭제된 댓글입니다.");
+        }
+        //삭제 안된 댓글일 경우
+        else {
+            responseCommentDto.setMemberId(comment.getMember() != null ? comment.getMember().getMemberId() : null);
+            responseCommentDto.setNickname(comment.getNickname());
+            responseCommentDto.setContent(comment.getContent());
+        }
         responseCommentDto.setOriginComment(comment.getOriginComment() != null ? comment.getOriginComment() : null);
         responseCommentDto.setCommentId(comment.getCommentId());
         responseCommentDto.setHelpNumber(comment.getHelpNumber());
