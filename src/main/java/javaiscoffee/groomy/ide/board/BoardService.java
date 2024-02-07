@@ -173,11 +173,7 @@ public class BoardService {
      * @return
      */
     public long getBoardPageNumber() {
-        if(boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) % 10 == 0) {
-            return boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) / 10;
-        } else {
-            return (boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) / 10) + 1;
-        }
+        return (long)Math.ceil(boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) / (double)10);
     }
 
     /**
