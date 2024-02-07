@@ -122,7 +122,7 @@ public class ProjectService {
     public Boolean deleteProject(Long memberId, Long projectId) {
         Project oldProject = projectRepository.getProjectByProjectId(projectId);
         //프로젝트를 찾을 수 없는 경우 에러 코드 반환
-        if(oldProject == null) {
+        if(oldProject == null || oldProject.getDeleted() == true) {
             return false;
         }
 

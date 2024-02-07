@@ -1,6 +1,9 @@
 package javaiscoffee.groomy.ide.board;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import javaiscoffee.groomy.ide.comment.Comment;
 import javaiscoffee.groomy.ide.member.Member;
 import jakarta.persistence.*;
@@ -11,15 +14,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- *  이거 테스트하시려면 환경변수에다가 application.properties에 있는 값 4개 넣으셔야 할텐데
- *  ddl 어쩌구 주석 처리 되어있는거 해제하시고 실행 하시면 자동으로 테이블 생성해줍니다.
- */
+
 @Entity
 @Getter
 @ToString(exclude = {"member", "comment"})
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "boardId"
+)
 public class Board {
     @Id @Column(name = "board_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)

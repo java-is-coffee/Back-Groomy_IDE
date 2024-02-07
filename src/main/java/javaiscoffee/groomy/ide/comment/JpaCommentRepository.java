@@ -23,7 +23,6 @@ public class JpaCommentRepository implements CommentRepository{
         this.em = em;
     }
 
-
     // C
     public Comment saveComment(Comment comment) {
         em.persist(comment);
@@ -34,10 +33,9 @@ public class JpaCommentRepository implements CommentRepository{
         return comment;
     }
 
-
     //R
-    public Optional<Comment> findByCommentId(Long commentId) {
-        return Optional.ofNullable(em.find(Comment.class, commentId));
+    public Comment findByCommentId(Long commentId) {
+        return em.find(Comment.class, commentId);
     }
 
     //U
@@ -46,7 +44,7 @@ public class JpaCommentRepository implements CommentRepository{
         return updatedComment;
     }
 
-    //소프트딜리트로
+    //소프트딜리트, 재사용 가능
     public void deleteComment(Long commentId) {
         Comment comment = em.find(Comment.class, commentId);
         comment.setCommentStatus(CommentStatus.DELETED);
@@ -56,7 +54,6 @@ public class JpaCommentRepository implements CommentRepository{
         query.executeUpdate(); // DB에서 댓글 수 업데이트
     }
 
-    //commentStatus 가 ACTIVE인 댓글만 + createdTime 오름차순으로 정렬한 결과값 반환
     @Override
     public List<Comment> findCommentByBoardId(Board board, CommentStatus status) {
         return em.createQuery("SELECT c FROM Comment c WHERE c.board = :board AND c.commentStatus = :status ORDER BY c.createdTime ASC", Comment.class)
@@ -67,7 +64,7 @@ public class JpaCommentRepository implements CommentRepository{
 
     @Override
     public List<Comment> findCommentByMemberId(Member member, CommentStatus status) {
-        return em.createQuery("SELECT c FROM Comment c WHERE c.member = :member AND c.commentStatus = :status ORDER BY c.createdTime ASC", Comment.class)
+        return em.createQuery("SELECT c FROM Comment c WHERE c.member = :member AND c.commentStatus = :status ORDER BY c.createdTime DESC", Comment.class)
                 .setParameter("member", member)
                 .setParameter("status", status)
                 .getResultList();

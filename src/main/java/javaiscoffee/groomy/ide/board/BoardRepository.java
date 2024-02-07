@@ -12,8 +12,9 @@ public interface BoardRepository {
     public Board updateBoard(Board updatedBoard);
     public void deleteBoard(Board deletedBoard);
     public List<Board> findBoardByBoardId(BoardStatus status);
+    public List<Board> findBoardByPaging(int paging, int pagingNumber, BoardStatus status);
     List<Board> findBoardByMemberId(Member member);  //해당 사용자의 게시글 조회
-
+    public long countBoardsByStatus(BoardStatus status);
 }
 
 
