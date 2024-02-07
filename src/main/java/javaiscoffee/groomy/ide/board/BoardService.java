@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -36,7 +37,7 @@ public class BoardService {
         BeanUtils.copyProperties(requestBoardDto.getData(), newBoard);
         Member creatorMember = memberRepository.findByMemberId(memberId).get();
 
-        if(memberId == requestBoardDto.getData().getMemberId() && creatorMember != null) {
+        if(Objects.equals(memberId, requestBoardDto.getData().getMemberId()) && creatorMember != null) {
             newBoard.setMember(creatorMember);
             Board savedBoard = boardRepository.saveBoard(newBoard);
             ResponseBoardDto responseBoardDto = responseBoardDto(savedBoard);
@@ -78,7 +79,7 @@ public class BoardService {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
         Member member = memberRepository.findByMemberId(memberId).get();
 
-        if(member != null && member.getMemberId() == findBoard.getMember().getMemberId() &&
+        if(member != null && member.equals(findBoard.getMember()) &&
                 findBoard != null && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
             BeanUtils.copyProperties(requestBoardDto.getData(), findBoard);
             Board editedBoard = boardRepository.updateBoard(findBoard);
@@ -103,7 +104,7 @@ public class BoardService {
         if(member != null && findBoardOptional.isPresent()) {
             Board findBoard = findBoardOptional.get();
 
-            if(member == findBoard.getMember() && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
+            if(member.equals(findBoard.getMember()) && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
                 findBoard.setBoardStatus(BoardStatus.DELETE);
                 boardRepository.deleteBoard(findBoard);
 
@@ -129,8 +130,11 @@ public class BoardService {
 
             for(int i = 0; i < boardList.size(); i++) {
                 Board boardListIndex = boardList.get(i);
-                ResponseBoardDto responseBoardDto = responseBoardDto(boardListIndex);
-                responseBoardDtoList.add(responseBoardDto);
+
+                if(boardListIndex.getBoardStatus() == BoardStatus.ACTIVE) {
+                    ResponseBoardDto responseBoardDto = responseBoardDto(boardListIndex);
+                    responseBoardDtoList.add(responseBoardDto);
+                }
             }
 
             return responseBoardDtoList;
@@ -146,6 +150,54 @@ public class BoardService {
      */
     public long getBoardPageNumber() {
         return (long)Math.ceil(boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) / (double)10);
+    }
+
+    /**
+     * 내가 적은 게시글 조회
+     * @param paging
+     * @return
+     */
+    public List<ResponseBoardDto> getMyBoardByPaging(int paging, Long memberId) {
+        List<Board> boardList = boardRepository.findBoardByPaging(paging, 10, BoardStatus.ACTIVE);
+        Member member = memberRepository.findByMemberId(memberId).get();
+
+        if(member != null && !boardList.isEmpty()) {
+            List<ResponseBoardDto> responseBoardDtoList = new ArrayList<>();
+
+            for(int i = 0; i < boardList.size(); i++) {
+                Board boardListIndex = boardList.get(i);
+
+                if(member.equals(boardListIndex.getMember()) && boardListIndex.getBoardStatus() == BoardStatus.ACTIVE) {
+                    ResponseBoardDto responseBoardDto = responseBoardDto(boardListIndex);
+                    responseBoardDtoList.add(responseBoardDto);
+                }
+            }
+
+            return responseBoardDtoList;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * 게시글 추천
+     *
+     * @param boardId
+     * @return
+     */
+    public ResponseBoardDto getBoardGoodById(Long boardId) {
+        Board findBoard = boardRepository.findByBoardId(boardId).get();
+
+        if(findBoard != null && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
+            findBoard.setHelpNumber(findBoard.getHelpNumber() + 1);
+            Board updatedFindBoard = boardRepository.updateBoard(findBoard);
+
+            ResponseBoardDto responseBoardDto = responseBoardDto(updatedFindBoard);
+
+            return responseBoardDto;
+        } else {
+            return null;
+        }
     }
 
     /**

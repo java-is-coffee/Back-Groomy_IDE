@@ -38,13 +38,13 @@ public class BoardController {
 
     @GetMapping("/content/{boardId}")
     public ResponseEntity<?> getBoardById(@PathVariable Long boardId) {
-        ResponseBoardDto findedBoard = boardService.getBoardById(boardId);
+        ResponseBoardDto foundBoard = boardService.getBoardById(boardId);
 
-        if(findedBoard == null) {
+        if(foundBoard == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
         }
 
-        return ResponseEntity.ok(findedBoard);
+        return ResponseEntity.ok(foundBoard);
     }
 
     @PatchMapping("/edit/{boardId}")
@@ -90,6 +90,29 @@ public class BoardController {
         }
 
         return ResponseEntity.ok(boardPageNumber);
+    }
+
+    @GetMapping("/myList/{paging}")
+    public ResponseEntity<?> getMyBoardByPaging(@PathVariable int paging, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        List<ResponseBoardDto> boardByPaging = boardService.getMyBoardByPaging(paging, memberId);
+
+        if(boardByPaging == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+
+        return ResponseEntity.ok(boardByPaging);
+    }
+
+    @PostMapping("/content/good/{boardId}")
+    public ResponseEntity<?> getBoardGoodById(@PathVariable Long boardId) {
+        ResponseBoardDto foundBoard = boardService.getBoardGoodById(boardId);
+
+        if(foundBoard == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+
+        return ResponseEntity.ok(foundBoard);
     }
 }
 
