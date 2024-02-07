@@ -36,8 +36,9 @@ public class CommentService {
         BeanUtils.copyProperties(commentDto.getData(), newComment);
         Member creatorMember = memberRepository.findByMemberId(commentDto.getData().getMemberId()).get();
         Board board = boardRepository.findByBoardId(commentDto.getData().getBoardId()).get();
-
+        log.info("입력 받은 댓글 정보 = {}",commentDto);
         Comment originComment = null;
+
         //Dto에서 가져온 대댓글이 null이 아니면
         if (commentDto.getData().getOriginComment() != null) {
             //레포지토리에 있는 대댓글 값 가져옴
@@ -51,7 +52,6 @@ public class CommentService {
         }
         newComment.setMember(creatorMember);
         newComment.setBoard(board);
-        log.info("입력 받은 댓글 정보 = {}",commentDto);
         log.info("새로 저장할 댓글 = {}",newComment);
         Comment savedComment = commentRepository.saveComment(newComment);
         return toResponseCommentDto(savedComment);
