@@ -27,7 +27,6 @@ public class ChatController {
     @PostMapping("/project/write/{projectId}")
     public ResponseEntity<?> writeProjectChat(@PathVariable(name = "projectId") Long projectId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMemberId();
-        return ResponseEntity.ok(chatService.writeChat(projectId,memberId));
+        return ResponseEntity.ok(chatService.writeChatTest(projectId,memberId));
     }
-
 }

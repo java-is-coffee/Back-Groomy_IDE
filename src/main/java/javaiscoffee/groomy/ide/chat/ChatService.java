@@ -4,6 +4,7 @@ import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.project.JpaProjectRepository;
 import javaiscoffee.groomy.ide.project.Project;
+import javaiscoffee.groomy.ide.project.ProjectMember;
 import javaiscoffee.groomy.ide.project.ProjectMemberId;
 import javaiscoffee.groomy.ide.security.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,6 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -23,7 +23,7 @@ public class ChatService {
     private final JpaProjectRepository projectRepository;
     private final JpaMemberRepository memberRepository;
 
-    public List<ChatLogResponseDto> getChatLogs(Long memberId, Long projectId, int paging, int pagingNumber) {
+    public List<ChatMessageDto> getChatLogs(Long memberId, Long projectId, int paging, int pagingNumber) {
         Member findMember = memberRepository.findByMemberId(memberId).orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
         Project findProject = projectRepository.getProjectByProjectId(projectId);
         if (findProject == null) {
@@ -38,9 +38,9 @@ public class ChatService {
     }
 
     // ProjectChat 리스트를 ChatLogResponseDto List로 변환
-    public List<ChatLogResponseDto> convertToChatLogResponseDtoList(List<ProjectChat> projectChats) {
+    public List<ChatMessageDto> convertToChatLogResponseDtoList(List<ProjectChat> projectChats) {
         return projectChats.stream().map(chat -> {
-            ChatLogResponseDto dto = new ChatLogResponseDto();
+            ChatMessageDto dto = new ChatMessageDto();
             Member member = chat.getMember();
 
             // Member 정보가 있는 경우
@@ -60,7 +60,50 @@ public class ChatService {
         }).collect(Collectors.toList()); // 결과를 List로 수집
     }
 
-    public ChatLogResponseDto writeChat(Long projectId, Long memberId) {
+    /**
+     * 프로젝트 채팅 검증하고 로그 저장하는 메서드
+     * 요구 데이터 : 토큰 값에서 뽑은 memberId, projectId, ChatMessageRequestDto
+     * 반환 데이터 : ChatMessageDto
+     */
+    public ChatMessageDto sendProjectChat(Long memberId, Long projectId, ChatMessageRequestDto requestDto) {
+        //멤버Id가 잘못 입력된 경우
+        if(memberId != requestDto.getData().getMemberId()) {
+            throw new MemberNotFoundException("입력 값이 잘못되었습니다.");
+        }
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
+
+        //프로젝트가 존재하지 않는 경우
+        Project project = projectRepository.getProjectByProjectId(projectId);
+        if (project != null) {
+            throw new MemberNotFoundException("입력 값이 잘못되었습니다.");
+        }
+
+        ProjectMemberId isProjectMember = new ProjectMemberId(projectId, memberId);
+        //요청한 멤버가 프로젝트에 참여하지 않은 경우
+        if(!projectRepository.isParticipated(isProjectMember)) {
+            throw new MemberNotFoundException("참여하고 있지 않은 프로젝트입니다.");
+        }
+
+        //채팅 로그 저장
+        ProjectChat projectChat = new ProjectChat();
+        projectChat.setMember(member);
+        projectChat.setProject(project);
+        projectChat.setMessage(requestDto.getData().getMessage());
+        ProjectChat savedChat = chatRepository.writeProjectChat(projectChat);
+
+        //응답값 생성
+        ChatMessageDto responseDto = new ChatMessageDto();
+        responseDto.setName(savedChat.getMember().getName());
+        responseDto.setEmail(savedChat.getMember().getEmail());
+        BeanUtils.copyProperties(savedChat, responseDto);
+        return responseDto;
+    }
+
+
+    /**
+     * 채팅 추가 테스트
+     */
+    public ChatMessageDto writeChatTest(Long projectId, Long memberId) {
         Project findProject = projectRepository.getProjectByProjectId(projectId);
         Member findMember = memberRepository.findByMemberId(memberId).get();
         ProjectChat projectChat = new ProjectChat();
@@ -68,7 +111,7 @@ public class ChatService {
         projectChat.setMember(findMember);
         projectChat.setMessage("테스트");
         ProjectChat savedChat = chatRepository.writeProjectChat(projectChat);
-        ChatLogResponseDto responseDto = new ChatLogResponseDto();
+        ChatMessageDto responseDto = new ChatMessageDto();
         responseDto.setName(savedChat.getMember().getName());
         responseDto.setEmail(savedChat.getMember().getEmail());
         BeanUtils.copyProperties(savedChat, responseDto);
