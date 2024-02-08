@@ -3,6 +3,7 @@ package javaiscoffee.groomy.ide.spring;
 import javaiscoffee.groomy.ide.response.MyResponse;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
+import javaiscoffee.groomy.ide.security.MemberNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -69,6 +70,11 @@ public class GlobalExceptionHandler {
 //        String message = ex.getParameterName() + "값이 존재하지 않습니다.";
 
         return new ResponseEntity<>(new Status(ResponseStatus.INPUT_ERROR), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MemberNotFoundException.class)
+    public ResponseEntity<Object> handleMemberNotFoundException(MemberNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
     }
 
     // 다른 예외 유형을 처리하는 핸들러를 추가할 수 있습니다.

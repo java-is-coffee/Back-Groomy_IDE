@@ -1,10 +1,13 @@
 package javaiscoffee.groomy.ide.project;
 
 import jakarta.persistence.*;
+import javaiscoffee.groomy.ide.chat.ProjectChat;
 import javaiscoffee.groomy.ide.member.Member;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -41,6 +44,8 @@ public class Project {
     private String projectPath; //프로젝트 접근 경로
     @OneToMany(mappedBy = "project")
     private Set<ProjectMember> projectMembers;
+    @OneToMany(mappedBy = "project")
+    private List<ProjectChat> projectChat = new ArrayList<>();
 
     /**
      * 저장되기 전에 미리 수행되는 메서드

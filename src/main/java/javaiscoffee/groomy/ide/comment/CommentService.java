@@ -1,6 +1,7 @@
 package javaiscoffee.groomy.ide.comment;
 
 import javaiscoffee.groomy.ide.board.Board;
+import javaiscoffee.groomy.ide.board.BoardStatus;
 import javaiscoffee.groomy.ide.board.JpaBoardRepository;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
@@ -31,12 +32,23 @@ public class CommentService {
      * @param commentDto
      * @return 작성한 댓글
      */
-    public ResponseCommentDto createComment(CommentDto commentDto) {
+    public ResponseCommentDto createComment(CommentDto commentDto, Long memberId) {
+        // 작성 요청한 memberId와 작성하려는 memberId가 다른 경우 null 반환
+        if (!memberId.equals(commentDto.getData().getMemberId())) {
+            return null;
+        }
+
         Comment newComment = new Comment();
         BeanUtils.copyProperties(commentDto.getData(), newComment);
-        Member creatorMember = memberRepository.findByMemberId(commentDto.getData().getMemberId()).get();
+        Member creatorMember = memberRepository.findByMemberId(memberId).get(); // .orElseThrow //토큰 값에서 memebrId 뽑아서 조회
         Board board = boardRepository.findByBoardId(commentDto.getData().getBoardId()).get();
-        log.info("입력 받은 댓글 정보 = {}",commentDto);
+
+        // 삭제된 게시글인 경우
+        if (board.getBoardStatus() == BoardStatus.DELETE) {
+            return null;
+        }
+
+        // 대댓글
         Comment originComment = null;
 
         //Dto에서 가져온 대댓글이 null이 아니면
@@ -50,6 +62,8 @@ public class CommentService {
             //댓글에 대댓글 값 넣어줌
             newComment.setOriginComment(originComment);
         }
+
+        // 댓글 저장
         newComment.setMember(creatorMember);
         newComment.setBoard(board);
         log.info("새로 저장할 댓글 = {}",newComment);
@@ -62,22 +76,39 @@ public class CommentService {
      * @param commentId
      * @return commentId 댓글 조회
      */
-    public ResponseCommentDto getCommentById(Long commentId) {
+    public ResponseCommentDto getCommentById(Long commentId, Long memberId) {
         Comment findedComment = commentRepository.findByCommentId(commentId);
+        Board board = boardRepository.findByBoardId(findedComment.getBoard().getBoardId()).get();
+        // 삭제된 댓글이나 삭제된 게시글인 경우 null 반환
+        if (findedComment == null || findedComment.getCommentStatus() == CommentStatus.DELETED || board == null || board.getBoardStatus() == BoardStatus.DELETE) {
+            return null;
+        }
+
         return toResponseCommentDto(findedComment);
     }
+    // 따봉 Dto에 조회 요청한 유저가 리스트에 있는 애들 중에서 따봉 눌렀는지 안 눌렀는지 나타내는 데이터값을 추가해서 보내면 될 듯
 
     /**
      * 댓글 수정
      * @param requestDto
      * @return nickname, content만 바꿔서 덮어씌운 old 반환
      */
-    public ResponseCommentDto editComment(CommentEditRequestDto requestDto, Long commentId) {
-        //기존 댓글 조회 후 없을 경우 에러 반환
+    public ResponseCommentDto editComment(CommentEditRequestDto requestDto, Long commentId, Long memberId) {
         Comment oldComment = commentRepository.findByCommentId(commentId);
-        if(oldComment == null) {
+        Board board = boardRepository.findByBoardId(oldComment.getBoard().getBoardId()).get();
+
+        // 원본 댓글과 게시글이 존재하는지, 게시글이 삭제 상태인지
+        if(oldComment == null || oldComment.getCommentStatus() == CommentStatus.DELETED || board == null || oldComment.getBoard().getBoardStatus() == BoardStatus.DELETE ) {
             return null;
         }
+
+        Member member = memberRepository.findByMemberId(memberId).get(); // .orElseThrow
+        // 원본 댓글 memberId와 수정 요청한 멤버의 memberId가 다른 경우 null 반환
+        if(!oldComment.getMember().getMemberId().equals(member.getMemberId())) {
+            return null;
+        }
+
+        // 댓글 수정
         oldComment.setNickname(requestDto.getData().getNickname());
         oldComment.setContent(requestDto.getData().getContent());
         log.info("수정된 댓글 = {}",oldComment);
@@ -85,20 +116,36 @@ public class CommentService {
         return toResponseCommentDto(updatedComment);
     }
 
-
-
     /**
      * 소프트 딜리트
      * @param commentId
      * @return
      */
-    public Boolean deleteComment(Long commentId) {
-        commentRepository.deleteComment(commentId);
+    public Boolean deleteComment(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findByCommentId(commentId);
+        // 댓글이 존재하지 않는 경우, 삭제된 댓글인 경우 삭제 실패 false
+        if (comment == null || comment.getCommentStatus() == CommentStatus.DELETED) {
+            return false;
+        }
 
+        // boardId in comment로 boardRepo에서 boardId 조회
+        Board board = boardRepository.findByBoardId(comment.getBoard().getBoardId()).get();
+        // 게시글이 존재하지 않는 경우, 삭제된 게시글인 경우 삭제 실패 false
+        if (board == null || board.getBoardStatus() == BoardStatus.DELETE) {
+            return false;
+        }
+
+        Member member = memberRepository.findByMemberId(memberId).get(); // .orElseThrow
+        // 멤버가 존재하지 않는 경우, member가 댓글 작성자가 아닌 경우 삭제 실패 false
+        if(!comment.getMember().getMemberId().equals(member.getMemberId())) {
+            return false;
+        }
+
+        // 댓글 삭제
+        commentRepository.deleteComment(commentId);
         log.info("댓글 삭제 완료 = {}", commentId);
         return true;
     }
-
 
     /**
      * 게시판에 딸린 모든 댓글 조회
@@ -106,7 +153,9 @@ public class CommentService {
      * @return CommentStatus가 ACTIVE인 모든 댓글 리스트로 반환
      */
     public List<ResponseCommentDto> getCommentByBoardId(Long boardId) {
+        // boardId 가져옴
         Board getBoard = boardRepository.findByBoardId(boardId).get();
+        // 가져온 board에 속한 ACTIVE 상태인 모든 댓글 가져옴
         List<Comment> commentList = commentRepository.findCommentByBoardId(getBoard, CommentStatus.ACTIVE);
         log.info("해당 게시판에 딸린 모든 댓글들 = {}", commentList);
         return toResponseCommentDtoList(commentList);
@@ -133,9 +182,18 @@ public class CommentService {
         ResponseCommentDto responseCommentDto = new ResponseCommentDto();
 
         responseCommentDto.setBoardId(comment.getBoard() != null ? comment.getBoard().getBoardId() : null);
-        responseCommentDto.setMemberId(comment.getMember() != null ? comment.getMember().getMemberId() : null);
-        responseCommentDto.setNickname(comment.getNickname());
-        responseCommentDto.setContent(comment.getContent());
+        //삭제된 원댓글일 때
+        if(comment.getCommentStatus() == CommentStatus.DELETED) {
+            responseCommentDto.setMemberId(null);
+            responseCommentDto.setNickname("알 수 없음");
+            responseCommentDto.setContent("삭제된 댓글입니다.");
+        }
+        //삭제 안된 댓글일 경우
+        else {
+            responseCommentDto.setMemberId(comment.getMember() != null ? comment.getMember().getMemberId() : null);
+            responseCommentDto.setNickname(comment.getNickname());
+            responseCommentDto.setContent(comment.getContent());
+        }
         responseCommentDto.setOriginComment(comment.getOriginComment() != null ? comment.getOriginComment() : null);
         responseCommentDto.setCommentId(comment.getCommentId());
         responseCommentDto.setHelpNumber(comment.getHelpNumber());

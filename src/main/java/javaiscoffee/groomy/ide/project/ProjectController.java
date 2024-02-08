@@ -31,7 +31,7 @@ public class ProjectController {
     }
     @GetMapping("/list")
     public ResponseEntity<?> getProjectList(@AuthenticationPrincipal CustomUserDetails userDetails) {
-        return ResponseEntity.ok(projectService.getProjectList(userDetails.getMemberId()));
+        return ResponseEntity.ok(projectService.getProjectList(userDetails.getMemberId(),true));
     }
 
     @PatchMapping("/edit/{projectId}")
@@ -49,6 +49,25 @@ public class ProjectController {
     public ResponseEntity<?> deleteProject(@PathVariable(name = "projectId") Long projectId,@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMemberId();
         if (!projectService.deleteProject(memberId, projectId)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+        return ResponseEntity.ok(null);
+    }
+
+    /**
+     * 초대받은 프로젝트 리스트만 반환
+     */
+    @GetMapping("/invited-list")
+    public ResponseEntity<?> getInvitedProjects(@AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(projectService.getProjectList(userDetails.getMemberId(),false));
+    }
+
+    /**
+     * 초대받은 프로젝트 참가
+     */
+    @PostMapping("/participate-project")
+    public ResponseEntity<?> participateAccept(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectParticipateRequestDto requestDto) {
+        if(!projectService.participateAccept(requestDto, userDetails.getMemberId())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
         }
         return ResponseEntity.ok(null);
