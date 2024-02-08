@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-public class ChatLogResponseDto {
+public class ChatMessageDto {
     private String name;
     private String email;
     private String message;
