@@ -56,6 +56,25 @@ public class JpaCommentRepository implements CommentRepository{
         query.executeUpdate(); // DB에서 댓글 수 업데이트
     }
 
+    public CommentHelpNumber findCommentHelpNumber(CommentHelpNumberId id) {
+        return em.find(CommentHelpNumber.class,id);
+    }
+
+    public CommentHelpNumber saveCommentHelpNumber(CommentHelpNumber helpNumber) {
+        em.persist(helpNumber);
+        em.flush();
+        return helpNumber;
+    }
+
+    public boolean deleteCommentHelpNumber(CommentHelpNumber helpNumber) {
+        try {
+            em.remove(helpNumber);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 
 
     //boardId로 comments 조회
