@@ -1,21 +1,24 @@
 package javaiscoffee.groomy.ide.project;
 
-import jakarta.validation.constraints.Null;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.ecs.AmazonECS;
+import com.amazonaws.services.ecs.AmazonECSClientBuilder;
+import com.amazonaws.services.ecs.model.*;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
-import javaiscoffee.groomy.ide.response.MyResponse;
-import javaiscoffee.groomy.ide.response.ResponseStatus;
-import javaiscoffee.groomy.ide.response.Status;
 import javaiscoffee.groomy.ide.security.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
+
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -80,6 +83,12 @@ public class ProjectService {
         ProjectCreateResponseDto responseDto = new ProjectCreateResponseDto();
         BeanUtils.copyProperties(newProject, responseDto);
         responseDto.setMemberId(projectCreator.getMemberId()); // memberId만 설정
+
+        //프로젝트 폴더 생성
+        createProjectFolder(memberId, createdProject.getProjectId());
+
+
+
         return responseDto;
     }
 
@@ -149,17 +158,82 @@ public class ProjectService {
     public Boolean participateAccept(ProjectParticipateRequestDto requestDto, Long memberId) {
         Member findMember = memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
-        if(findMember.getMemberId() != requestDto.getData().getInvitedMemberId()) {
+        if(!Objects.equals(findMember.getMemberId(), requestDto.getData().getInvitedMemberId())) {
             return false;
         }
         Project findProject = projectRepository.getProjectByProjectId(requestDto.getData().getProjectId());
-        if(findProject == null || findProject.getDeleted() == true) {
+        if(findProject == null || findProject.getDeleted()) {
             return false;
         }
         //프로젝트 초대 명단 업데이트
         ProjectMemberId projectMemberId = new ProjectMemberId(findProject.getProjectId(), memberId);
         return projectRepository.acceptProject(projectMemberId);
     }
+
+    /**
+     * ec2 내부에 /home/projects/{memberId}/{projectId} 주소로 폴더를 생성
+     */
+    public boolean createProjectFolder(Long memberId, Long projectId) {
+        Path path = Paths.get("/home/projects/" + memberId + "/" + projectId);
+        try {
+            Files.createDirectories(path);
+            return true; // 폴더 생성 성공
+        } catch (IOException e) {
+            return false; // 폴더 생성 실패
+        }
+    }
+
+    public boolean createRegisterTaskDefinitionRequest(Long memberId, Long projectId, ProjectLanguage language) {
+        AmazonECS ecsClient = AmazonECSClientBuilder.standard()
+                .withRegion(Regions.AP_NORTHEAST_2)
+                .build();
+
+        String taskDefinition = getTaskDefinitionByLanguage(language); // 언어에 따라 태스크 종류 선택
+
+        RunTaskRequest runTaskRequest = new RunTaskRequest()
+                .withCluster("groomy-cluster")
+                .withTaskDefinition(taskDefinition)
+                .withCount(1)
+                .withLaunchType("EC2") // 또는 "EC2"
+                .withOverrides(new TaskOverride()
+                        .withContainerOverrides(new ContainerOverride()
+                                .withName("project/"+memberId+"-"+projectId)
+                                .withEnvironment(new KeyValuePair()
+                                        .withName("PROJECT_PATH")
+                                        .withValue("/home/projects/" + memberId + "/" + projectId))));
+
+        RunTaskResult runTaskResult = ecsClient.runTask(runTaskRequest);
+        return !runTaskResult.getTasks().isEmpty();
+    }
+
+    private String getTaskDefinitionByLanguage(ProjectLanguage language) {
+        return switch (language) {
+            case JAVA -> "java-task-definition:1";
+            case JAVASCRIPT -> "javascript-task-definition:1";
+            case PYTHON -> "python-task-definition:1";
+            default -> "default-task-definition:1";
+        };
+    }
+
+    private String createTaskDefinition(ProjectLanguage language) {
+        // AWS SDK를 사용하여 ECS Task Definition 생성 로직 구현
+        AmazonECS ecsClient = AmazonECSClientBuilder.standard()
+                .withRegion(Regions.AP_NORTHEAST_2)
+                .build();
+
+        // 생성된 Task Definition의 ARN을 반환
+        return "arn:aws:ecs:region:account:task-definition/taskName";
+    }
+
+    private boolean runEcsTask(String taskDefinitionArn, Long memberId, Long projectId) {
+        // AWS SDK를 사용하여 ECS Task 실행 로직 구현
+        // 성공적으로 실행되면 true 반환
+        return true;
+    }
+
+
+
+
 
     //프로젝트 List를 ProjectCreateResponseDto List로 변환
     private static List<ProjectCreateResponseDto> toProjectCreateResponseDtoList(List<Project> projects) {
