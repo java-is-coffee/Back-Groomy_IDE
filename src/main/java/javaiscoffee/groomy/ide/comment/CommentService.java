@@ -175,7 +175,7 @@ public class CommentService {
         Member member = memberRepository.findByMemberId(memberId).get();
         CommentHelpNumberId helpNumberId = new CommentHelpNumberId(member.getMemberId(),comment.getCommentId());
         CommentHelpNumber helpNumber = commentRepository.findCommentHelpNumber(helpNumberId);
-        // 댓글이 존재하지 않거나 삭제된 상태인 경우, 멤버가 존재하지 않는 경우 null 반환
+        // 댓글이 존재하지 않거나 삭제된 상태인 경우, 자신이 작성한 댓글일 경우 null 반환
         if (comment == null || comment.getCommentStatus() == CommentStatus.DELETED
                 || comment.getMember().getMemberId().equals(memberId)) {
             return null;
@@ -187,6 +187,7 @@ public class CommentService {
                 commentRepository.saveCommentHelpNumber(helpNumber);
                 comment.setHelpNumber(comment.getHelpNumber()+1);
                 comment = commentRepository.updateComment(comment);
+                log.info("추천합니다");
             }
             //유저가 댓글을 추천한 적이 있는 경우
             else {

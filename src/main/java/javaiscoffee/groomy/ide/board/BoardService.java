@@ -186,15 +186,16 @@ public class BoardService {
         Member member = memberRepository.findByMemberId(memberId).get();
         HelpBoardId helpBoardId = new HelpBoardId(member.getMemberId(), findBoard.getBoardId());
         HelpBoard helpBoard = jpaBoardRepository.findBoardHelpNumber(helpBoardId);
-        // 게시글이 존재하거 ACTIVE인 상태, 멤버가 존재하고 자신이 작성한 댓글이 아닌 경우 추천 가능
+        // 게시글이 존재하거나 ACTIVE인 상태, 자신이 작성한 댓글이 아닌 경우 추천 가능
         if(findBoard != null && findBoard.getBoardStatus() == BoardStatus.ACTIVE
-                && !findBoard.getMember().getMemberId().equals(member)) {
+                && !findBoard.getMember().getMemberId().equals(memberId)) {
             // 유저가 게시글을 추천한 적이 없는 경우
             if (helpBoard == null) {
                 helpBoard = new HelpBoard(helpBoardId, member, findBoard);
                 jpaBoardRepository.saveBoardHelpNumber(helpBoard);
                 findBoard.setHelpNumber(findBoard.getHelpNumber()+1);
                 findBoard = boardRepository.updateBoard(findBoard);
+                log.info("게시글 추천");
             }
             // 유저가 게시글을 추천한 적이 있다면
             else {
@@ -203,10 +204,10 @@ public class BoardService {
                 }
                 findBoard.setHelpNumber(findBoard.getHelpNumber()-1);
                 findBoard = boardRepository.updateBoard(findBoard);
+                log.info("게시글 추천 취소");
             }
             return responseBoardDto(findBoard);
-        }
-        else {
+        } else {
             return null;
         }
     }
@@ -222,9 +223,9 @@ public class BoardService {
         Member member = memberRepository.findByMemberId(memberId).get();
         ScrapId scrapId = new ScrapId(member.getMemberId(), board.getBoardId());
         Scrap scrap = jpaBoardRepository.findBoardScrap(scrapId);
-        // 게시글이 존재하거나 ACTIVE인 상태, 멤버가 존재하고 자신이 작성한 댓글이 아닌 경우 스크랩 가능
+        // 게시글이 존재하거나 ACTIVE인 상태, 자신이 작성한 게시글이 아닌 경우 스크랩 가능
         if (board != null && board.getBoardStatus() == BoardStatus.ACTIVE
-                && !board.getMember().getMemberId().equals(member)) {
+                && !board.getMember().getMemberId().equals(memberId)) {
             // 유저가 게시글을 스크랩한 적이 없는 경우
             if (scrap == null) {
                 scrap = new Scrap(scrapId, member, board);
@@ -234,7 +235,7 @@ public class BoardService {
             }
             // 유저가 스크랩을 한 적이 있다면
             else {
-                if (jpaBoardRepository.deleteBoardScrap(scrap)) {
+                if ((jpaBoardRepository.deleteBoardScrap(scrap))) {
                     return null;
                 }
                 board.setScrapNumber(board.getScrapNumber() - 1);

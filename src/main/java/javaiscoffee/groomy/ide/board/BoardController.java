@@ -102,22 +102,15 @@ public class BoardController {
         return ResponseEntity.ok(boardByPaging);
     }
 
-//    @PostMapping("/content/good/{boardId}")
-//    public ResponseEntity<?> getBoardGoodById(@PathVariable Long boardId) {
-//        ResponseBoardDto foundBoard = boardService.getBoardGoodById(boardId);
-//
-//        if(foundBoard == null) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
-//        }
-//
-//        return ResponseEntity.ok(foundBoard);
-//    }
 
     // 게시글 추천
     @PostMapping("/content/good/{boardId}")
     public ResponseEntity<?> clickGood(@PathVariable Long boardId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMemberId();
         ResponseBoardDto updatedHelpNumber = boardService.getBoardGoodById(boardId, memberId);
+        if (updatedHelpNumber == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
+        }
         return ResponseEntity.ok(updatedHelpNumber);
     }
 
@@ -126,6 +119,9 @@ public class BoardController {
     public ResponseEntity<?> clickScrap(@PathVariable Long boardId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMemberId();
         ResponseBoardDto updatedScrap = boardService.toggleScrap(boardId, memberId);
+        if (updatedScrap == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
+        }
         return ResponseEntity.ok(updatedScrap);
     }
 }

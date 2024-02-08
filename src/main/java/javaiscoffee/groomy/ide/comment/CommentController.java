@@ -86,7 +86,9 @@ public class CommentController {
     public ResponseEntity<?> clickGood(@PathVariable Long commentId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMemberId();
         ResponseCommentDto updatedHelpNumber = commentService.toggleGoodComment(commentId, memberId);
-
+        if (updatedHelpNumber == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
+        }
         return ResponseEntity.ok(updatedHelpNumber);
     }
 
