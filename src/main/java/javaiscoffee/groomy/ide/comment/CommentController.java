@@ -80,12 +80,16 @@ public class CommentController {
 
 
     /**
-     * 모든 댓글 조회에 필요한 API
+     * 따봉
      */
-//    @GetMapping("/comments/")
-//    public ResponseEntity<?> getAllComments() {
-//        return ResponseEntity.ok(commentService.getAll)
-//    }
+    @PostMapping("/comment/good/{commentId}")
+    public ResponseEntity<?> clickGood(@PathVariable Long commentId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        ResponseCommentDto updatedHelpNumber = commentService.toggleGoodComment(commentId, memberId);
+
+        return ResponseEntity.ok(updatedHelpNumber);
+    }
+
 
     /**
      * 게시글에 딸린 모든 댓글 조회할 때 필요한 API
