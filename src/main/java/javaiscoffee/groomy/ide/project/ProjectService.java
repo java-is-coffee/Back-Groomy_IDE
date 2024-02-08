@@ -6,9 +6,12 @@ import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.response.MyResponse;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
+import javaiscoffee.groomy.ide.security.MemberNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +19,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -89,8 +93,9 @@ public class ProjectService {
         projectRepository.participateProject(projectMember);
     }
 
-    public List<ProjectCreateResponseDto> getProjectList(Long memberId) {
-        return projectRepository.getProjectList(memberId);
+    public List<ProjectCreateResponseDto> getProjectList(Long memberId, boolean participated) {
+        List<Project> projectList = projectRepository.getProjectList(memberId,participated);
+        return toProjectCreateResponseDtoList(projectList);
     }
 
     public ProjectCreateResponseDto editProject(Long projectId,Long memberId, ProjectCreateRequestDto requestDto) {
@@ -122,7 +127,7 @@ public class ProjectService {
     public Boolean deleteProject(Long memberId, Long projectId) {
         Project oldProject = projectRepository.getProjectByProjectId(projectId);
         //프로젝트를 찾을 수 없는 경우 에러 코드 반환
-        if(oldProject == null) {
+        if(oldProject == null || oldProject.getDeleted() == true) {
             return false;
         }
 
@@ -135,5 +140,42 @@ public class ProjectService {
             return false;
         }
         return true;
+    }
+
+    /**
+     * 멤버와 프로젝트를 찾아서 프로젝트 참가로 변경
+     * 입력받는 값 : projectParticipateRequestDto, 토큰에서 뽑은 memberId
+     */
+    public Boolean participateAccept(ProjectParticipateRequestDto requestDto, Long memberId) {
+        Member findMember = memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
+        if(findMember.getMemberId() != requestDto.getData().getInvitedMemberId()) {
+            return false;
+        }
+        Project findProject = projectRepository.getProjectByProjectId(requestDto.getData().getProjectId());
+        if(findProject == null || findProject.getDeleted() == true) {
+            return false;
+        }
+        //프로젝트 초대 명단 업데이트
+        ProjectMemberId projectMemberId = new ProjectMemberId(findProject.getProjectId(), memberId);
+        return projectRepository.acceptProject(projectMemberId);
+    }
+
+    //프로젝트 List를 ProjectCreateResponseDto List로 변환
+    private static List<ProjectCreateResponseDto> toProjectCreateResponseDtoList(List<Project> projects) {
+        List<ProjectCreateResponseDto> projectList = projects.stream().map(project -> {
+            ProjectCreateResponseDto dto = new ProjectCreateResponseDto();
+            dto.setProjectId(project.getProjectId());
+            dto.setMemberId(project.getMemberId().getMemberId());
+            dto.setProjectName(project.getProjectName());
+            dto.setDescription(project.getDescription());
+            dto.setLanguage(project.getLanguage());
+            dto.setCreatedDate(project.getCreatedDate());
+            dto.setDeleted(project.getDeleted());
+            dto.setProjectPath(project.getProjectPath());
+            return dto;
+        }).collect(Collectors.toList());
+
+        return projectList;
     }
 }
