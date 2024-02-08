@@ -67,6 +67,7 @@ public class BoardController {
         return ResponseEntity.ok(null);
     }
 
+
     @GetMapping("/{paging}")
     public ResponseEntity<?> getBoardByPaging(@PathVariable int paging) {
         List<ResponseBoardDto> boardByPaging = boardService.getBoardByPaging(paging);
@@ -101,15 +102,31 @@ public class BoardController {
         return ResponseEntity.ok(boardByPaging);
     }
 
+//    @PostMapping("/content/good/{boardId}")
+//    public ResponseEntity<?> getBoardGoodById(@PathVariable Long boardId) {
+//        ResponseBoardDto foundBoard = boardService.getBoardGoodById(boardId);
+//
+//        if(foundBoard == null) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
+//        }
+//
+//        return ResponseEntity.ok(foundBoard);
+//    }
+
+    // 게시글 추천
     @PostMapping("/content/good/{boardId}")
-    public ResponseEntity<?> getBoardGoodById(@PathVariable Long boardId) {
-        ResponseBoardDto foundBoard = boardService.getBoardGoodById(boardId);
+    public ResponseEntity<?> clickGood(@PathVariable Long boardId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        ResponseBoardDto updatedHelpNumber = boardService.getBoardGoodById(boardId, memberId);
+        return ResponseEntity.ok(updatedHelpNumber);
+    }
 
-        if(foundBoard == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
-        }
-
-        return ResponseEntity.ok(foundBoard);
+    // 게시글 스크랩
+    @PostMapping("/scrap/{boardId}")
+    public ResponseEntity<?> clickScrap(@PathVariable Long boardId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        ResponseBoardDto updatedScrap = boardService.toggleScrap(boardId, memberId);
+        return ResponseEntity.ok(updatedScrap);
     }
 }
 

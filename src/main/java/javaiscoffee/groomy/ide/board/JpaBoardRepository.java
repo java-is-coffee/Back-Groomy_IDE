@@ -46,6 +46,47 @@ public class JpaBoardRepository implements BoardRepository {
         em.merge(deletedBoard);
     }
 
+    // 추천
+    public HelpBoard findBoardHelpNumber(HelpBoardId id) {
+        return em.find(HelpBoard.class, id);
+    }
+
+    public HelpBoard saveBoardHelpNumber(HelpBoard helpBoard) {
+        em.persist(helpBoard);
+        em.flush();
+        return helpBoard;
+    }
+
+    public boolean deleteBoardHelpNumber(HelpBoard helpBoard) {
+        try {
+            em.remove(helpBoard);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    // 스크랩
+    public Scrap findBoardScrap(ScrapId id) {
+        return em.find(Scrap.class, id);
+    }
+
+    public Scrap saveBoardScrap(Scrap scrap) {
+        em.persist(scrap);
+        em.flush();
+        return scrap;
+    }
+
+    public boolean deleteBoardScrap(Scrap scrap) {
+        try {
+            em.remove(scrap);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
     @Override
     public List<Board> findBoardByPaging(int paging, int pagingNumber, BoardStatus status) {
         return em.createQuery("SELECT b FROM Board b WHERE b.boardStatus = :status ORDER BY b.createdTime DESC", Board.class)

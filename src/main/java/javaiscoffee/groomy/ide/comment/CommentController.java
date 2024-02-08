@@ -18,7 +18,7 @@ public class CommentController {
     private final CommentService commentService;
 
     /**
-     * 댓글 작성 할 때 필요한 API, 검증 과정 ㅇ
+     * 댓글 작성 할 때 필요한 API
      */
     @PostMapping("/comment/write/{boardId}")
     public ResponseEntity<?> writeComment(@RequestBody CommentDto commentDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
