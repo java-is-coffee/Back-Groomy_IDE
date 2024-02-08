@@ -86,7 +86,7 @@ public class CommentService {
 
         return toResponseCommentDto(findedComment);
     }
-    // 따봉 Dto에 조회 요청한 유저가 리스트에 있는 애들 중에서 따봉 눌렀는지 안 눌렀는지 나타내는 데이터값을 추가해서 보내면 될 듯
+
 
     /**
      * 댓글 수정
@@ -172,6 +172,35 @@ public class CommentService {
         log.info("해당 사용자가 작성한 모든 댓글들 = {}", commentList);
         return toResponseCommentDtoList(commentList);
     }
+
+
+    // 따봉 Dto에 조회 요청한 유저가 리스트에 있는 애들 중에서 따봉 눌렀는지 안 눌렀는지 나타내는 데이터값을 추가해서 보내면 될 듯
+    public ResponseCommentDto toggleGoodComment(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findByCommentId(commentId);
+        Member member = memberRepository.findByMemberId(memberId).get();
+        CommentHelpNumberId helpNumberId = new CommentHelpNumberId(member.getMemberId(),comment.getCommentId());
+        CommentHelpNumber helpNumber = commentRepository.findCommentHelpNumber(helpNumberId);
+        //유저가 댓글을 추천한 적이 없는 경우
+        if(helpNumber == null) {
+            helpNumber = new CommentHelpNumber(helpNumberId,member,comment);
+            commentRepository.saveCommentHelpNumber(helpNumber);
+            comment.setHelpNumber(comment.getHelpNumber()+1);
+            comment = commentRepository.updateComment(comment);
+        }
+        //유저가 댓글을 추천한 적이 있는 경우
+        else {
+            if(!commentRepository.deleteCommentHelpNumber(helpNumber)) {
+                return null;
+            }
+            comment.setHelpNumber(comment.getHelpNumber()-1);
+            comment = commentRepository.updateComment(comment);
+        }
+
+
+        return toResponseCommentDto(comment);
+    }
+
+
 
     // Comment 객체를 ResponseCommentDto로 매핑하는 메서드
     public static ResponseCommentDto toResponseCommentDto(Comment comment) {

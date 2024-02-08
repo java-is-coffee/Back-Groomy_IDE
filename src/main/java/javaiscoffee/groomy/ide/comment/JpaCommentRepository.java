@@ -35,7 +35,9 @@ public class JpaCommentRepository implements CommentRepository{
 
     //R
     public Comment findByCommentId(Long commentId) {
-        return em.find(Comment.class, commentId);
+        Comment comment = em.find(Comment.class, commentId);
+
+        return comment;
     }
 
     //U
@@ -54,6 +56,9 @@ public class JpaCommentRepository implements CommentRepository{
         query.executeUpdate(); // DB에서 댓글 수 업데이트
     }
 
+
+
+    //boardId로 comments 조회
     @Override
     public List<Comment> findCommentByBoardId(Board board, CommentStatus status) {
         return em.createQuery("SELECT c FROM Comment c WHERE (c.board = :board AND c.commentStatus = :status AND c.originComment is not null) OR (c.board = :board AND c.originComment is null) ORDER BY c.createdTime ASC", Comment.class)
@@ -62,6 +67,7 @@ public class JpaCommentRepository implements CommentRepository{
                 .getResultList();
     }
 
+
     @Override
     public List<Comment> findCommentByMemberId(Member member, CommentStatus status) {
         return em.createQuery("SELECT c FROM Comment c WHERE c.member = :member AND c.commentStatus = :status ORDER BY c.createdTime DESC", Comment.class)
@@ -69,6 +75,7 @@ public class JpaCommentRepository implements CommentRepository{
                 .setParameter("status", status)
                 .getResultList();
     }
+
 
 
 }
