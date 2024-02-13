@@ -30,7 +30,7 @@ public class FileController {
     @GetMapping("/list")
     public ResponseEntity<?> getFileList(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody FileRenameRequestDto requestDto) {
         Long memberId = userDetails.getMemberId();
-        return ResponseEntity.ok(fileService.getAllFiles(memberId, requestDto));
+        return ResponseEntity.ok(fileService.getProjectFilesStructure(memberId, requestDto.getData().getProjectId()));
     }
 
     @GetMapping("/content")

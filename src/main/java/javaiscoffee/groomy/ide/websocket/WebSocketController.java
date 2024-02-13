@@ -1,5 +1,8 @@
-package javaiscoffee.groomy.ide.chat;
+package javaiscoffee.groomy.ide.websocket;
 
+import javaiscoffee.groomy.ide.chat.ChatMessageDto;
+import javaiscoffee.groomy.ide.chat.ChatMessageRequestDto;
+import javaiscoffee.groomy.ide.chat.ChatService;
 import javaiscoffee.groomy.ide.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +31,7 @@ public class WebSocketController {
 
     @MessageMapping("/projectchat/{projectId}/send")
     @SendTo("/projectws/{projectId}/messages")
-    public ChatMessageDto sendProjectMessages(@DestinationVariable(value="projectId") Long projectId,@AuthenticationPrincipal CustomUserDetails userDetails, ChatMessageRequestDto requestDto) {
+    public ChatMessageDto sendProjectMessages(@DestinationVariable(value="projectId") Long projectId, @AuthenticationPrincipal CustomUserDetails userDetails, ChatMessageRequestDto requestDto) {
         log.info("받은 메시지 로그 = {}",requestDto);
         Long memberId = userDetails.getMemberId();
         ChatMessageDto chatMessageDto = new ChatMessageDto();

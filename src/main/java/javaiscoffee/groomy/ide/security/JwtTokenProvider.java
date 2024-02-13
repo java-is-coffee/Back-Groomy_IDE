@@ -6,17 +6,11 @@ import io.jsonwebtoken.security.Keys;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -81,7 +75,7 @@ public class JwtTokenProvider {
 
         log.info("토큰 재발급하는 memberId = {}", memberId);
 
-        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new MemberNotFoundException("유저를 찾을 수 없습니다."));
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException("유저를 찾을 수 없습니다."));
 
         // 사용자 정보에서 권한 가져오기
         String authorities = member.getAuthorities().stream()

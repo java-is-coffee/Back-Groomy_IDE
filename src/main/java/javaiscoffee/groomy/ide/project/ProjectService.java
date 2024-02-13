@@ -6,7 +6,7 @@ import com.amazonaws.services.ecs.AmazonECSClientBuilder;
 import com.amazonaws.services.ecs.model.*;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
-import javaiscoffee.groomy.ide.security.MemberNotFoundException;
+import javaiscoffee.groomy.ide.security.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -171,7 +171,7 @@ public class ProjectService {
     @Transactional
     public Boolean participateAccept(ProjectParticipateRequestDto requestDto, Long memberId) {
         Member findMember = memberRepository.findByMemberId(memberId)
-                .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
+                .orElseThrow(() -> new BaseException("멤버를 찾을 수 없습니다."));
         if(!Objects.equals(findMember.getMemberId(), requestDto.getData().getInvitedMemberId())) {
             return false;
         }
@@ -193,7 +193,7 @@ public class ProjectService {
             Files.createDirectories(path);
             return true; // 폴더 생성 성공
         } catch (IOException e) {
-            throw new MemberNotFoundException("프로젝트 폴더 생성 실패");
+            throw new BaseException("프로젝트 폴더 생성 실패");
         }
     }
 

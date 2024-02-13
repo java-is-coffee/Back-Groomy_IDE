@@ -6,16 +6,16 @@ import javaiscoffee.groomy.ide.project.JpaProjectRepository;
 import javaiscoffee.groomy.ide.project.Project;
 import javaiscoffee.groomy.ide.project.ProjectMemberId;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
-import javaiscoffee.groomy.ide.security.MemberNotFoundException;
+import javaiscoffee.groomy.ide.security.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -23,8 +23,7 @@ import java.util.stream.Stream;
 public class FileService {
     private final MemberRepository memberRepository;
     private final JpaProjectRepository projectRepository;
-    private final String projectBasePath = "C:\\Users\\tkrhk\\Desktop\\api테스트\\";
-    //private final String projectBasePath = "/home/projects/";
+    private final String projectBasePath = "/home/projects/";
 
     /**
      * 파일 및 폴더 생성
@@ -52,7 +51,7 @@ public class FileService {
             log.info("파일 생성 성공 = {}",fullPath);
         } catch (IOException e) {
             log.error("파일 생성 예외 발생 = {}",data.getFileName());
-            throw new MemberNotFoundException(ResponseStatus.SAVE_FAILED.getMessage());
+            throw new BaseException(ResponseStatus.SAVE_FAILED.getMessage());
         }
     }
 
@@ -70,44 +69,57 @@ public class FileService {
             Files.move(oldFullPath, newFullPath, StandardCopyOption.REPLACE_EXISTING); // 기존 파일/폴더를 새 경로(이름)로 이동
         } catch (IOException e) {
             log.error("파일 수정 예외 발생 = {}",data.getOldPath());
-            throw new MemberNotFoundException(ResponseStatus.SAVE_FAILED.getMessage());
+            throw new BaseException(ResponseStatus.SAVE_FAILED.getMessage());
         }
     }
     /**
      * 프로젝트 폴더 내용 목록 조회
-     * 반환 데이터 = 전체 파일들의 절대 경로를 String으로 반환
+     * 반환 데이터 = 파일 및 폴더 구조를 탐색하고 FileResponseDto 리스트로 반환
      */
-    public List<String> getAllFiles(Long memberId, FileRenameRequestDto requestDto) {
-        FileRenameRequestDto.RequestData data = requestDto.getData();
+    public List<FileResponseDto> getProjectFilesStructure(Long memberId, Long projectId) {
+        Path rootPath = Paths.get(projectBasePath + memberId + "/" + projectId);
         //권한이 있는지 검사
-        isParticipated(data.getProjectId(), memberId);
+        isParticipated(projectId, memberId);
 
-        Path projectPath = Paths.get(projectBasePath + memberId + "/" + data.getProjectId());
-        List<String> fileList = new ArrayList<>();
-        List<String> directoryList = new ArrayList<>();
-        try (Stream<Path> paths = Files.walk(projectPath)) {
-            paths.forEach(path -> {
-                if (Files.isRegularFile(path)) {
-                    // 파일인 경우
-                    fileList.add(projectPath.relativize(path).toString());
-                } else if (Files.isDirectory(path) && !path.equals(projectPath)) {
-                    // 디렉토리인 경우, 최상위 디렉토리는 제외
-                    directoryList.add(projectPath.relativize(path).toString());
-                }
-            });
-        } catch (IOException e) {
-            log.error("프로젝트 파일 목록 조회 예외 발생 = {}", projectPath);
-            throw new MemberNotFoundException(ResponseStatus.READ_FAILED.getMessage());
-        }
-
-        // 파일과 디렉토리 리스트를 합쳐서 반환
-        directoryList.addAll(fileList);
-        return directoryList;
+        List<FileResponseDto> rootList = new ArrayList<>();
+        traverseFolder(rootPath, rootList, rootPath);
+        return rootList;
     }
 
     /**
+     * dfs 방식으로 폴더 탐색
+     * 반환 리스트
+     */
+    private void traverseFolder(Path directory, List<FileResponseDto> fileList, Path rootPath) {
+        try (DirectoryStream<Path> stream = Files.newDirectoryStream(directory)) {
+            for (Path path : stream) {
+                BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
+                FileResponseDto fileDto = new FileResponseDto();
+                fileDto.setId(attrs.creationTime().toString());
+                fileDto.setName(path.getFileName().toString());
+                fileDto.setPath(rootPath.relativize(path).toString());
+                fileDto.setLastUpdatedTime(attrs.lastModifiedTime().toString());
+
+                if (attrs.isDirectory()) {
+                    fileDto.setType(FileType.FOLDER);
+                    fileDto.setChildren(new ArrayList<>());
+                    traverseFolder(path, fileDto.getChildren(), rootPath);
+                } else {
+                    fileDto.setType(FileType.FILE);
+                    // 파일의 경우 children을 설정하지 않거나 빈 리스트를 할당
+                }
+
+                fileList.add(fileDto);
+            }
+        }   catch (IOException e) {
+            throw new BaseException("파일 목록 조회에 실패했습니다.");
+        }
+    }
+
+
+    /**
      * 파일 내용 조회
-     * oldPath = 전체 경로
+     * oldPath = 전체 상대 경로 => /home/projects/1/9/ 제외
      * newName = null 사용 안함
      * 반환 데이터 = 전체 코드를 String으로 반환
      */
@@ -121,7 +133,7 @@ public class FileService {
             return content;
         } catch (IOException e) {
             log.error("파일 읽기 예외 발생 = {}",data.getOldPath());
-            throw new MemberNotFoundException(ResponseStatus.NOT_FOUND.getMessage());
+            throw new BaseException(ResponseStatus.NOT_FOUND.getMessage());
         }
     }
 
@@ -139,7 +151,7 @@ public class FileService {
             Files.deleteIfExists(fullPath);
         } catch (IOException e) {
             log.error("파일 삭제 예외 발생 = {}",data.getOldPath());
-            throw new MemberNotFoundException(ResponseStatus.DELETE_FAILED.getMessage());
+            throw new BaseException(ResponseStatus.DELETE_FAILED.getMessage());
         }
     }
 
@@ -147,21 +159,21 @@ public class FileService {
      * 멤버가 프로젝트에 참가하고 있는지 검사
      */
     private void isParticipated(Long projectId, Long memberId) {
-        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new MemberNotFoundException(ResponseStatus.NOT_FOUND.getMessage()));
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
         Project project = projectRepository.getProjectByProjectId(projectId);
         //멤버가 없으면, 프로젝트가 없으면, 프로젝트가 삭제되면 예외처리
         if(member == null || project == null || project.getDeleted()) {
-            throw new MemberNotFoundException(ResponseStatus.NOT_FOUND.getMessage());
+            throw new BaseException(ResponseStatus.NOT_FOUND.getMessage());
         }
         ProjectMemberId projectMemberId = new ProjectMemberId(project.getProjectId(), member.getMemberId());
+        //프로젝트에 참가하고 있지 않으면 예외처리
         if(!projectRepository.isParticipated(projectMemberId)) {
-            throw new MemberNotFoundException(ResponseStatus.FORBIDDEN.getMessage());
+            throw new BaseException(ResponseStatus.FORBIDDEN.getMessage());
         }
     }
 
 
     public Path getFileFullPath (Long memberId, Long projectId, String filePath) {
-        return Paths.get(projectBasePath + memberId + "\\" + projectId + "\\" + filePath);
-//        return Paths.get(projectBasePath + memberId + "/" + projectId + "/" + filePath + "/" + fileName);
+        return Paths.get(projectBasePath + memberId + "/" + projectId + "/" + filePath);
     }
 }
