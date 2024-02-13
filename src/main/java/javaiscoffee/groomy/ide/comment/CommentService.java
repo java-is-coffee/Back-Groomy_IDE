@@ -173,30 +173,37 @@ public class CommentService {
     }
 
 
-    // 따봉 Dto에 조회 요청한 유저가 리스트에 있는 애들 중에서 따봉 눌렀는지 안 눌렀는지 나타내는 데이터값을 추가해서 보내면 될 듯
+    // 댓글 추천
     public ResponseCommentDto toggleGoodComment(Long commentId, Long memberId) {
         Comment comment = commentRepository.findByCommentId(commentId);
         Member member = memberRepository.findByMemberId(memberId).get();
         CommentHelpNumberId helpNumberId = new CommentHelpNumberId(member.getMemberId(),comment.getCommentId());
         CommentHelpNumber helpNumber = commentRepository.findCommentHelpNumber(helpNumberId);
-        //유저가 댓글을 추천한 적이 없는 경우
-        if(helpNumber == null) {
-            helpNumber = new CommentHelpNumber(helpNumberId,member,comment);
-            commentRepository.saveCommentHelpNumber(helpNumber);
-            comment.setHelpNumber(comment.getHelpNumber()+1);
-            comment = commentRepository.updateComment(comment);
+        // 댓글이 존재하지 않거나 삭제된 상태인 경우, 자신이 작성한 댓글일 경우 null 반환
+        if (comment == null || comment.getCommentStatus() == CommentStatus.DELETED
+                || comment.getMember().getMemberId().equals(memberId)) {
+            return null;
         }
-        //유저가 댓글을 추천한 적이 있는 경우
         else {
-            if(!commentRepository.deleteCommentHelpNumber(helpNumber)) {
-                return null;
+            //유저가 댓글을 추천한 적이 없는 경우
+            if(helpNumber == null) {
+                helpNumber = new CommentHelpNumber(helpNumberId,member,comment);
+                commentRepository.saveCommentHelpNumber(helpNumber);
+                comment.setHelpNumber(comment.getHelpNumber()+1);
+                comment = commentRepository.updateComment(comment);
+                log.info("추천합니다");
             }
-            comment.setHelpNumber(comment.getHelpNumber()-1);
-            comment = commentRepository.updateComment(comment);
+            //유저가 댓글을 추천한 적이 있는 경우
+            else {
+                if(!commentRepository.deleteCommentHelpNumber(helpNumber)) {
+                    return null;
+                }
+                comment.setHelpNumber(comment.getHelpNumber()-1);
+                comment = commentRepository.updateComment(comment);
+            }
+            return toResponseCommentDto(comment);
         }
 
-
-        return toResponseCommentDto(comment);
     }
 
 

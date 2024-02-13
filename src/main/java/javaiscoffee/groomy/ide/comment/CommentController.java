@@ -18,7 +18,7 @@ public class CommentController {
     private final CommentService commentService;
 
     /**
-     * 댓글 작성 할 때 필요한 API, 검증 과정 ㅇ
+     * 댓글 작성 할 때 필요한 API
      */
     @PostMapping("/comment/write/{boardId}")
     public ResponseEntity<?> writeComment(@RequestBody CommentDto commentDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -86,7 +86,9 @@ public class CommentController {
     public ResponseEntity<?> clickGood(@PathVariable Long commentId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMemberId();
         ResponseCommentDto updatedHelpNumber = commentService.toggleGoodComment(commentId, memberId);
-
+        if (updatedHelpNumber == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
+        }
         return ResponseEntity.ok(updatedHelpNumber);
     }
 

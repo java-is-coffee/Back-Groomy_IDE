@@ -75,7 +75,6 @@ public class JpaCommentRepository implements CommentRepository{
     }
 
 
-
     //boardId로 comments 조회
     @Override
     public List<Comment> findCommentByBoardId(Board board, CommentStatus status) {
