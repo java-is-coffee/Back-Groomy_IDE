@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import javaiscoffee.groomy.ide.project.ProjectService;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
+import javaiscoffee.groomy.ide.security.BaseException;
 import javaiscoffee.groomy.ide.security.CustomUserDetails;
 import javaiscoffee.groomy.ide.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -38,20 +39,21 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String authToken = accessor.getFirstNativeHeader("Authorization");
-            if (authToken != null) {
+            if (authToken != null && authToken.startsWith("Bearer ")) {
                 if (jwtTokenProvider.validateToken(authToken)) {
-                    Authentication auth = jwtTokenProvider.getAuthentication(authToken);
+                    String token = authToken.substring(7);
+                    Authentication auth = jwtTokenProvider.getAuthentication(token);
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 } else {
                     // 토큰 검증 실패 처리 로직
                     log.error("웹소켓 토큰 검증 실패: {}", authToken);
                     // 인증 실패 시 처리 로직 필요 (예: 연결 종료 또는 에러 메시지 전송)
                     // 여기서는 에러 메시지를 클라이언트에게 보내는 것이 아니라, 단순히 로그를 남기고 메시지를 처리하지 않습니다.
-                    return null; // 이 부분은 메시지를 중단시키고, 메시지를 브로커로 전달하지 않습니다.
+                    throw new BaseException("웹소켓 연결 시 토큰 검증에 실패했습니다.");
                 }
             } else {
                 log.error("웹소켓 연결 시 인증 헤더가 누락됨");
-                return null;
+                throw new BaseException("웹소켓 연결 시 인증 헤더가 누락되었습니다.");
             }
         }
         return message;
