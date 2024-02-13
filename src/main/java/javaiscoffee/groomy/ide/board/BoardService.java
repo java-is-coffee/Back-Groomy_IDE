@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@AllArgsConstructor //required args?
+@AllArgsConstructor //requiredargs~?
 @Transactional(readOnly = true)
 public class BoardService {
     private final BoardRepository boardRepository;
@@ -254,6 +254,29 @@ public class BoardService {
             return null;
         }
 
+    }
+
+    // 스크랩 게시글 List 조회
+    public List<ResponseBoardDto> getHelpBoardByPaging(int paging, Long memberId) {
+//        log.info("스크랩 게시물 조회");
+        Member member = memberRepository.findByMemberId(memberId).get();
+
+        if (member == null) {
+            return null;
+        }
+        List<Scrap> helpBoardList = jpaBoardRepository.findScrappedByMember(paging, 10, member);
+        if(!helpBoardList.isEmpty()) {
+            List<ResponseBoardDto> responseBoardDtoList = new ArrayList<>();
+
+            for(Scrap scrap : helpBoardList) {
+                Board board = scrap.getBoardId();
+                ResponseBoardDto responseBoardDto = responseBoardDto(board);
+                responseBoardDtoList.add(responseBoardDto);
+            }
+            return responseBoardDtoList;
+        } else {
+            return null;
+        }
     }
 
 

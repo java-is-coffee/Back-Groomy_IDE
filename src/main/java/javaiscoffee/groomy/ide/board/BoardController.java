@@ -124,6 +124,19 @@ public class BoardController {
         }
         return ResponseEntity.ok(updatedScrap);
     }
+
+
+    @GetMapping("/scrap/list/{paging}")
+    public ResponseEntity<?> getGoodListByPaging(@PathVariable int paging, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("스크랩 게시물 목록 조회 요청");
+        Long memberId = userDetails.getMemberId();
+        List<ResponseBoardDto> goodByPaging = boardService.getHelpBoardByPaging(paging, memberId);
+        if(goodByPaging == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+
+        return ResponseEntity.ok(goodByPaging);
+    }
 }
 
 //그냥 컨트롤러로 요청 들어오면 해당 하는 게시글은 무조건 삭제 수정하도록
