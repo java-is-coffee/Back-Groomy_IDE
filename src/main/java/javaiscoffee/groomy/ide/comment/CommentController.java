@@ -18,7 +18,7 @@ public class CommentController {
     private final CommentService commentService;
 
     /**
-     * 댓글 작성 할 때 필요한 API, 검증 과정 ㅇ
+     * 댓글 작성 할 때 필요한 API
      */
     @PostMapping("/comment/write/{boardId}")
     public ResponseEntity<?> writeComment(@RequestBody CommentDto commentDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -80,12 +80,18 @@ public class CommentController {
 
 
     /**
-     * 모든 댓글 조회에 필요한 API
+     * 따봉
      */
-//    @GetMapping("/comments/")
-//    public ResponseEntity<?> getAllComments() {
-//        return ResponseEntity.ok(commentService.getAll)
-//    }
+    @PostMapping("/comment/good/{commentId}")
+    public ResponseEntity<?> clickGood(@PathVariable Long commentId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        ResponseCommentDto updatedHelpNumber = commentService.toggleGoodComment(commentId, memberId);
+        if (updatedHelpNumber == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+        return ResponseEntity.ok(updatedHelpNumber);
+    }
+
 
     /**
      * 게시글에 딸린 모든 댓글 조회할 때 필요한 API

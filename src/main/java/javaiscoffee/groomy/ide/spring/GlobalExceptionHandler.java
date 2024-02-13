@@ -1,9 +1,8 @@
 package javaiscoffee.groomy.ide.spring;
 
-import javaiscoffee.groomy.ide.response.MyResponse;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
-import javaiscoffee.groomy.ide.security.MemberNotFoundException;
+import javaiscoffee.groomy.ide.security.BaseException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -72,9 +71,9 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new Status(ResponseStatus.INPUT_ERROR), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(MemberNotFoundException.class)
-    public ResponseEntity<Object> handleMemberNotFoundException(MemberNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
+    @ExceptionHandler(BaseException.class)
+    public ResponseEntity<Object> handleMemberNotFoundException(BaseException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     // 다른 예외 유형을 처리하는 핸들러를 추가할 수 있습니다.

@@ -11,7 +11,6 @@ import java.util.List;
 
 @Slf4j
 @Repository
-@Transactional
 @RequiredArgsConstructor
 public class JpaChatRepository {
     private final EntityManager em;

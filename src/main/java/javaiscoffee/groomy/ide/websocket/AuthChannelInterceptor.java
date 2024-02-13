@@ -1,4 +1,4 @@
-package javaiscoffee.groomy.ide.chat;
+package javaiscoffee.groomy.ide.websocket;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletResponse;
@@ -50,7 +50,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                 }
             } else {
                 log.error("웹소켓 연결 시 인증 헤더가 누락됨");
-                return null; // 인증 헤더가 없으므로 연결을 중단합니다.
+                return null;
             }
         }
         return message;

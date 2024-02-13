@@ -1,13 +1,10 @@
-package javaiscoffee.groomy.ide.chat;
+package javaiscoffee.groomy.ide.websocket;
 
-import javaiscoffee.groomy.ide.chat.AuthChannelInterceptor;
-import javaiscoffee.groomy.ide.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.messaging.simp.stomp.StompSessionHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;

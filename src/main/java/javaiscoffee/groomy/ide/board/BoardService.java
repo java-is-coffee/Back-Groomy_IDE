@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
@@ -16,10 +17,11 @@ import java.util.Optional;
 @Slf4j
 @Service
 @AllArgsConstructor //requiredargs~?
-//@Transactional
+@Transactional(readOnly = true)
 public class BoardService {
     private final BoardRepository boardRepository;
     private final JpaMemberRepository memberRepository;
+    private final JpaBoardRepository jpaBoardRepository;
 
     /**
      * 게시글 작성
@@ -27,6 +29,7 @@ public class BoardService {
      * @param requestBoardDto
      * @return
      */
+    @Transactional
     public ResponseBoardDto createBoard(RequestBoardDto requestBoardDto, Long memberId) {
         Board newBoard = new Board();
         BeanUtils.copyProperties(requestBoardDto.getData(), newBoard);
@@ -70,6 +73,7 @@ public class BoardService {
      * @param requestBoardDto
      * @return
      */
+    @Transactional
     public ResponseBoardDto editBoard(@RequestBody RequestBoardDto requestBoardDto, Long boardId, Long memberId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
         Member member = memberRepository.findByMemberId(memberId).get();
@@ -92,6 +96,7 @@ public class BoardService {
      * @param boardId
      * @return
      */
+    @Transactional
     public Boolean deleteBoard(Long boardId, Long memberId) {
         Optional<Board> findBoardOptional = boardRepository.findByBoardId(boardId);
         Member member = memberRepository.findByMemberId(memberId).get();
@@ -176,24 +181,82 @@ public class BoardService {
 
     /**
      * 게시글 추천
-     *
      * @param boardId
+     * @param memberId
      * @return
      */
-    public ResponseBoardDto getBoardGoodById(Long boardId) {
+    @Transactional
+    public ResponseBoardDto toggleGoodBoard(Long boardId, Long memberId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
-
-        if(findBoard != null && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
-            findBoard.setHelpNumber(findBoard.getHelpNumber() + 1);
-            Board updatedFindBoard = boardRepository.updateBoard(findBoard);
-
-            ResponseBoardDto responseBoardDto = responseBoardDto(updatedFindBoard);
-
-            return responseBoardDto;
+        Member member = memberRepository.findByMemberId(memberId).get();
+        HelpBoardId helpBoardId = new HelpBoardId(member.getMemberId(), findBoard.getBoardId());
+        HelpBoard helpBoard = jpaBoardRepository.findBoardHelpNumber(helpBoardId);
+        // 게시글이 존재하거나 ACTIVE인 상태, 자신이 작성한 댓글이 아닌 경우 추천 가능
+        if(findBoard != null && findBoard.getBoardStatus() == BoardStatus.ACTIVE
+                && !findBoard.getMember().getMemberId().equals(memberId)) {
+            // 유저가 게시글을 추천한 적이 없는 경우
+            if (helpBoard == null) {
+                helpBoard = new HelpBoard(helpBoardId, member, findBoard);
+                jpaBoardRepository.saveBoardHelpNumber(helpBoard);
+                findBoard.setHelpNumber(findBoard.getHelpNumber()+1);
+                findBoard = boardRepository.updateBoard(findBoard);
+                log.info("게시글 추천");
+            }
+            // 유저가 게시글을 추천한 적이 있다면
+            else {
+                if (!(jpaBoardRepository.deleteBoardHelpNumber(helpBoard))) {
+                    return null;
+                }
+                findBoard.setHelpNumber(findBoard.getHelpNumber()-1);
+                findBoard = boardRepository.updateBoard(findBoard);
+                log.info("게시글 추천 취소");
+            }
+            return responseBoardDto(findBoard);
         } else {
+            log.info("게시글 추천 예외 발생 = {}",memberId);
             return null;
         }
     }
+
+    /**
+     * 스크랩
+     * @param boardId
+     * @param memberId
+     * @return
+     */
+    @Transactional
+    public ResponseBoardDto toggleScrap(Long boardId, Long memberId) {
+        Board board = boardRepository.findByBoardId(boardId).get();
+        Member member = memberRepository.findByMemberId(memberId).get();
+        ScrapId scrapId = new ScrapId(member.getMemberId(), board.getBoardId());
+        Scrap scrap = jpaBoardRepository.findBoardScrap(scrapId);
+        // 게시글이 존재하거나 ACTIVE인 상태, 자신이 작성한 게시글이 아닌 경우 스크랩 가능
+        if (board != null && board.getBoardStatus() == BoardStatus.ACTIVE
+                && !board.getMember().getMemberId().equals(memberId)) {
+            // 유저가 게시글을 스크랩한 적이 없는 경우
+            if (scrap == null) {
+                scrap = new Scrap(scrapId, member, board);
+                jpaBoardRepository.saveBoardScrap(scrap);
+                board.setScrapNumber(board.getScrapNumber()+1);
+                board = boardRepository.updateBoard(board);
+            }
+            // 유저가 스크랩을 한 적이 있다면
+            else {
+                if (!(jpaBoardRepository.deleteBoardScrap(scrap))) {
+                    return null;
+                }
+                board.setScrapNumber(board.getScrapNumber() - 1);
+                board = boardRepository.updateBoard(board);
+            }
+            return responseBoardDto(board);
+        }
+        else {
+            return null;
+        }
+
+    }
+
+
 
     /**
      * 사용자가 작성한 모든 게시글 조회

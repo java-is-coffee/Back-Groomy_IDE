@@ -5,23 +5,19 @@ import javaiscoffee.groomy.ide.board.BoardStatus;
 import javaiscoffee.groomy.ide.board.JpaBoardRepository;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
-import javaiscoffee.groomy.ide.response.MyResponse;
-import javaiscoffee.groomy.ide.response.ResponseStatus;
-import javaiscoffee.groomy.ide.response.Status;
-import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
 @AllArgsConstructor
-//@Transactional
+@Transactional(readOnly = true)
 public class CommentService {
     private final JpaCommentRepository commentRepository;
     private final JpaMemberRepository memberRepository;
@@ -32,6 +28,7 @@ public class CommentService {
      * @param commentDto
      * @return 작성한 댓글
      */
+    @Transactional
     public ResponseCommentDto createComment(CommentDto commentDto, Long memberId) {
         // 작성 요청한 memberId와 작성하려는 memberId가 다른 경우 null 반환
         if (!memberId.equals(commentDto.getData().getMemberId())) {
@@ -86,13 +83,14 @@ public class CommentService {
 
         return toResponseCommentDto(findedComment);
     }
-    // 따봉 Dto에 조회 요청한 유저가 리스트에 있는 애들 중에서 따봉 눌렀는지 안 눌렀는지 나타내는 데이터값을 추가해서 보내면 될 듯
+
 
     /**
      * 댓글 수정
      * @param requestDto
      * @return nickname, content만 바꿔서 덮어씌운 old 반환
      */
+    @Transactional
     public ResponseCommentDto editComment(CommentEditRequestDto requestDto, Long commentId, Long memberId) {
         Comment oldComment = commentRepository.findByCommentId(commentId);
         Board board = boardRepository.findByBoardId(oldComment.getBoard().getBoardId()).get();
@@ -121,6 +119,7 @@ public class CommentService {
      * @param commentId
      * @return
      */
+    @Transactional
     public Boolean deleteComment(Long commentId, Long memberId) {
         Comment comment = commentRepository.findByCommentId(commentId);
         // 댓글이 존재하지 않는 경우, 삭제된 댓글인 경우 삭제 실패 false
@@ -172,6 +171,43 @@ public class CommentService {
         log.info("해당 사용자가 작성한 모든 댓글들 = {}", commentList);
         return toResponseCommentDtoList(commentList);
     }
+
+
+    // 댓글 추천
+    @Transactional
+    public ResponseCommentDto toggleGoodComment(Long commentId, Long memberId) {
+        Comment comment = commentRepository.findByCommentId(commentId);
+        Member member = memberRepository.findByMemberId(memberId).get();
+        CommentHelpNumberId helpNumberId = new CommentHelpNumberId(member.getMemberId(),comment.getCommentId());
+        CommentHelpNumber helpNumber = commentRepository.findCommentHelpNumber(helpNumberId);
+        // 댓글이 존재하지 않거나 삭제된 상태인 경우, 자신이 작성한 댓글일 경우 null 반환
+        if (comment == null || comment.getCommentStatus() == CommentStatus.DELETED
+                || comment.getMember().getMemberId().equals(memberId)) {
+            return null;
+        }
+        else {
+            //유저가 댓글을 추천한 적이 없는 경우
+            if(helpNumber == null) {
+                helpNumber = new CommentHelpNumber(helpNumberId,member,comment);
+                commentRepository.saveCommentHelpNumber(helpNumber);
+                comment.setHelpNumber(comment.getHelpNumber()+1);
+                comment = commentRepository.updateComment(comment);
+                log.info("추천합니다");
+            }
+            //유저가 댓글을 추천한 적이 있는 경우
+            else {
+                if(!commentRepository.deleteCommentHelpNumber(helpNumber)) {
+                    return null;
+                }
+                comment.setHelpNumber(comment.getHelpNumber()-1);
+                comment = commentRepository.updateComment(comment);
+            }
+            return toResponseCommentDto(comment);
+        }
+
+    }
+
+
 
     // Comment 객체를 ResponseCommentDto로 매핑하는 메서드
     public static ResponseCommentDto toResponseCommentDto(Comment comment) {
