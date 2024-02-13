@@ -16,7 +16,7 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-@AllArgsConstructor //requiredargs~?
+@AllArgsConstructor //required args?
 @Transactional(readOnly = true)
 public class BoardService {
     private final BoardRepository boardRepository;
