@@ -204,7 +204,7 @@ public class BoardService {
             }
             // 유저가 게시글을 추천한 적이 있다면
             else {
-                if ((jpaBoardRepository.deleteBoardHelpNumber(helpBoard))) {
+                if (!(jpaBoardRepository.deleteBoardHelpNumber(helpBoard))) {
                     return null;
                 }
                 findBoard.setHelpNumber(findBoard.getHelpNumber()-1);
@@ -213,6 +213,7 @@ public class BoardService {
             }
             return responseBoardDto(findBoard);
         } else {
+            log.info("게시글 추천 예외 발생 = {}",memberId);
             return null;
         }
     }
@@ -241,7 +242,7 @@ public class BoardService {
             }
             // 유저가 스크랩을 한 적이 있다면
             else {
-                if ((jpaBoardRepository.deleteBoardScrap(scrap))) {
+                if (!(jpaBoardRepository.deleteBoardScrap(scrap))) {
                     return null;
                 }
                 board.setScrapNumber(board.getScrapNumber() - 1);
