@@ -191,8 +191,10 @@ public class ProjectService {
         Path path = Paths.get("/home/projects/" + memberId + "/" + projectId);
         try {
             Files.createDirectories(path);
+            log.info("폴더 생성 성공: {}", path);
             return true; // 폴더 생성 성공
         } catch (IOException e) {
+            log.error("프로젝트 폴더 생성 실패", e);
             throw new BaseException("프로젝트 폴더 생성 실패");
         }
     }

@@ -36,10 +36,9 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String authToken = accessor.getFirstNativeHeader("Authorization");
-            if (authToken != null && authToken.startsWith("Bearer ")) {
-                String token = authToken.substring(7);
-                if (jwtTokenProvider.validateToken(token)) {
-                    Authentication auth = jwtTokenProvider.getAuthentication(token);
+            if (authToken != null) {
+                if (jwtTokenProvider.validateToken(authToken)) {
+                    Authentication auth = jwtTokenProvider.getAuthentication(authToken);
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 } else {
                     // 토큰 검증 실패 처리 로직
