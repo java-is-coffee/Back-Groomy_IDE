@@ -174,6 +174,7 @@ public class CommentService {
 
 
     // 댓글 추천
+    @Transactional
     public ResponseCommentDto toggleGoodComment(Long commentId, Long memberId) {
         Comment comment = commentRepository.findByCommentId(commentId);
         Member member = memberRepository.findByMemberId(memberId).get();

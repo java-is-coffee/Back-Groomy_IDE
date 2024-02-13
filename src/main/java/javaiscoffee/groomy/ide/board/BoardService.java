@@ -185,7 +185,8 @@ public class BoardService {
      * @param memberId
      * @return
      */
-    public ResponseBoardDto getBoardGoodById(Long boardId, Long memberId) {
+    @Transactional
+    public ResponseBoardDto toggleGoodBoard(Long boardId, Long memberId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
         Member member = memberRepository.findByMemberId(memberId).get();
         HelpBoardId helpBoardId = new HelpBoardId(member.getMemberId(), findBoard.getBoardId());
@@ -222,6 +223,7 @@ public class BoardService {
      * @param memberId
      * @return
      */
+    @Transactional
     public ResponseBoardDto toggleScrap(Long boardId, Long memberId) {
         Board board = boardRepository.findByBoardId(boardId).get();
         Member member = memberRepository.findByMemberId(memberId).get();
