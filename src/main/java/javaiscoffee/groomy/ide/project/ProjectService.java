@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ProjectService {
     private final JpaProjectRepository projectRepository;
@@ -88,7 +89,6 @@ public class ProjectService {
         createProjectFolder(memberId, createdProject.getProjectId());
 
 
-
         return responseDto;
     }
 
@@ -102,11 +102,23 @@ public class ProjectService {
         projectRepository.participateProject(projectMember);
     }
 
+    /**
+     * 프로젝트 목록 조회
+     */
     public List<ProjectCreateResponseDto> getProjectList(Long memberId, boolean participated) {
         List<Project> projectList = projectRepository.getProjectList(memberId,participated);
         return toProjectCreateResponseDtoList(projectList);
     }
 
+    /**
+     * 프로젝트에 멤버가 참가하고 있는지 조회
+     */
+    public boolean isParticipated (Long memberId, Long projectId) {
+        ProjectMemberId projectMemberId = new ProjectMemberId(projectId, memberId);
+        return projectRepository.isParticipated(projectMemberId);
+    }
+
+    @Transactional
     public ProjectCreateResponseDto editProject(Long projectId,Long memberId, ProjectCreateRequestDto requestDto) {
 
         Project oldProject = projectRepository.getProjectByProjectId(projectId);
@@ -133,6 +145,7 @@ public class ProjectService {
         return responseDto;
     }
 
+    @Transactional
     public Boolean deleteProject(Long memberId, Long projectId) {
         Project oldProject = projectRepository.getProjectByProjectId(projectId);
         //프로젝트를 찾을 수 없는 경우 에러 코드 반환
@@ -155,6 +168,7 @@ public class ProjectService {
      * 멤버와 프로젝트를 찾아서 프로젝트 참가로 변경
      * 입력받는 값 : projectParticipateRequestDto, 토큰에서 뽑은 memberId
      */
+    @Transactional
     public Boolean participateAccept(ProjectParticipateRequestDto requestDto, Long memberId) {
         Member findMember = memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
@@ -179,7 +193,7 @@ public class ProjectService {
             Files.createDirectories(path);
             return true; // 폴더 생성 성공
         } catch (IOException e) {
-            return false; // 폴더 생성 실패
+            throw new MemberNotFoundException("프로젝트 폴더 생성 실패");
         }
     }
 

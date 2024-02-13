@@ -13,7 +13,6 @@ import java.util.Optional;
 
 @Repository
 @Table(name = "member")
-@Transactional
 public class JpaMemberRepository implements MemberRepository {
     private final EntityManager em;
 

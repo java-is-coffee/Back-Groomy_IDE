@@ -12,6 +12,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +21,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @AllArgsConstructor
-//@Transactional
+@Transactional(readOnly = true)
 public class CommentService {
     private final JpaCommentRepository commentRepository;
     private final JpaMemberRepository memberRepository;
@@ -31,6 +32,7 @@ public class CommentService {
      * @param commentDto
      * @return 작성한 댓글
      */
+    @Transactional
     public ResponseCommentDto createComment(CommentDto commentDto) {
         Comment newComment = new Comment();
         BeanUtils.copyProperties(commentDto.getData(), newComment);
@@ -72,6 +74,7 @@ public class CommentService {
      * @param requestDto
      * @return nickname, content만 바꿔서 덮어씌운 old 반환
      */
+    @Transactional
     public ResponseCommentDto editComment(CommentEditRequestDto requestDto, Long commentId) {
         //기존 댓글 조회 후 없을 경우 에러 반환
         Comment oldComment = commentRepository.findByCommentId(commentId);
@@ -92,6 +95,7 @@ public class CommentService {
      * @param commentId
      * @return
      */
+    @Transactional
     public Boolean deleteComment(Long commentId) {
         commentRepository.deleteComment(commentId);
 

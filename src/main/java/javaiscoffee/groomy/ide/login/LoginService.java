@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class LoginService {
     private final MemberRepository memberRepository;
@@ -34,7 +35,6 @@ public class LoginService {
      * 2. authenticate() 메서드를 통해 요청된 Member에 대한 검증이 진행된다.
      * 3. 검증이 정상적으로 통과되었다면 인증된 Authentication 객체를 기반으로 JWT 토큰을 생성한다.
      */
-    @Transactional
     public TokenDto login(LoginDto loginDto) {
         log.info("로그인 검사 시작 loginDto={}",loginDto);
         // 1. Login ID/PW 를 기반으로 Authentication 객체 생성
@@ -56,6 +56,7 @@ public class LoginService {
         }
     }
 
+    @Transactional
     public Member register(RegisterDto registerDto) {
         RegisterDto.Data data = registerDto.getData();
         //이미 중복된 이메일이 존재

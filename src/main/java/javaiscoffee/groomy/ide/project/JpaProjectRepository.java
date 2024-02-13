@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
-@Transactional
 @RequiredArgsConstructor
 public class JpaProjectRepository {
     private final EntityManager em;
