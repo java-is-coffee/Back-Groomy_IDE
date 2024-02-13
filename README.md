@@ -94,7 +94,7 @@ PR 요청 시 빌드를 진행하도록 작성
 
 ## 👤 Contributor
 
-| 문경미  | 박상현 |  윤지호   | 
+| 문경미  | 박상현 |  윤지호   |
 | :--------: | :--------: | :------: |
 | <img src="https://contrib.rocks/image?repo=M-roaroa/Netflix-Clone" /> |  <img src="https://contrib.rocks/image?repo=cocohodo/react-netflix" /> | <img src="https://contrib.rocks/image?repo=j5i3h8o8/netflix" /> | 
 | @M-roaroa  | @cocohodo |  @j5i3h8o8   | 
