@@ -3,9 +3,14 @@ package javaiscoffee.groomy.ide.websocket;
 import javaiscoffee.groomy.ide.chat.ChatMessageDto;
 import javaiscoffee.groomy.ide.chat.ChatMessageRequestDto;
 import javaiscoffee.groomy.ide.chat.ChatService;
+import javaiscoffee.groomy.ide.codeeditor.CodeEditorResponseDto;
+import javaiscoffee.groomy.ide.project.ProjectService;
+import javaiscoffee.groomy.ide.response.ResponseStatus;
+import javaiscoffee.groomy.ide.security.BaseException;
 import javaiscoffee.groomy.ide.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
@@ -17,6 +22,7 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 public class WebSocketController {
     private final ChatService chatService;
+    private final ProjectService projectService;
 
     /**
      * 프로젝트 채팅 담당 코드
@@ -29,12 +35,22 @@ public class WebSocketController {
      */
 
 
-    @MessageMapping("/projectchat/{projectId}/send")
+    @MessageMapping("/project-chat/{projectId}/send")
     @SendTo("/projectws/{projectId}/messages")
-    public ChatMessageDto sendProjectMessages(@DestinationVariable(value="projectId") Long projectId, @AuthenticationPrincipal CustomUserDetails userDetails, ChatMessageRequestDto requestDto) {
+    public ChatMessageDto sendProjectMessages(@DestinationVariable(value="projectId") Long projectId, ChatMessageRequestDto requestDto) {
         log.info("받은 메시지 로그 = {}",requestDto);
-        Long memberId = userDetails.getMemberId();
         ChatMessageDto chatMessageDto = new ChatMessageDto();
-        return chatService.sendProjectChat(memberId, projectId, requestDto);
+        return chatService.sendProjectChat(requestDto.getData().getMemberId(), projectId, requestDto);
+    }
+
+    @MessageMapping("/project-code/{projectId}/send")
+    @SendTo("/projectws/{projectId}/code")
+    public CodeEditorResponseDto sendCodeEditor(@DestinationVariable(value="projectId") Long projectId, ChatMessageRequestDto requestDto) {
+        if (!projectService.isParticipated(requestDto.getData().getMemberId(), projectId)) {
+            throw new BaseException(ResponseStatus.UNAUTHORIZED.getMessage());
+        }
+        CodeEditorResponseDto responseDto = new CodeEditorResponseDto();
+        BeanUtils.copyProperties(requestDto.getData(),responseDto);
+        return responseDto;
     }
 }

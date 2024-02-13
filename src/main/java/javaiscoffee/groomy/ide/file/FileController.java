@@ -27,13 +27,13 @@ public class FileController {
         return ResponseEntity.ok(null);
     }
 
-    @GetMapping("/list")
+    @PostMapping("/list")
     public ResponseEntity<?> getFileList(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody FileRenameRequestDto requestDto) {
         Long memberId = userDetails.getMemberId();
         return ResponseEntity.ok(fileService.getProjectFilesStructure(memberId, requestDto.getData().getProjectId()));
     }
 
-    @GetMapping("/content")
+    @PostMapping("/content")
     public ResponseEntity<?> getFileContent(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody FileRenameRequestDto requestDto) {
         Long memberId = userDetails.getMemberId();
         return ResponseEntity.ok(fileService.readFileContent(memberId, requestDto));
