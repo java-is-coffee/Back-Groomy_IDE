@@ -52,13 +52,13 @@ public class BoardService {
      * @param boardId
      * @return
      */
+    @Transactional
     public ResponseBoardDto getBoardById(Long boardId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
 
         if(findBoard != null && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
             findBoard.setViewNumber(findBoard.getViewNumber() + 1);
             Board updatedFindBoard = boardRepository.updateBoard(findBoard);
-
             ResponseBoardDto responseBoardDto = responseBoardDto(updatedFindBoard);
 
             return responseBoardDto;
