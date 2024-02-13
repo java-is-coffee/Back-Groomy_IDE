@@ -107,7 +107,7 @@ public class BoardController {
     @PostMapping("/content/good/{boardId}")
     public ResponseEntity<?> clickGood(@PathVariable Long boardId, @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMemberId();
-        ResponseBoardDto updatedHelpNumber = boardService.getBoardGoodById(boardId, memberId);
+        ResponseBoardDto updatedHelpNumber = boardService.toggleGoodBoard(boardId, memberId);
         if (updatedHelpNumber == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
         }
