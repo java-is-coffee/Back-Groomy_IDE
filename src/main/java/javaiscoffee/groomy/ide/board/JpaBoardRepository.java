@@ -1,13 +1,10 @@
 package javaiscoffee.groomy.ide.board;
 
-import javaiscoffee.groomy.ide.comment.Comment;
-import javaiscoffee.groomy.ide.comment.CommentStatus;
 import javaiscoffee.groomy.ide.member.Member;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -90,6 +87,16 @@ public class JpaBoardRepository implements BoardRepository {
     public List<Board> findBoardByPaging(int paging, int pagingNumber, BoardStatus status) {
         return em.createQuery("SELECT b FROM Board b WHERE b.boardStatus = :status ORDER BY b.createdTime DESC", Board.class)
                 .setParameter("status",status)
+                .setFirstResult((paging - 1) * pagingNumber)
+                .setMaxResults(pagingNumber)
+                .getResultList();
+    }
+
+    // 스크랩 게시물 목록 조회
+    public List<Scrap> findScrappedByMember(int paging, int pagingNumber, Member member) {
+        log.info("쿼리문 시작");
+        return em.createQuery("SELECT s FROM Scrap s WHERE s.member = :member ORDER BY s.boardId.createdTime DESC", Scrap.class)
+                .setParameter("member",member)
                 .setFirstResult((paging - 1) * pagingNumber)
                 .setMaxResults(pagingNumber)
                 .getResultList();
