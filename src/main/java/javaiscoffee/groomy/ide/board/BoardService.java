@@ -52,6 +52,7 @@ public class BoardService {
      * @param boardId
      * @return
      */
+    @Transactional
     public ResponseBoardDto getBoardById(Long boardId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
 
