@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
@@ -16,7 +17,7 @@ import java.util.Optional;
 @Slf4j
 @Service
 @AllArgsConstructor //requiredargs~?
-//@Transactional
+@Transactional(readOnly = true)
 public class BoardService {
     private final BoardRepository boardRepository;
     private final JpaMemberRepository memberRepository;
@@ -27,6 +28,7 @@ public class BoardService {
      * @param requestBoardDto
      * @return
      */
+    @Transactional
     public ResponseBoardDto createBoard(RequestBoardDto requestBoardDto, Long memberId) {
         Board newBoard = new Board();
         BeanUtils.copyProperties(requestBoardDto.getData(), newBoard);
@@ -70,6 +72,7 @@ public class BoardService {
      * @param requestBoardDto
      * @return
      */
+    @Transactional
     public ResponseBoardDto editBoard(@RequestBody RequestBoardDto requestBoardDto, Long boardId, Long memberId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
         Member member = memberRepository.findByMemberId(memberId).get();
@@ -92,6 +95,7 @@ public class BoardService {
      * @param boardId
      * @return
      */
+    @Transactional
     public Boolean deleteBoard(Long boardId, Long memberId) {
         Optional<Board> findBoardOptional = boardRepository.findByBoardId(boardId);
         Member member = memberRepository.findByMemberId(memberId).get();

@@ -9,6 +9,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,7 +17,7 @@ import java.util.List;
 @Slf4j
 @Service
 @AllArgsConstructor
-//@Transactional
+@Transactional(readOnly = true)
 public class CommentService {
     private final JpaCommentRepository commentRepository;
     private final JpaMemberRepository memberRepository;
@@ -27,6 +28,7 @@ public class CommentService {
      * @param commentDto
      * @return 작성한 댓글
      */
+    @Transactional
     public ResponseCommentDto createComment(CommentDto commentDto, Long memberId) {
         // 작성 요청한 memberId와 작성하려는 memberId가 다른 경우 null 반환
         if (!memberId.equals(commentDto.getData().getMemberId())) {
@@ -88,6 +90,7 @@ public class CommentService {
      * @param requestDto
      * @return nickname, content만 바꿔서 덮어씌운 old 반환
      */
+    @Transactional
     public ResponseCommentDto editComment(CommentEditRequestDto requestDto, Long commentId, Long memberId) {
         Comment oldComment = commentRepository.findByCommentId(commentId);
         Board board = boardRepository.findByBoardId(oldComment.getBoard().getBoardId()).get();
@@ -116,6 +119,7 @@ public class CommentService {
      * @param commentId
      * @return
      */
+    @Transactional
     public Boolean deleteComment(Long commentId, Long memberId) {
         Comment comment = commentRepository.findByCommentId(commentId);
         // 댓글이 존재하지 않는 경우, 삭제된 댓글인 경우 삭제 실패 false

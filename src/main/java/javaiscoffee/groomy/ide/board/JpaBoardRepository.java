@@ -14,7 +14,6 @@ import java.util.Optional;
 
 @Slf4j
 @Repository
-@Transactional
 public class JpaBoardRepository implements BoardRepository {
     @PersistenceContext
     private final EntityManager em;

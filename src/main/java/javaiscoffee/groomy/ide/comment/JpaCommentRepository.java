@@ -15,7 +15,6 @@ import java.util.Optional;
 
 @Slf4j
 @Repository
-@Transactional
 public class JpaCommentRepository implements CommentRepository{
 
     private final EntityManager em;

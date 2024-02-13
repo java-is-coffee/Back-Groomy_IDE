@@ -11,12 +11,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class ChatService {
     private final JpaChatRepository chatRepository;
@@ -65,6 +67,7 @@ public class ChatService {
      * 요구 데이터 : 토큰 값에서 뽑은 memberId, projectId, ChatMessageRequestDto
      * 반환 데이터 : ChatMessageDto
      */
+    @Transactional
     public ChatMessageDto sendProjectChat(Long memberId, Long projectId, ChatMessageRequestDto requestDto) {
         //멤버Id가 잘못 입력된 경우
         if(memberId != requestDto.getData().getMemberId()) {
@@ -103,6 +106,7 @@ public class ChatService {
     /**
      * 채팅 추가 테스트
      */
+    @Transactional
     public ChatMessageDto writeChatTest(Long projectId, Long memberId) {
         Project findProject = projectRepository.getProjectByProjectId(projectId);
         Member findMember = memberRepository.findByMemberId(memberId).get();

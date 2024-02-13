@@ -5,8 +5,11 @@ public enum ResponseStatus {
     REGISTER_DUPLICATED("중복된 이메일이 존재합니다."),
     LOGIN_FAILED("로그인에 실패했습니다."),
     INPUT_ERROR("입력값이 잘못되었습니다."),
-    REGISTER_FAILED("회원가입에 실패하였습니다."),
+    REGISTER_FAILED("회원가입에 실패했습니다."),
     UNAUTHORIZED("유효하지 않은 토큰입니다."),
+    SAVE_FAILED("저장에 실패했습니다."),
+    DELETE_FAILED("삭제에 실패했습니다."),
+    READ_FAILED("조회에 실패했습니다."),
     FORBIDDEN("권한이 없습니다."),
     NOT_FOUND("찾을 수 없음"),
     ERROR("서버 오류");

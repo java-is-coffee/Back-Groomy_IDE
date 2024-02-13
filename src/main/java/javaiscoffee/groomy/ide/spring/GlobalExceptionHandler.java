@@ -74,7 +74,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MemberNotFoundException.class)
     public ResponseEntity<Object> handleMemberNotFoundException(MemberNotFoundException ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
     // 다른 예외 유형을 처리하는 핸들러를 추가할 수 있습니다.
