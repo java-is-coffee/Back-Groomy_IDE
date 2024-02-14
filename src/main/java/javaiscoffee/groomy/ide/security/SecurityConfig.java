@@ -27,7 +27,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors().configurationSource(corsConfigurationSource())
+                .cors()
                 .and()
                 .httpBasic().disable()
                 //rest api이므로 basic auth 및 csrf 보안을 사용하지 않는다는 설정
