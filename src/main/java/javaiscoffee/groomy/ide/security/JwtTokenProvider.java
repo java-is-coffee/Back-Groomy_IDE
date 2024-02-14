@@ -124,7 +124,7 @@ public class JwtTokenProvider {
 
     // 토큰 정보를 검증하는 메서드
     public boolean validateToken(String token) {
-        log.info("ValidateToken 메서드 JWT token 검증 : {}", token);
+        log.debug("ValidateToken 메서드 JWT token 검증 : {}", token);
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
