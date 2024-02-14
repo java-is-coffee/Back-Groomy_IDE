@@ -14,6 +14,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Controller;
 public class WebSocketController {
     private final ChatService chatService;
     private final ProjectService projectService;
+    private final SimpMessagingTemplate messagingTemplate;
 
     /**
      * 프로젝트 채팅 담당 코드
