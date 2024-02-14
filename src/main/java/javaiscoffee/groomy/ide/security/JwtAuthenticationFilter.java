@@ -34,6 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         String requestURI = request.getRequestURI();
+        log.debug("Filtering request: {}", requestURI);
 
         // 로그인과 회원가입 요청에 대해서는 필터를 적용하지 않음
         if ("/api/member/login".equals(requestURI) || "/api/member/register".equals(requestURI)
@@ -45,13 +46,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // 1. Request Header 에서 JWT 토큰 추출
         String token = resolveToken((HttpServletRequest) request);
 
+        log.debug("토큰 검증 실행 : {}", token);
+
         // 2. validateToken 으로 토큰 유효성 검사
         if (token != null && jwtTokenProvider.validateToken(token)) {
+            log.info("토큰 검증 성공");
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
             filterChain.doFilter(request, response);
         } else {
-            log.info("토큰 에러 = {}",token);
+            log.info("토큰 검증 에러");
             //access token이 잘못되어서 검사 실패했을 경우
             Status status = new Status(ResponseStatus.UNAUTHORIZED);
 
