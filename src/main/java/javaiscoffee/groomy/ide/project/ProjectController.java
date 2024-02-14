@@ -14,12 +14,23 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * 추가해야 하는 API
+ * 프로젝트 초대 거절 API
+ * 프로젝트 떠나기 API
+ * 프로젝트 초대하기 API
+ */
+
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/ide")
 public class ProjectController {
     private final ProjectService projectService;
+
+    /**
+     * 프로젝트 생성
+     */
     @PostMapping("/create")
     public ResponseEntity<?> createProject(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectCreateRequestDto projectCreateRequestDto) {
         Long memberId = userDetails.getMemberId();
@@ -29,11 +40,18 @@ public class ProjectController {
         }
         return ResponseEntity.ok(savedProject);
     }
+
+    /**
+     * 이미 참가하고 있는 프로젝트 리스트 조회
+     */
     @GetMapping("/list")
     public ResponseEntity<?> getProjectList(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(projectService.getProjectList(userDetails.getMemberId(),true));
     }
 
+    /**
+     * 프로젝트 정보 수정
+     */
     @PatchMapping("/edit/{projectId}")
     public ResponseEntity<?> editProject(@PathVariable(name = "projectId") Long projectId,@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectCreateRequestDto requestDto) {
         Long memberId = userDetails.getMemberId();
@@ -45,6 +63,11 @@ public class ProjectController {
         return ResponseEntity.ok(editedProject);
     }
 
+    /**
+     * 프로젝트 삭제 API
+     * 생성자가 삭제하기 하면 프로젝트 소프트 딜리트
+     * 초대받은 멤버가 삭제하기 하면 프로젝트 멤버 삭제
+     */
     @DeleteMapping("/delete/{projectId}")
     public ResponseEntity<?> deleteProject(@PathVariable(name = "projectId") Long projectId,@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMemberId();
@@ -55,6 +78,7 @@ public class ProjectController {
     }
 
     /**
+     * 아직 참가하지 않은 프로젝트 리스트 조회
      * 초대받은 프로젝트 리스트만 반환
      */
     @GetMapping("/invited-list")
@@ -67,7 +91,18 @@ public class ProjectController {
      */
     @PostMapping("/participate-project")
     public ResponseEntity<?> participateAccept(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectParticipateRequestDto requestDto) {
-        if(!projectService.participateAccept(requestDto, userDetails.getMemberId())) {
+        if(!projectService.participateAccept(requestDto, userDetails.getMemberId(),true)) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+        return ResponseEntity.ok(null);
+    }
+
+    /**
+     * 초대받은 프로젝트 거절
+     */
+    @PostMapping("/reject-project")
+    public ResponseEntity<?> projectReject(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectParticipateRequestDto requestDto) {
+        if(!projectService.participateAccept(requestDto, userDetails.getMemberId(),false)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.NOT_FOUND));
         }
         return ResponseEntity.ok(null);

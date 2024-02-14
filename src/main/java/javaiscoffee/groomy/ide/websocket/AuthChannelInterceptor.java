@@ -68,10 +68,12 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
         }
         //구독 시 프로젝트에 참가하고 있는지 확인
         else if(StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+            log.info("웹소켓 구독 요청 시작");
             //멤버 ID와 프로젝트 ID를 조회
             Long memberId = (Long) accessor.getSessionAttributes().get("memberId");
+            log.info("웹소켓 속성 정보 =>> 멤버ID = {}", memberId);
             Long projectId = extractProjectIdFromDestination(accessor.getDestination());
-            log.info("웹소켓 구독 정보 =>> 멤버ID = {}, 프로젝트ID = {}",memberId,projectId);
+            log.info("웹소켓 구독 정보 =>> 프로젝트ID = {}",projectId);
             if(!projectService.isParticipated(memberId, projectId)) {
                 throw new BaseException("프로젝트 구독 권한이 없습니다.");
             }

@@ -6,6 +6,7 @@ import com.amazonaws.services.ecs.AmazonECSClientBuilder;
 import com.amazonaws.services.ecs.model.*;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
+import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.security.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -147,21 +148,26 @@ public class ProjectService {
 
     @Transactional
     public Boolean deleteProject(Long memberId, Long projectId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
         Project oldProject = projectRepository.getProjectByProjectId(projectId);
         //프로젝트를 찾을 수 없는 경우 에러 코드 반환
         if(oldProject == null || oldProject.getDeleted() == true) {
             return false;
         }
+        //프로젝트에 참여하고 있지 않으면 에러 코드 반환
+        ProjectMemberId projectMemberId = new ProjectMemberId(projectId, memberId);
+        if (!projectRepository.isParticipated(projectMemberId)) {
+            return false;
+        }
 
-        //프로젝트 생성자와 토큰의 memberId가 다른 경우 에러 코드 반환
+        //프로젝트 생성자와 토큰의 memberId가 다른 경우 프로젝트 멤버에서 삭제
         if(!Objects.equals(memberId, oldProject.getMemberId().getMemberId())) {
-            return false;
+            return projectRepository.removeMemberFromProject(projectMemberId);
         }
-        //삭제 실패하면 에러 코드 반환
-        if(!projectRepository.delete(oldProject)) {
-            return false;
+        //생성자와 요청한 memberId가 같으면 프로젝트 삭제(소프트 딜리트)
+        else {
+            return projectRepository.delete(oldProject);
         }
-        return true;
     }
 
     /**
@@ -169,7 +175,7 @@ public class ProjectService {
      * 입력받는 값 : projectParticipateRequestDto, 토큰에서 뽑은 memberId
      */
     @Transactional
-    public Boolean participateAccept(ProjectParticipateRequestDto requestDto, Long memberId) {
+    public Boolean participateAccept(ProjectParticipateRequestDto requestDto, Long memberId, boolean isAccept) {
         Member findMember = memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new BaseException("멤버를 찾을 수 없습니다."));
         if(!Objects.equals(findMember.getMemberId(), requestDto.getData().getInvitedMemberId())) {
@@ -179,9 +185,14 @@ public class ProjectService {
         if(findProject == null || findProject.getDeleted()) {
             return false;
         }
-        //프로젝트 초대 명단 업데이트
         ProjectMemberId projectMemberId = new ProjectMemberId(findProject.getProjectId(), memberId);
-        return projectRepository.acceptProject(projectMemberId);
+        //초대 수락했으면
+        if(isAccept) {
+            return projectRepository.acceptProject(projectMemberId);
+        }
+
+        //초대 거절했으면 초대 받은 리스트에서 프로젝트 삭제
+        return projectRepository.removeMemberFromProject(projectMemberId);
     }
 
     /**

@@ -3,15 +3,11 @@ package javaiscoffee.groomy.ide.project;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
-import javaiscoffee.groomy.ide.member.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
@@ -34,7 +30,7 @@ public class JpaProjectRepository {
 
     /**
      * 프로젝트에 참가시키기
-     * 요구 데이터 : projectMember
+     * 요구 데이터 : projectMember(참여했는지 안했는지는 이전 과정에서 설정)
      * 반환 데이터 : 프로젝트 인원 추가에 성공하면 true, 실패하면 false
      */
     public boolean participateProject(ProjectMember projectMember) {
@@ -56,6 +52,20 @@ public class JpaProjectRepository {
         try {
             ProjectMember projectMember = em.find(ProjectMember.class, projectMemberId);
             projectMember.setParticipated(true);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    /**
+     * 프로젝트 초대 삭제(거절)하기
+     * 요구 데이터 : Member와 Proejct
+     * 반환 데이터 : 성공하면 true, 실패하면 false
+     */
+    public boolean removeMemberFromProject(ProjectMemberId projectMemberId) {
+        try {
+            em.remove(projectMemberId);
             return true;
         } catch (Exception e) {
             return false;
