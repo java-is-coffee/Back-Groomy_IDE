@@ -43,11 +43,10 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String authToken = accessor.getFirstNativeHeader("Authorization");
             log.info("웹소켓 인터셉터 인증 토큰 = {}",authToken);
-            if (authToken != null && authToken.startsWith("Bearer ")) {
+            if (authToken != null) {
                 if (jwtTokenProvider.validateToken(authToken)) {
-                    String token = authToken.substring(7).trim();
-                    log.info("인증 토큰 검증 성공 = {}",token);
-                    Authentication auth = jwtTokenProvider.getAuthentication(token);
+                    log.info("인증 토큰 검증 성공 = {}",authToken);
+                    Authentication auth = jwtTokenProvider.getAuthentication(authToken);
                     SecurityContextHolder.getContext().setAuthentication(auth);
                 } else {
                     // 토큰 검증 실패 처리 로직
