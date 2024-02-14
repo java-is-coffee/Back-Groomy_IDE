@@ -48,10 +48,10 @@ public class WebSocketController {
     @MessageMapping("/project-code/{projectId}/send")
     @SendTo("/projectws/{projectId}/code")
     public CodeEditorResponseDto sendCodeEditor(@DestinationVariable(value="projectId") Long projectId, ChatMessageRequestDto requestDto) {
-        if (!projectService.isParticipated(requestDto.getData().getMemberId(), projectId)) {
-            log.error("참여하고 있지 않은 프로젝트입니다. = {}",requestDto);
-            throw new BaseException(ResponseStatus.UNAUTHORIZED.getMessage());
-        }
+//        if (!projectService.isParticipated(requestDto.getData().getMemberId(), projectId)) {
+//            log.error("참여하고 있지 않은 프로젝트입니다. = {}",requestDto);
+//            throw new BaseException(ResponseStatus.FORBIDDEN.getMessage());
+//        }
         CodeEditorResponseDto responseDto = new CodeEditorResponseDto();
         BeanUtils.copyProperties(requestDto.getData(),responseDto);
         return responseDto;

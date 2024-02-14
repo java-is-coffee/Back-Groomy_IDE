@@ -42,6 +42,15 @@ public class ProjectController {
     }
 
     /**
+     * 프로젝트 인원 초대
+     * 리스트로 받아서 한 번에 초대할지, 아니면 한 명씩 초대할지 결정해야함
+     */
+    @PostMapping("/inviteMembers")
+    public ResponseEntity<?> inviteMembersToProject(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectCreateRequestDto projectCreateRequestDto) {
+        return null;
+    }
+
+    /**
      * 이미 참가하고 있는 프로젝트 리스트 조회
      */
     @GetMapping("/list")
