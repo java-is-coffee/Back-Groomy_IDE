@@ -28,18 +28,16 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 @Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class AuthChannelInterceptor implements ChannelInterceptor {
     private final JwtTokenProvider jwtTokenProvider;
-
-    @Autowired
-    public AuthChannelInterceptor(JwtTokenProvider jwtTokenProvider) {
-        this.jwtTokenProvider = jwtTokenProvider;
-    }
+    private final ProjectService projectService;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        //연결 시 토큰값 확인
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String authToken = accessor.getFirstNativeHeader("Authorization");
             log.info("웹소켓 인터셉터 인증 토큰 = {}",authToken);
@@ -48,6 +46,14 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                     log.info("인증 토큰 검증 성공 = {}",authToken);
                     Authentication auth = jwtTokenProvider.getAuthentication(authToken);
                     SecurityContextHolder.getContext().setAuthentication(auth);
+
+                    // Authentication 객체로부터 UserDetails를 추출해서 memberId를 저장
+                    if (auth.getPrincipal() instanceof CustomUserDetails) {
+                        CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
+                        Long memberId = userDetails.getMemberId();
+                        // 여기서 세션 속성에 memberId 저장 필요
+                        accessor.getSessionAttributes().put("memberId", memberId);
+                    }
                 } else {
                     // 토큰 검증 실패 처리 로직
                     log.error("웹소켓 토큰 검증 실패: {}", authToken);
@@ -60,6 +66,33 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
                 throw new BaseException("웹소켓 연결 시 인증 헤더가 누락되었습니다.");
             }
         }
+        //구독 시 프로젝트에 참가하고 있는지 확인
+        else if(StompCommand.SUBSCRIBE.equals(accessor.getCommand())) {
+            //멤버 ID와 프로젝트 ID를 조회
+            Long memberId = (Long) accessor.getSessionAttributes().get("memberId");
+            Long projectId = extractProjectIdFromDestination(accessor.getDestination());
+            log.info("웹소켓 구독 정보 =>> 멤버ID = {}, 프로젝트ID = {}",memberId,projectId);
+            if(!projectService.isParticipated(memberId, projectId)) {
+                throw new BaseException("프로젝트 구독 권한이 없습니다.");
+            }
+            accessor.getSessionAttributes().put("projectId",projectId);
+        }
         return message;
+    }
+
+    /**
+     * 웹소켓 destination 문자열에서 프로젝트ID를 추출해서 반환
+     * 박상현 2024-02-14
+     */
+    private Long extractProjectIdFromDestination(String destination) {
+        try {
+            // destination 예시: /app/project-chat/123/send
+            String[] parts = destination.split("/");
+            // 프로젝트 ID가 항상 동일한 위치에 있다고 가정
+            return Long.parseLong(parts[3]);
+        } catch (Exception e) {
+            log.error("Destination에서 프로젝트 ID 추출 실패: {}", destination, e);
+            throw new BaseException("유효하지 않은 Destination 형식입니다.");
+        }
     }
 }
