@@ -101,7 +101,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
             // destination 예시: /app/project-chat/123/send
             String[] parts = destination.split("/");
             // 프로젝트 ID가 항상 동일한 위치에 있다고 가정
-            return Long.parseLong(parts[3]);
+            return Long.parseLong(parts[2]);
         } catch (Exception e) {
             log.error("Destination에서 프로젝트 ID 추출 실패: {}", destination, e);
             throw new BaseException("유효하지 않은 Destination 형식입니다.");
