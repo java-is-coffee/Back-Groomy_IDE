@@ -51,12 +51,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 2. validateToken 으로 토큰 유효성 검사
         if (token != null && jwtTokenProvider.validateToken(token)) {
-            log.info("토큰 검증 성공");
+            log.debug("토큰 검증 성공");
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
             filterChain.doFilter(request, response);
         } else {
-            log.info("토큰 검증 에러 = {}",token);
+            log.debug("토큰 검증 에러 = {}",token);
             //access token이 잘못되어서 검사 실패했을 경우
             Status status = new Status(ResponseStatus.UNAUTHORIZED);
 
