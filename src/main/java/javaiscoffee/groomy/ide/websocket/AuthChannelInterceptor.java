@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@Order(Ordered.HIGHEST_PRECEDENCE + 99)
 public class AuthChannelInterceptor implements ChannelInterceptor {
     private final JwtTokenProvider jwtTokenProvider;
 
