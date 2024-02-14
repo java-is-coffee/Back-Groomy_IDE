@@ -1,30 +1,29 @@
 package javaiscoffee.groomy.ide.websocket;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.http.HttpServletResponse;
+
 import javaiscoffee.groomy.ide.project.ProjectService;
-import javaiscoffee.groomy.ide.response.ResponseStatus;
-import javaiscoffee.groomy.ide.response.Status;
 import javaiscoffee.groomy.ide.security.BaseException;
 import javaiscoffee.groomy.ide.security.CustomUserDetails;
 import javaiscoffee.groomy.ide.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.Response;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.messaging.support.ChannelInterceptor;
 import org.springframework.messaging.support.MessageHeaderAccessor;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+
+/**
+ * 웹소켓 전용 검증 처리하는 인터셉터
+ * 연결할 때 토큰 유효성 검사 => 성공하면 세션 속성에 memberId 저장
+ * 구독할 때 해당 프로젝트 참가 여부 검사 => 성공하면 세션 속성에 memberId 저장
+ */
 
 @Slf4j
 @Component
@@ -33,6 +32,7 @@ import org.springframework.stereotype.Component;
 public class AuthChannelInterceptor implements ChannelInterceptor {
     private final JwtTokenProvider jwtTokenProvider;
     private final ProjectService projectService;
+    private final SubscriptionManager subscriptionManager;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
@@ -40,10 +40,10 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
         //연결 시 토큰값 확인
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String authToken = accessor.getFirstNativeHeader("Authorization");
-            log.info("웹소켓 인터셉터 인증 토큰 = {}",authToken);
+            log.debug("웹소켓 인터셉터 인증 토큰 = {}",authToken);
             if (authToken != null) {
                 if (jwtTokenProvider.validateToken(authToken)) {
-                    log.info("인증 토큰 검증 성공 = {}",authToken);
+                    log.debug("인증 토큰 검증 성공 = {}",authToken);
                     Authentication auth = jwtTokenProvider.getAuthentication(authToken);
                     SecurityContextHolder.getContext().setAuthentication(auth);
 
@@ -75,6 +75,11 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
             if(!projectService.isParticipated(memberId, projectId)) {
                 throw new BaseException("프로젝트 구독 권한이 없습니다.");
             }
+
+            // SubscriptionManager를 사용하여 구독 처리
+            subscriptionManager.subscribe(memberId, projectId);
+
+            //세션 속성에 프로젝트 ID 저장
             accessor.getSessionAttributes().put("projectId",projectId.toString());
         }
         return message;

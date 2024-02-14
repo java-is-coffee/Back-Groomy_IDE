@@ -12,6 +12,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @RequiredArgsConstructor
 public class WebSocketEventListener {
     private final SimpMessagingTemplate messagingTemplate;
+    private final SubscriptionManager subscriptionManager;
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
@@ -29,6 +30,9 @@ public class WebSocketEventListener {
         CodeEditorResponseDto responseDto = new CodeEditorResponseDto();
         responseDto.setMemberId(memberId);
         responseDto.setAction(action);
+
+        // 사용자 연결 해제 시 SubscriptionManager에서 구독 정보 제거
+        subscriptionManager.disconnect(memberId);
 
         // 구독자들에게 사용자 연결 해제 메시지 전송
         messagingTemplate.convertAndSend(String.format("/projectws/%s/code", projectId), responseDto);
