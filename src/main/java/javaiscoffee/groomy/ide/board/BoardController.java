@@ -124,6 +124,27 @@ public class BoardController {
         }
         return ResponseEntity.ok(updatedScrap);
     }
-}
 
-//그냥 컨트롤러로 요청 들어오면 해당 하는 게시글은 무조건 삭제 수정하도록
+
+    @GetMapping("/scrap/list/{paging}")
+    public ResponseEntity<?> getGoodListByPaging(@PathVariable int paging, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        List<ResponseBoardDto> goodByPaging = boardService.getHelpBoardByPaging(paging, memberId);
+        if(goodByPaging == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+
+        return ResponseEntity.ok(goodByPaging);
+    }
+
+    @GetMapping("/search/{paging}")
+    public ResponseEntity<?> searchBoardByPaging(@PathVariable int paging, @RequestParam(name="search_keyword") String searchKeyword, @RequestParam(name="completed", required = false) Boolean completed) {
+        List<ResponseBoardDto> searchBoard = boardService.searchBoardByPaging(paging, searchKeyword, completed);
+
+        if(searchBoard == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+
+        return ResponseEntity.ok(searchBoard);
+    }
+}

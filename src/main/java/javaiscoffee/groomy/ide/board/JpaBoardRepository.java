@@ -1,13 +1,11 @@
 package javaiscoffee.groomy.ide.board;
 
-import javaiscoffee.groomy.ide.comment.Comment;
-import javaiscoffee.groomy.ide.comment.CommentStatus;
+import jakarta.persistence.TypedQuery;
 import javaiscoffee.groomy.ide.member.Member;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -95,6 +93,16 @@ public class JpaBoardRepository implements BoardRepository {
                 .getResultList();
     }
 
+    // 스크랩 게시물 목록 조회
+    public List<Scrap> findScrappedByMember(int paging, int pagingNumber, Member member) {
+        log.info("쿼리문 시작");
+        return em.createQuery("SELECT s FROM Scrap s WHERE s.member = :member ORDER BY s.boardId.createdTime DESC", Scrap.class)
+                .setParameter("member",member)
+                .setFirstResult((paging - 1) * pagingNumber)
+                .setMaxResults(pagingNumber)
+                .getResultList();
+    }
+
     @Override
     public long countBoardsByStatus(BoardStatus status) {
         return em.createQuery("SELECT COUNT(b) FROM Board b WHERE b.boardStatus = :status", Long.class)
@@ -115,6 +123,26 @@ public class JpaBoardRepository implements BoardRepository {
         return em.createQuery("SELECT b FROM Board b WHERE b.member = :member", Board.class)
                 .setParameter("member", member)
                 .getResultList();
+    }
+
+    @Override
+    public List<Board> searchBoardByPaging(int paging, String searchKeyword, Boolean completed, int pagingNumber, BoardStatus status) {
+        if (completed != null) {
+            return em.createQuery("SELECT b FROM Board b WHERE b.boardStatus = :status AND (b.title LIKE :keyword OR b.content LIKE :keyword OR b.nickname LIKE :keyword) AND b.isCompleted = :completed ORDER BY b.createdTime DESC", Board.class)
+                    .setParameter("status", status)
+                    .setParameter("keyword", "%" + searchKeyword + "%")
+                    .setParameter("completed", completed)
+                    .setFirstResult((paging - 1) * pagingNumber)
+                    .setMaxResults(pagingNumber)
+                    .getResultList();
+        } else {
+            return em.createQuery("SELECT b FROM Board b WHERE b.boardStatus = :status AND (b.title LIKE :keyword OR b.content LIKE :keyword OR b.nickname LIKE :keyword) ORDER BY b.createdTime DESC", Board.class)
+                    .setParameter("status", status)
+                    .setParameter("keyword", "%" + searchKeyword + "%")
+                    .setFirstResult((paging - 1) * pagingNumber)
+                    .setMaxResults(pagingNumber)
+                    .getResultList();
+        }
     }
 }
 

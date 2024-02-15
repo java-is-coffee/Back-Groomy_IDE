@@ -71,13 +71,13 @@ public class ProjectService {
         log.info("new project = {}", newProject);
 
         //생성된 프로젝트에 생성자 참가시키기
-        participateProject(createdProject, projectCreator,true);
+        inviteProject(createdProject, projectCreator,true);
         //생성된 프로젝트에 초대할 멤버들이 있을 때 구하고 초대하기
         if(requestDtoData.getInviteMembers().size()>0) {
             log.info("프로젝트 생성할 때 초대할 멤버가 있음 = {}명",requestDtoData.getInviteMembers().size());
             List<Member> invitedMembers = memberRepository.findInvitedMembers(requestDtoData.getInviteMembers());
             for(Member invitedMember : invitedMembers) {
-                participateProject(createdProject, invitedMember,false);
+                inviteProject(createdProject, invitedMember,false);
             }
         }
 
@@ -94,11 +94,36 @@ public class ProjectService {
     }
 
     /**
+     * 리스트로 입력 받은 멤버들을 초대한다.
+     */
+    @Transactional
+    public void inviteMemberByList(Long memberId, Long projectId, ProjectCreateRequestDto requestDto) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
+        Project project = projectRepository.getProjectByProjectId(projectId);
+        //프로젝트가 없거나 생성자랑 초대를 요청한 멤버가 다르면 예외 처리
+        if (project == null || !Objects.equals(project.getMemberId().getMemberId(), member.getMemberId())) {  throw new BaseException(ResponseStatus.NOT_FOUND.getMessage()); }
+
+        ProjectCreateRequestDto.Data requestDtoData = requestDto.getData();
+        //비어 있으면 그냥 무효
+        if(!requestDtoData.getInviteMembers().isEmpty()) {
+            log.info("프로젝트 생성할 때 초대할 멤버가 있음 = {}명",requestDtoData.getInviteMembers().size());
+            List<Member> invitedMembers = memberRepository.findInvitedMembers(requestDtoData.getInviteMembers());
+            for(Member invitedMember : invitedMembers) {
+                inviteProject(project, invitedMember,false);
+            }
+        }
+
+    }
+
+    /**
      * 용도 : 프로젝트에 입력 받은 멤버를 초대하거나 추가한다.
      * 매개변수 : 대상이 되는 프로젝트, 초대하거나 추가할 멤버, true=추가 false=초대
      */
-    private void participateProject(Project createdProject, Member projectCreator, boolean participated) {
+    private void inviteProject(Project createdProject, Member projectCreator, boolean participated) {
         ProjectMemberId projectMemberId = new ProjectMemberId(createdProject.getProjectId(), projectCreator.getMemberId());
+        //이미 참여하고 있는 멤버면 초대하지 않음
+        if (projectRepository.isParticipated(projectMemberId)) return;
+        //참여 안하고 있으면 생성
         ProjectMember projectMember = new ProjectMember(projectMemberId, createdProject, projectCreator,participated);
         projectRepository.participateProject(projectMember);
     }
