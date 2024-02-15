@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.websocket;
-import javaiscoffee.groomy.ide.codeeditor.CodeEditorResponseDto;
+import javaiscoffee.groomy.ide.codeeditor.CodeEditorAction;
+import javaiscoffee.groomy.ide.codeeditor.CodeEditorDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
@@ -27,9 +28,9 @@ public class WebSocketEventListener {
         Long projectId = Long.parseLong(projectIdStr);
         String action = "disconnect";
         // 구독자들에게 메시지 전송
-        CodeEditorResponseDto responseDto = new CodeEditorResponseDto();
+        CodeEditorDto responseDto = new CodeEditorDto();
         responseDto.setMemberId(memberId);
-        responseDto.setAction(action);
+        responseDto.setAction(CodeEditorAction.DISCONNECT);
 
         // 사용자 연결 해제 시 SubscriptionManager에서 구독 정보 제거
         subscriptionManager.disconnect(memberId);
