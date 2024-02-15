@@ -279,7 +279,31 @@ public class BoardService {
         }
     }
 
+    /**
+     * 게시글 검색
+     * @param paging
+     * @return
+     */
+    public List<ResponseBoardDto> searchBoardByPaging(int paging, String searchKeyword, Boolean completed) {
+        List<Board> boardList = boardRepository.searchBoardByPaging(paging, searchKeyword, completed, 10, BoardStatus.ACTIVE);
 
+        if(!boardList.isEmpty()) {
+            List<ResponseBoardDto> responseBoardDtoList = new ArrayList<>();
+
+            for(int i = 0; i < boardList.size(); i++) {
+                Board boardListIndex = boardList.get(i);
+
+                if(boardListIndex.getBoardStatus() == BoardStatus.ACTIVE) {
+                    ResponseBoardDto responseBoardDto = responseBoardDto(boardListIndex);
+                    responseBoardDtoList.add(responseBoardDto);
+                }
+            }
+
+            return responseBoardDtoList;
+        } else {
+            return null;
+        }
+    }
 
     /**
      * 사용자가 작성한 모든 게시글 조회

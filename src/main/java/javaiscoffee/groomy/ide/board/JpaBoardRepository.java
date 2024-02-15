@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.board;
 
+import jakarta.persistence.TypedQuery;
 import javaiscoffee.groomy.ide.member.Member;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -122,6 +123,26 @@ public class JpaBoardRepository implements BoardRepository {
         return em.createQuery("SELECT b FROM Board b WHERE b.member = :member", Board.class)
                 .setParameter("member", member)
                 .getResultList();
+    }
+
+    @Override
+    public List<Board> searchBoardByPaging(int paging, String searchKeyword, Boolean completed, int pagingNumber, BoardStatus status) {
+        if (completed != null) {
+            return em.createQuery("SELECT b FROM Board b WHERE b.boardStatus = :status AND (b.title LIKE :keyword OR b.content LIKE :keyword OR b.nickname LIKE :keyword) AND b.isCompleted = :completed ORDER BY b.createdTime DESC", Board.class)
+                    .setParameter("status", status)
+                    .setParameter("keyword", "%" + searchKeyword + "%")
+                    .setParameter("completed", completed)
+                    .setFirstResult((paging - 1) * pagingNumber)
+                    .setMaxResults(pagingNumber)
+                    .getResultList();
+        } else {
+            return em.createQuery("SELECT b FROM Board b WHERE b.boardStatus = :status AND (b.title LIKE :keyword OR b.content LIKE :keyword OR b.nickname LIKE :keyword) ORDER BY b.createdTime DESC", Board.class)
+                    .setParameter("status", status)
+                    .setParameter("keyword", "%" + searchKeyword + "%")
+                    .setFirstResult((paging - 1) * pagingNumber)
+                    .setMaxResults(pagingNumber)
+                    .getResultList();
+        }
     }
 }
 
