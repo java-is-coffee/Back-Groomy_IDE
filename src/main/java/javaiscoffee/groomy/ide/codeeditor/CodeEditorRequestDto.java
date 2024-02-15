@@ -5,6 +5,7 @@ import lombok.Data;
 @Data
 public class CodeEditorRequestDto {
     private RequestData data;
+    @Data
     public static class RequestData {
         private Long memberId;
         private String action;
