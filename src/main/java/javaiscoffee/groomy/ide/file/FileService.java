@@ -9,6 +9,7 @@ import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.security.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -56,6 +57,41 @@ public class FileService {
     }
 
     /**
+     * 웹소켓 통신 메세지를 받고 파일 및 폴더 생성하고 나서 응답 메세지를 반환
+     * 파일 내용 수정까지 포함
+     */
+    public FileWebsocketResponseDto websocketSave (FileWebsocketRequestDto.RequestData data, Long memberId, Long projectId) {
+        Path fullPath = getFileFullPath(memberId, projectId, data.getPath());
+        FileWebsocketResponseDto responseDto = new FileWebsocketResponseDto();
+        log.info("웹소켓 파일 및 폴더 저장 = {}",fullPath);
+        try {
+            //파일 생성
+            if(data.getType() == FileType.FILE) {
+                //디렉토리가 없으면 생성
+                Files.createDirectories(fullPath.getParent());
+                //파일에 내용쓰기
+                Files.writeString(fullPath, data.getContent(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+            }
+            //폴더 생성
+            else if (data.getType() == FileType.FOLDER) {
+                //디렉토리 생성
+                Files.createDirectories(fullPath);
+            }
+            log.info("파일 생성 성공 = {}",fullPath);
+
+            //응답DTO 생성
+            BasicFileAttributes attrs = Files.readAttributes(fullPath, BasicFileAttributes.class);
+            responseDto.setItemId(attrs.creationTime().toString());
+            BeanUtils.copyProperties(data,responseDto);
+            return responseDto;
+
+        } catch (IOException e) {
+            log.error("웹소켓 파일 생성 예외 발생 = {}",fullPath);
+            throw new BaseException(ResponseStatus.SAVE_FAILED.getMessage());
+        }
+    }
+
+    /**
      * 파일 및 폴더 이름 변경
      */
     public void renameFileOrFolder(Long memberId, FileRenameRequestDto requestDto) {
@@ -72,6 +108,28 @@ public class FileService {
             throw new BaseException(ResponseStatus.SAVE_FAILED.getMessage());
         }
     }
+
+    /**
+     * 웹소켓 통신 메시지를 받고 파일 및 폴더 이름을 변경하고 메세지 전송
+     */
+    public FileWebsocketResponseDto websocketRename(FileWebsocketRequestDto.RequestData data, Long memberId, Long projectId) {
+        FileWebsocketResponseDto responseDto = new FileWebsocketResponseDto();
+        try{
+            Path oldFullPath = Paths.get(projectBasePath + memberId + "/" + projectId + "/" + data.getPath());
+            Path newFullPath = oldFullPath.resolveSibling(data.getName()); // 같은 부모 디렉토리 내에서 새 이름으로 경로 생성
+            Files.move(oldFullPath, newFullPath, StandardCopyOption.REPLACE_EXISTING); // 기존 파일/폴더를 새 경로(이름)로 이동
+
+            //응답DTO 생성
+            BasicFileAttributes attrs = Files.readAttributes(newFullPath, BasicFileAttributes.class);
+            responseDto.setItemId(attrs.creationTime().toString());
+            BeanUtils.copyProperties(data,responseDto);
+            return responseDto;
+        } catch (IOException e) {
+            log.error("웹소켓 파일 수정 예외 발생 = {}",data.getPath());
+            throw new BaseException(ResponseStatus.SAVE_FAILED.getMessage());
+        }
+    }
+
     /**
      * 프로젝트 폴더 내용 목록 조회
      * 반환 데이터 = 파일 및 폴더 구조를 탐색하고 FileResponseDto 리스트로 반환
@@ -153,6 +211,28 @@ public class FileService {
             Files.deleteIfExists(fullPath);
         } catch (IOException e) {
             log.error("파일 삭제 예외 발생 = {}",data.getOldPath());
+            throw new BaseException(ResponseStatus.DELETE_FAILED.getMessage());
+        }
+    }
+
+    /**
+     * 웹소켓 메세지를 전달 받고 파일 및 폴더를 삭제하고 메세지 전달
+     * path만 사용
+     */
+    public FileWebsocketResponseDto websocketDelete(FileWebsocketRequestDto.RequestData data, Long memberId, Long projectId) {
+        FileWebsocketResponseDto responseDto = new FileWebsocketResponseDto();
+        Path fullPath = getFileFullPath(memberId, projectId, data.getPath());
+        try {
+            //응답 DTO 내용 초기화
+            BasicFileAttributes attrs = Files.readAttributes(fullPath, BasicFileAttributes.class);
+            responseDto.setItemId(attrs.creationTime().toString());
+            BeanUtils.copyProperties(data,responseDto);
+            //파일 및 폴더 삭제
+            Files.deleteIfExists(fullPath);
+
+            return responseDto;
+        } catch (IOException e) {
+            log.error("파일 삭제 예외 발생 = {}",fullPath);
             throw new BaseException(ResponseStatus.DELETE_FAILED.getMessage());
         }
     }

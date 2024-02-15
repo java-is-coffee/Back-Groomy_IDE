@@ -45,9 +45,11 @@ public class ProjectController {
      * 프로젝트 인원 초대
      * 리스트로 받아서 한 번에 초대할지, 아니면 한 명씩 초대할지 결정해야함
      */
-    @PostMapping("/inviteMembers")
-    public ResponseEntity<?> inviteMembersToProject(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectCreateRequestDto projectCreateRequestDto) {
-        return null;
+    @PostMapping("/inviteMembers/{projectId}")
+    public ResponseEntity<?> inviteMembersToProject(@PathVariable(name = "projectId") Long projectId, @AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ProjectCreateRequestDto requestDto) {
+        Long memberId = userDetails.getMemberId();
+        projectService.inviteMemberByList(memberId, projectId, requestDto);
+        return ResponseEntity.ok(null);
     }
 
     /**
