@@ -66,6 +66,15 @@ public class WebSocketController {
     }
 
     /**
+     * 라이브코딩 웹세션 yjs 방식
+     */
+    @MessageMapping("/project-codeYJS/{projectId}/send")
+    @SendTo("/projectws/{projectId}/codeYJS")
+    public String sendCodeEditorYJS(@DestinationVariable(value="projectId") Long projectId, String requestDto) {
+        return requestDto;
+    }
+
+    /**
      * 파일계층 웹소켓
      * 파일계층을 수정하는 메세지를 받으면 ec2 내부 파일을 수정하고 멤버들에게 전송한다.
      */
