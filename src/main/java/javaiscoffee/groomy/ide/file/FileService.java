@@ -258,4 +258,14 @@ public class FileService {
     public Path getFileFullPath (Long memberId, Long projectId, String filePath) {
         return Paths.get(projectBasePath + memberId + "/" + projectId + "/" + filePath);
     }
+
+    public String getFileId (String filePath,Long memberId, Long projectId) {
+        try {
+            Path fileFullPath = getFileFullPath(memberId, projectId, filePath);
+            BasicFileAttributes attrs = Files.readAttributes(fileFullPath, BasicFileAttributes.class);
+            return attrs.creationTime().toString() + fileFullPath.getFileName();
+        } catch (IOException e) {
+            throw new BaseException(ResponseStatus.NOT_FOUND.getMessage());
+        }
+    }
 }

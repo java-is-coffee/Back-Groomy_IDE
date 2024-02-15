@@ -3,8 +3,7 @@ package javaiscoffee.groomy.ide.websocket;
 import javaiscoffee.groomy.ide.chat.ChatMessageDto;
 import javaiscoffee.groomy.ide.chat.ChatMessageRequestDto;
 import javaiscoffee.groomy.ide.chat.ChatService;
-import javaiscoffee.groomy.ide.codeeditor.CodeEditorRequestDto;
-import javaiscoffee.groomy.ide.codeeditor.CodeEditorResponseDto;
+import javaiscoffee.groomy.ide.codeeditor.CodeEditorDto;
 import javaiscoffee.groomy.ide.file.FileService;
 import javaiscoffee.groomy.ide.file.FileWebsocketAction;
 import javaiscoffee.groomy.ide.file.FileWebsocketRequestDto;
@@ -12,16 +11,13 @@ import javaiscoffee.groomy.ide.file.FileWebsocketResponseDto;
 import javaiscoffee.groomy.ide.project.ProjectService;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.security.BaseException;
-import javaiscoffee.groomy.ide.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
 @Slf4j
@@ -60,14 +56,13 @@ public class WebSocketController {
      */
     @MessageMapping("/project-code/{projectId}/send")
     @SendTo("/projectws/{projectId}/code")
-    public CodeEditorResponseDto sendCodeEditor(@DestinationVariable(value="projectId") Long projectId, CodeEditorRequestDto requestDto) {
+    public CodeEditorDto sendCodeEditor(@DestinationVariable(value="projectId") Long projectId, CodeEditorDto requestDto) {
 //        if (!projectService.isParticipated(requestDto.getData().getMemberId(), projectId)) {
 //            log.error("참여하고 있지 않은 프로젝트입니다. = {}",requestDto);
 //            throw new BaseException(ResponseStatus.FORBIDDEN.getMessage());
 //        }
-        CodeEditorResponseDto responseDto = new CodeEditorResponseDto();
-        BeanUtils.copyProperties(requestDto.getData(),responseDto);
-        return responseDto;
+
+        return requestDto;
     }
 
     /**

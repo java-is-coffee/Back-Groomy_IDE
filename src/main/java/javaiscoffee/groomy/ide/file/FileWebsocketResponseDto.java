@@ -9,7 +9,7 @@ import java.util.List;
  */
 @Data
 public class FileWebsocketResponseDto {
-    private String itemId;  //파일, 폴더 생성시간
+    private String itemId;  //파일, 폴더 생성시간 + 이름
     private String name; // 파일,폴더 이름
     private String path; // 상대경로
     private FileType type; // 파일 타입
