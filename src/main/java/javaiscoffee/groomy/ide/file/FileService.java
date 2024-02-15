@@ -81,7 +81,7 @@ public class FileService {
 
             //응답DTO 생성
             BasicFileAttributes attrs = Files.readAttributes(fullPath, BasicFileAttributes.class);
-            responseDto.setItemId(attrs.creationTime().toString());
+            responseDto.setItemId(attrs.creationTime().toString() + data.getName());
             BeanUtils.copyProperties(data,responseDto);
             return responseDto;
 
@@ -121,7 +121,7 @@ public class FileService {
 
             //응답DTO 생성
             BasicFileAttributes attrs = Files.readAttributes(newFullPath, BasicFileAttributes.class);
-            responseDto.setItemId(attrs.creationTime().toString());
+            responseDto.setItemId(attrs.creationTime().toString() + data.getName());
             BeanUtils.copyProperties(data,responseDto);
             return responseDto;
         } catch (IOException e) {
@@ -155,7 +155,7 @@ public class FileService {
             for (Path path : stream) {
                 BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
                 FileResponseDto fileDto = new FileResponseDto();
-                fileDto.setId(attrs.creationTime().toString());
+                fileDto.setId(attrs.creationTime().toString() + path.getFileName());
                 fileDto.setName(path.getFileName().toString());
                 fileDto.setPath(rootPath.relativize(path).toString());
                 fileDto.setLastUpdatedTime(attrs.lastModifiedTime().toString());
@@ -225,7 +225,7 @@ public class FileService {
         try {
             //응답 DTO 내용 초기화
             BasicFileAttributes attrs = Files.readAttributes(fullPath, BasicFileAttributes.class);
-            responseDto.setItemId(attrs.creationTime().toString());
+            responseDto.setItemId(attrs.creationTime().toString() + data.getName());
             BeanUtils.copyProperties(data,responseDto);
             //파일 및 폴더 삭제
             Files.deleteIfExists(fullPath);
