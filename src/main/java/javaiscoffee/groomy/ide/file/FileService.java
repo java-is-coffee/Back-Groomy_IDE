@@ -135,11 +135,11 @@ public class FileService {
      * 반환 데이터 = 파일 및 폴더 구조를 탐색하고 FileResponseDto 리스트로 반환
      */
     public List<FileResponseDto> getProjectFilesStructure(Long memberId, Long projectId) {
+        //권한이 있는지 검사
+        isParticipated(projectId, memberId);
         Project project = projectRepository.getProjectByProjectId(projectId);
         Path rootPath = Paths.get(projectBasePath + project.getMemberId().getMemberId() + "/" + projectId);
         log.info("파일 목록 조회 경로 = {}",rootPath);
-        //권한이 있는지 검사
-        isParticipated(projectId, memberId);
 
         List<FileResponseDto> rootList = new ArrayList<>();
         traverseFolder(rootPath, rootList, rootPath);
@@ -187,8 +187,9 @@ public class FileService {
         FileRenameRequestDto.RequestData data = requestDto.getData();
         //권한이 있는지 검사
         isParticipated(data.getProjectId(), memberId);
+        Project project = projectRepository.getProjectByProjectId(data.getProjectId());
         try {
-            Path fullPath = getFileFullPath(memberId, data.getProjectId(), data.getOldPath());
+            Path fullPath = getFileFullPath(memberId, project.getMemberId().getMemberId(), data.getOldPath());
             String content = Files.readString(fullPath);
             return content;
         } catch (IOException e) {
