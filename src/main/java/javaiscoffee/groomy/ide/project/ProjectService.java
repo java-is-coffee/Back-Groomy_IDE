@@ -4,6 +4,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.ecs.AmazonECS;
 import com.amazonaws.services.ecs.AmazonECSClientBuilder;
 import com.amazonaws.services.ecs.model.*;
+import javaiscoffee.groomy.ide.member.FindMemberByEmailResponseDto;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
@@ -112,7 +113,6 @@ public class ProjectService {
                 inviteProject(project, invitedMember,false);
             }
         }
-
     }
 
     /**
@@ -137,6 +137,25 @@ public class ProjectService {
     }
 
     /**
+     * 현재 프로젝트에 참가하고 있는 멤버 리스트 조회
+     */
+    public List<FindMemberByEmailResponseDto> getProjectMemberList(Long memberId, Long projectId) {
+        Project project = projectRepository.getProjectByProjectId(projectId);
+        //프로젝트가 없으면 예외처리
+        //요청한 멤버가 프로젝트 생성자가 아니면 예외 처리 => 프로젝트에 참가하고 있는지도 같이 검사됨
+        if (project == null || !project.getMemberId().getMemberId().equals(memberId)) {
+            throw new BaseException(ResponseStatus.FORBIDDEN.getMessage());
+        }
+        List<Member> projectMemberList = projectRepository.getProjectMemberList(projectId, memberId);
+        //멤버 객체를 응답 객체로 변환
+        return projectMemberList.stream().map(member -> {
+            FindMemberByEmailResponseDto responseDto = new FindMemberByEmailResponseDto();
+            BeanUtils.copyProperties(member,responseDto);
+            return responseDto;
+        }).collect(Collectors.toList());
+    }
+
+    /**
      * 프로젝트에 멤버가 참가하고 있는지 조회
      */
     public boolean isParticipated (Long memberId, Long projectId) {
@@ -144,6 +163,10 @@ public class ProjectService {
         return projectRepository.isParticipated(projectMemberId);
     }
 
+    /**
+     * 프로젝트 정보 수정
+     * 프로젝트 이름과 설명만 변경 가능
+     */
     @Transactional
     public ProjectCreateResponseDto editProject(Long projectId,Long memberId, ProjectCreateRequestDto requestDto) {
 
@@ -171,6 +194,9 @@ public class ProjectService {
         return responseDto;
     }
 
+    /**
+     * 프로젝트 삭제 = 소프트 딜리트
+     */
     @Transactional
     public Boolean deleteProject(Long memberId, Long projectId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
@@ -192,6 +218,28 @@ public class ProjectService {
         //생성자와 요청한 memberId가 같으면 프로젝트 삭제(소프트 딜리트)
         else {
             return projectRepository.delete(oldProject);
+        }
+    }
+
+    /**
+     * 프로젝트 멤버 추방
+     * 생성자만 가능하고, 생성자 본인은 추방 불가
+     */
+    @Transactional
+    public void kickProjectMember (Long memberId, Long projectId, Long kickMemberId) {
+        Project project = projectRepository.getProjectByProjectId(projectId);
+        //프로젝트가 없거나, 프로젝트 생성자가 아니거나,
+        // 추방하려는 멤버가 생성자이거나, 추방하려는 멤버가 프로젝트에 참가하고 있지 않을 경우 예외처리
+        if(project == null || !project.getMemberId().getMemberId().equals(memberId) ||
+                memberId.equals(kickMemberId) || !isParticipated(kickMemberId, projectId)) {
+            log.error("잘못된 추방 요청 memberId = {}, projectId = {}, kickMemberId = {}",memberId,projectId,kickMemberId);
+            throw new BaseException(ResponseStatus.DELETE_FAILED.getMessage());
+        }
+
+        ProjectMemberId kickProjectMemberId = new ProjectMemberId(projectId, kickMemberId);
+        if(!projectRepository.removeMemberFromProject(kickProjectMemberId)) {
+            log.error("멤버 추방 실패 IOException = {}",kickProjectMemberId);
+            throw new BaseException(ResponseStatus.DELETE_FAILED.getMessage());
         }
     }
 

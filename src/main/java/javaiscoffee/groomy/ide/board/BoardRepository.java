@@ -16,6 +16,7 @@ public interface BoardRepository {
     List<Board> findBoardByMemberId(Member member);  //해당 사용자의 게시글 조회
     public List<Board> searchBoardByPaging(int paging, String searchKeyword, Boolean completed, int pagingNumber, BoardStatus status);
     public long countBoardsByStatus(BoardStatus status);
+    public long countBoardsBySearch(BoardStatus status, String searchKeyword, Boolean completed);
 }
 
 

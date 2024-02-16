@@ -149,7 +149,7 @@ public class BoardService {
      * @return
      */
     public long getBoardPageNumber() {
-        return (long)Math.ceil(boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) / (double)10);
+        return (long)Math.ceil(boardRepository.countBoardsByStatus(BoardStatus.ACTIVE) / (double) 10);
     }
 
     /**
@@ -303,6 +303,15 @@ public class BoardService {
         } else {
             return null;
         }
+    }
+
+    /**
+     * 게시글 검색 페이지 갯수 확인
+     * @param
+     * @return
+     */
+    public long searchBoardPageNumber(String searchKeyword, Boolean completed) {
+        return (long)Math.ceil(boardRepository.countBoardsBySearch(BoardStatus.ACTIVE, searchKeyword, completed) / (double) 10);
     }
 
     /**
