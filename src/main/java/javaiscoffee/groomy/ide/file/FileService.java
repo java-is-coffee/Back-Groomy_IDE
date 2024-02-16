@@ -184,10 +184,12 @@ public class FileService {
      * 반환 데이터 = 전체 코드를 String으로 반환
      */
     public String readFileContent(Long memberId, FileRenameRequestDto requestDto) {
+        log.info("파일 읽기 API 시작");
         FileRenameRequestDto.RequestData data = requestDto.getData();
         //권한이 있는지 검사
         isParticipated(data.getProjectId(), memberId);
         Project project = projectRepository.getProjectByProjectId(data.getProjectId());
+        log.info("파일 내용 읽기 요청 oldPath = {}",data.getOldPath());
         Path fullPath = getFileFullPath(project.getMemberId().getMemberId(), project.getProjectId(), data.getOldPath());
         log.info("파일 내용 읽기 요청 = {}",fullPath);
         try {
