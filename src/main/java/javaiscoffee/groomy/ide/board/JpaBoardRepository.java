@@ -144,6 +144,22 @@ public class JpaBoardRepository implements BoardRepository {
                     .getResultList();
         }
     }
+
+    @Override
+    public long countBoardsBySearch(BoardStatus status, String searchKeyword, Boolean completed) {
+        if (completed != null) {
+            return em.createQuery("SELECT COUNT(b) FROM Board b WHERE b.boardStatus = :status AND (b.title LIKE :keyword OR b.content LIKE :keyword OR b.nickname LIKE :keyword) AND b.isCompleted = :completed", Long.class)
+                    .setParameter("status", status)
+                    .setParameter("keyword", "%" + searchKeyword + "%")
+                    .setParameter("completed", completed)
+                    .getSingleResult();
+        } else {
+            return em.createQuery("SELECT COUNT(b) FROM Board b WHERE b.boardStatus = :status AND (b.title LIKE :keyword OR b.content LIKE :keyword OR b.nickname LIKE :keyword)", Long.class)
+                    .setParameter("status", status)
+                    .setParameter("keyword", "%" + searchKeyword + "%")
+                    .getSingleResult();
+        }
+    }
 }
 
 // 모든 게시글 조회 만들어야하나?
