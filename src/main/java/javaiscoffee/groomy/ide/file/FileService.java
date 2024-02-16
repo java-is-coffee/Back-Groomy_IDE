@@ -188,12 +188,13 @@ public class FileService {
         //권한이 있는지 검사
         isParticipated(data.getProjectId(), memberId);
         Project project = projectRepository.getProjectByProjectId(data.getProjectId());
+        Path fullPath = getFileFullPath(project.getMemberId().getMemberId(), project.getProjectId(), data.getOldPath());
         try {
-            Path fullPath = getFileFullPath(memberId, project.getMemberId().getMemberId(), data.getOldPath());
+            log.info("파일 내용 읽기 요청 = {}",fullPath);
             String content = Files.readString(fullPath);
             return content;
         } catch (IOException e) {
-            log.error("파일 읽기 예외 발생 = {}",data.getOldPath());
+            log.error("파일 읽기 예외 발생 = {}",fullPath);
             throw new BaseException(ResponseStatus.NOT_FOUND.getMessage());
         }
     }
