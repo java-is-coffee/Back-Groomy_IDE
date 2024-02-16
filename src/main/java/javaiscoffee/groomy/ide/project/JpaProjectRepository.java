@@ -3,6 +3,7 @@ package javaiscoffee.groomy.ide.project;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
+import javaiscoffee.groomy.ide.member.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
@@ -60,12 +61,14 @@ public class JpaProjectRepository {
 
     /**
      * 프로젝트 초대 삭제(거절)하기
-     * 요구 데이터 : Member와 Proejct
+     * 요구 데이터 : ProjectMemberId
      * 반환 데이터 : 성공하면 true, 실패하면 false
      */
     public boolean removeMemberFromProject(ProjectMemberId projectMemberId) {
+        //프로젝트멤버 객체 조회
+        ProjectMember projectMember = em.find(ProjectMember.class, projectMemberId);
         try {
-            em.remove(projectMemberId);
+            em.remove(projectMember);
             return true;
         } catch (Exception e) {
             return false;
@@ -82,6 +85,17 @@ public class JpaProjectRepository {
         TypedQuery<Project> query = em.createQuery(jpql, Project.class).setParameter("participated",participated);
         query.setParameter("memberId", memberId);
 
+        return query.getResultList();
+    }
+
+    /**
+     * 현재 프로젝트에 참가하고 있는 멤버 리스트 반환
+     */
+    public List<Member> getProjectMemberList(Long projectId, Long memberId) {
+        String jpql = "SELECT pm.member FROM ProjectMember pm WHERE pm.project.projectId = :projectId AND pm.member.memberId != :memberId";
+        TypedQuery<Member> query = em.createQuery(jpql, Member.class)
+                .setParameter("projectId",projectId)
+                .setParameter("memberId", memberId);
         return query.getResultList();
     }
 
