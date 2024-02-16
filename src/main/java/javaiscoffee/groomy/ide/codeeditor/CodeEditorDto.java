@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.codeeditor;
 
+import jakarta.annotation.Nullable;
 import lombok.Data;
 
 @Data
@@ -20,11 +21,6 @@ public class CodeEditorDto {
     @Data
     public static class CursorMove {
         private String memberName;
-        private Position position;
-        @Data
-        public static class Position {
-            private int lineNumber;
-            private int columnNumber;
-        }
+        private Range range;
     }
 }
