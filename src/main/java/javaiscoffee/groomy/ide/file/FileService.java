@@ -189,8 +189,8 @@ public class FileService {
         isParticipated(data.getProjectId(), memberId);
         Project project = projectRepository.getProjectByProjectId(data.getProjectId());
         Path fullPath = getFileFullPath(project.getMemberId().getMemberId(), project.getProjectId(), data.getOldPath());
+        log.info("파일 내용 읽기 요청 = {}",fullPath);
         try {
-            log.info("파일 내용 읽기 요청 = {}",fullPath);
             String content = Files.readString(fullPath);
             return content;
         } catch (IOException e) {
