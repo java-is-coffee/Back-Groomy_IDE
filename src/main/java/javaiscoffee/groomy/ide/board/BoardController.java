@@ -147,4 +147,15 @@ public class BoardController {
 
         return ResponseEntity.ok(searchBoard);
     }
+
+    @GetMapping("/search/page-number")
+    public ResponseEntity<?> searchBoardPageNumber(@RequestParam(name="search_keyword") String searchKeyword, @RequestParam(name="completed", required = false) Boolean completed) {
+        long boardPageNumber = boardService.searchBoardPageNumber(searchKeyword, completed);
+
+        if(boardPageNumber == 0) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
+        }
+
+        return ResponseEntity.ok(boardPageNumber);
+    }
 }
