@@ -38,7 +38,7 @@ public class YJSEndpoint {
     public void onOpen(Session session, @PathParam("projectId") String projectId) {
         log.debug("YJS 연결 시작");
         // URL 쿼리 파라미터에서 인증 토큰 추출
-        String token = getQueryParam(session, "authToken");
+        String token = getQueryParam(session, "tempToken");
 
         if (jwtTokenProvider.validateToken(token)) {
             log.debug("YJS 토근 검증 성공");
