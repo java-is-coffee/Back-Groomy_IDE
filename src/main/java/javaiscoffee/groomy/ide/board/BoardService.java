@@ -199,6 +199,7 @@ public class BoardService {
                 helpBoard = new HelpBoard(helpBoardId, member, findBoard);
                 jpaBoardRepository.saveBoardHelpNumber(helpBoard);
                 findBoard.setHelpNumber(findBoard.getHelpNumber()+1);
+                findBoard.getMember().setHelpNumber(findBoard.getMember().getHelpNumber() + 1);
                 findBoard = boardRepository.updateBoard(findBoard);
                 log.info("게시글 추천");
             }
@@ -208,6 +209,7 @@ public class BoardService {
                     return null;
                 }
                 findBoard.setHelpNumber(findBoard.getHelpNumber()-1);
+                findBoard.getMember().setHelpNumber(findBoard.getMember().getHelpNumber() - 1);
                 findBoard = boardRepository.updateBoard(findBoard);
                 log.info("게시글 추천 취소");
             }

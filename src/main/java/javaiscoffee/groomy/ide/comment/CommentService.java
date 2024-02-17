@@ -191,6 +191,7 @@ public class CommentService {
                 helpNumber = new CommentHelpNumber(helpNumberId,member,comment);
                 commentRepository.saveCommentHelpNumber(helpNumber);
                 comment.setHelpNumber(comment.getHelpNumber()+1);
+                comment.getMember().setHelpNumber(comment.getMember().getHelpNumber() + 1);
                 comment = commentRepository.updateComment(comment);
                 log.info("추천합니다");
             }
@@ -200,6 +201,7 @@ public class CommentService {
                     return null;
                 }
                 comment.setHelpNumber(comment.getHelpNumber()-1);
+                comment.getMember().setHelpNumber(comment.getMember().getHelpNumber() - 1);
                 comment = commentRepository.updateComment(comment);
             }
             return toResponseCommentDto(comment);
