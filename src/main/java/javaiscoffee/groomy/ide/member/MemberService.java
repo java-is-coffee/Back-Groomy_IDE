@@ -4,6 +4,7 @@ import javaiscoffee.groomy.ide.response.MyResponse;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
 import jakarta.validation.constraints.Null;
+import javaiscoffee.groomy.ide.security.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Slf4j
@@ -50,10 +52,10 @@ public class MemberService {
      */
     @Transactional
     public MemberInformationResponseDto updateMemberInformation(String email, MemberInformationDto memberInformationDto) {
-        Member member = memberRepository.findByEmail(email).get();
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
 
         //멤버 조회 실패했을 경우 (포스트맨으로 다르게 보내는 경우 등)
-        if(member == null || member.getMemberId() != memberInformationDto.getData().getMemberId()
+        if(!Objects.equals(member.getMemberId(), memberInformationDto.getData().getMemberId())
         || !member.getEmail().equals(memberInformationDto.getData().getEmail())) {
             return null;
         }
@@ -78,12 +80,9 @@ public class MemberService {
      */
     @Transactional
     public Boolean resetPassword(String email, String password) {
-        Member member = memberRepository.findByEmail(email).get();
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
 
         //멤버 조회 실패했을 경우 (포스트맨으로 다르게 보내는 경우 등)
-        if(member == null) {
-            return false;
-        }
 
         log.info("입력받은 비밀번호 = {}",password);
 

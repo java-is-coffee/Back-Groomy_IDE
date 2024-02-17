@@ -77,7 +77,12 @@ public class LoginService {
         return null;
     }
 
-    public TokenDto refresh(String refreshToken) {
+    /**
+     * access 토큰 재발급
+     * isTemp = true이면 라이브코딩용 임시 토큰 발급이므로 1분짜리 토큰 발급
+     * isTemp = false이면 일반적인 30분 토큰 발급
+     */
+    public TokenDto refresh(String refreshToken, boolean isTemp) {
         try {
             // refreshToken 유효성 검증
             if (!jwtTokenProvider.validateToken(refreshToken)) {
@@ -86,7 +91,15 @@ public class LoginService {
             }
 
             // 새로운 AccessToken 생성
-            String newAccessToken = jwtTokenProvider.generateNewAccessToken(refreshToken);
+            String newAccessToken;
+            //라이브 코딩용 1분짜리 임시토큰 발급
+            if(isTemp) {
+                newAccessToken = jwtTokenProvider.generateNewAccessToken(refreshToken, 1000*60);
+            }
+            //일반적인 refresh 요청으로 30분짜리 토큰 발급
+            else {
+                newAccessToken = jwtTokenProvider.generateNewAccessToken(refreshToken, 1000*60*30);
+            }
 
             // 새로운 토큰과 함께 응답 반환
             TokenDto tokenDto = new TokenDto("Bearer", newAccessToken, refreshToken);

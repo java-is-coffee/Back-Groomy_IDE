@@ -64,7 +64,7 @@ public class JwtTokenProvider {
     }
 
     //Access Token이 만료되어서 refresh Token을 받았을 때 새로운 access Token을 생성해서 반환
-    public String generateNewAccessToken(String refreshToken) {
+    public String generateNewAccessToken(String refreshToken, int expirationTime) {
         // refreshToken에서 클레임 추출
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -84,7 +84,7 @@ public class JwtTokenProvider {
 
         // 새로운 AccessToken 생성
         long now = (new Date().getTime());
-        Date accessTokenExpiresIn = new Date(now + (1000 * 60 * 30)); // 30분 후 만료
+        Date accessTokenExpiresIn = new Date(now + (expirationTime)); // 30분 후 만료
         // 새로운 AccessToken 반환
         return Jwts.builder()
                 .setSubject(member.getUsername())
