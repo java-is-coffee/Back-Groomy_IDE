@@ -19,6 +19,12 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * 웹소켓 전용 검증 처리하는 인터셉터
  * 연결할 때 토큰 유효성 검사 => 성공하면 세션 속성에 memberId 저장
@@ -37,8 +43,16 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
         StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+        String destination = accessor.getDestination();
+
         //연결 시 토큰값 확인
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+
+            // YJS 경로에 대한 요청인 경우, 토큰 검증 로직을 건너뛴다
+            if (destination != null && destination.startsWith("/YJS")) {
+                return message; // 인증 처리를 건너뛰고 메시지 처리를 계속 진행
+            }
+
             String authToken = accessor.getFirstNativeHeader("Authorization");
             log.debug("웹소켓 인터셉터 인증 토큰 = {}",authToken);
             if (authToken != null) {
@@ -74,7 +88,6 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
             Long memberId = Long.parseLong(memberIdStr);
             log.info("웹소켓 구독 정보 =>> 멤버ID = {}", memberId);
             // destination에서 프로젝트 ID 추출
-            String destination = accessor.getDestination();
             Long projectId = extractProjectIdFromDestination(destination);
             log.info("웹소켓 구독 정보 =>> 프로젝트ID = {}",projectId);
 
