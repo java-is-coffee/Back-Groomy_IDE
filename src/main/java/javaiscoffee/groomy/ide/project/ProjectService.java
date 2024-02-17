@@ -1,9 +1,6 @@
 package javaiscoffee.groomy.ide.project;
 
-import com.amazonaws.regions.Regions;
-import com.amazonaws.services.ecs.AmazonECS;
-import com.amazonaws.services.ecs.AmazonECSClientBuilder;
-import com.amazonaws.services.ecs.model.*;
+import javaiscoffee.groomy.ide.aws.EcsService;
 import javaiscoffee.groomy.ide.member.FindMemberByEmailResponseDto;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
@@ -14,7 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import software.amazon.awssdk.services.ecs.model.RunTaskResponse;
 
 
 import java.io.IOException;
@@ -33,6 +30,7 @@ import java.util.stream.Collectors;
 public class ProjectService {
     private final JpaProjectRepository projectRepository;
     private final JpaMemberRepository memberRepository;
+    private final EcsService ecsService;
 
     /**
      * 사용 용도 : 프로젝트 생성하고 나서 생성자를 프로젝트에 참여시키기 + 초대할 사람들을 초대하기
@@ -90,6 +88,9 @@ public class ProjectService {
         //프로젝트 폴더 생성
         createProjectFolder(memberId, createdProject.getProjectId());
 
+        //프로젝트 태스크 정의 생성 및 태스크 실행
+        RunTaskResponse taskResponse = ecsService.createAndRunTask(memberId, createdProject.getProjectId(), createdProject.getLanguage());
+        log.info("태스크 생성 및 실행 = {}",taskResponse);
 
         return responseDto;
     }
