@@ -26,12 +26,12 @@ public class EcsService {
      * 태스크를 처음 정의하고 실행시키는 메서드
      * 프로젝트 생성할 때 사용
      */
-    public RunTaskResponse runContainer(Long memberId, Long projectId) {
+    public RunTaskResponse createAndRunTask(Long memberId, Long projectId, ProjectLanguage language) {
         log.info("태스크 실행 시작");
         Volume volume = createVolume(memberId, projectId);
-        ContainerDefinition containerDefinition = createContainerDefinition(selectContainerImageByLanguage(ProjectLanguage.JAVA));
+        ContainerDefinition containerDefinition = createContainerDefinition(selectContainerImageByLanguage(language));
         RegisterTaskDefinitionResponse registerTaskDefinitionResponse = registerTaskDefinition(volume, containerDefinition);
-        RunTaskResponse runTaskResponse = runTask(registerTaskDefinitionResponse);
+        RunTaskResponse runTaskResponse = runTask(registerTaskDefinitionResponse.taskDefinition().taskDefinitionArn());
         log.info("태스크 실행 결과 = {}",runTaskResponse.toString());
 
         List<Task> tasks = runTaskResponse.tasks();
@@ -44,6 +44,28 @@ public class EcsService {
     /**
      * 태스크 컨테이너를 정지시키는 메서드
      */
+    public void stopTask(String taskArn) {
+        log.info("태스크 정지 시작: {}", taskArn);
+        ecsClient.stopTask(StopTaskRequest.builder()
+                        .cluster(CLUSTER_NAME)
+                        .task(taskArn)
+                        .reason("No Using Member")
+                        .build());
+    }
+
+    /**
+     * 태스크 정의를 이용해 컨테이너를 실행하고 응답 저장
+     */
+    public RunTaskResponse runTask(String taskDefinitionArn) {
+        return ecsClient.runTask(RunTaskRequest.builder()
+                .cluster(CLUSTER_NAME)
+                .taskDefinition(taskDefinitionArn)
+                .count(1)
+                .networkConfiguration(networkConfiguration)
+                .enableExecuteCommand(true)
+                .launchType(LaunchType.EC2)
+                .build());
+    }
 
     //네트워크 설정
     private static NetworkConfiguration networkConfiguration = NetworkConfiguration.builder()
@@ -98,19 +120,7 @@ public class EcsService {
                 .build());
     }
 
-    /**
-     * 태스크를 실행하고 응답 저장
-     */
-    private RunTaskResponse runTask(RegisterTaskDefinitionResponse registerTaskDefinitionResponse) {
-        return ecsClient.runTask(RunTaskRequest.builder()
-                .cluster(CLUSTER_NAME)
-                .taskDefinition(registerTaskDefinitionResponse.taskDefinition().taskDefinitionArn())
-                .count(1)
-                .networkConfiguration(networkConfiguration)
-                .enableExecuteCommand(true)
-                .launchType(LaunchType.EC2)
-                .build());
-    }
+
 
     private static String selectContainerImageByLanguage(ProjectLanguage language) {
         switch (language) {

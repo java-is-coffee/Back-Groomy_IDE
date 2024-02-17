@@ -1,6 +1,7 @@
 package javaiscoffee.groomy.ide.websocket;
 
 import jakarta.websocket.server.ServerEndpoint;
+import javaiscoffee.groomy.ide.project.ProjectService;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.security.BaseException;
 import javaiscoffee.groomy.ide.security.CustomUserDetails;
@@ -31,6 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @ServerEndpoint(value = "/YJS/{projectId}", configurator = SpringConfigurator.class)
 public class YJSEndpoint {
     private final JwtTokenProvider jwtTokenProvider;
+    private final ProjectService projectService;
     // 프로젝트 ID와 해당 프로젝트에 연결된 세션의 목록을 매핑
     private static Map<String, Set<Session>> projectSessionsMap = new ConcurrentHashMap<>();
 
@@ -47,7 +49,16 @@ public class YJSEndpoint {
             if (auth.getPrincipal() instanceof CustomUserDetails) {
                 CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
                 Long memberId = userDetails.getMemberId();
+                if(!projectService.isParticipated(memberId,Long.parseLong(projectId))) {
+                    log.error("YJS 프로젝트 참여하지 않음 memberId = {} projectId={}",memberId,projectId);
+                    try {
+                        session.close();
+                    } catch (IOException e) {
+                        throw new BaseException(ResponseStatus.UNAUTHORIZED.getMessage());
+                    }
+                }
                 session.getUserProperties().put("memberId", memberId);
+                session.getUserProperties().put("projectId", projectId);
             }
             projectSessionsMap.computeIfAbsent(projectId, k -> ConcurrentHashMap.newKeySet()).add(session);
         } else {
