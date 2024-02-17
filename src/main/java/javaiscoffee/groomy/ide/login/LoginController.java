@@ -43,12 +43,31 @@ public class LoginController {
         return ResponseEntity.ok(null);
     }
 
+    /**
+     * access 토큰 30분짜리 재발급
+     */
     @PostMapping("/refresh")
     public ResponseEntity<?> refreshAccessToken(@RequestBody RefreshTokenDto refreshTokenDto) {
         String refreshToken = refreshTokenDto.getData().getRefreshToken();
         log.info("refreshToken 받음 = {}", refreshToken);
-        //토큰 검증 후 토큰 받아오기
-        TokenDto tokenDto = loginService.refresh(refreshToken);
+        //토큰 검증 후 30분짜리 일반 토큰 받아오기
+        TokenDto tokenDto = loginService.refresh(refreshToken,false);
+        if(tokenDto==null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.UNAUTHORIZED));
+        }
+        return ResponseEntity.ok(tokenDto);
+    }
+
+    /**
+     * 라이브 코딩용 임시 토큰 발급
+     * refresh랑 똑같은데 1분짜리 토큰 발급만 다름
+     */
+    @PostMapping("/tempToken")
+    public ResponseEntity<?> getTempAccessToken(@RequestBody RefreshTokenDto refreshTokenDto) {
+        String refreshToken = refreshTokenDto.getData().getRefreshToken();
+        log.info("refreshToken 받음 = {}", refreshToken);
+        //토큰 검증 후 30분짜리 일반 토큰 받아오기
+        TokenDto tokenDto = loginService.refresh(refreshToken,true);
         if(tokenDto==null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new Status(ResponseStatus.UNAUTHORIZED));
         }

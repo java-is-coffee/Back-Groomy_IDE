@@ -283,58 +283,6 @@ public class ProjectService {
         }
     }
 
-    public boolean createRegisterTaskDefinitionRequest(Long memberId, Long projectId, ProjectLanguage language) {
-        AmazonECS ecsClient = AmazonECSClientBuilder.standard()
-                .withRegion(Regions.AP_NORTHEAST_2)
-                .build();
-
-        String taskDefinition = getTaskDefinitionByLanguage(language); // 언어에 따라 태스크 종류 선택
-
-        RunTaskRequest runTaskRequest = new RunTaskRequest()
-                .withCluster("groomy-cluster")
-                .withTaskDefinition(taskDefinition)
-                .withCount(1)
-                .withLaunchType("EC2") // 또는 "EC2"
-                .withOverrides(new TaskOverride()
-                        .withContainerOverrides(new ContainerOverride()
-                                .withName("project/"+memberId+"-"+projectId)
-                                .withEnvironment(new KeyValuePair()
-                                        .withName("PROJECT_PATH")
-                                        .withValue("/home/projects/" + memberId + "/" + projectId))));
-
-        RunTaskResult runTaskResult = ecsClient.runTask(runTaskRequest);
-        return !runTaskResult.getTasks().isEmpty();
-    }
-
-    private String getTaskDefinitionByLanguage(ProjectLanguage language) {
-        return switch (language) {
-            case JAVA -> "java-task-definition:1";
-            case JAVASCRIPT -> "javascript-task-definition:1";
-            case PYTHON -> "python-task-definition:1";
-            default -> "default-task-definition:1";
-        };
-    }
-
-    private String createTaskDefinition(ProjectLanguage language) {
-        // AWS SDK를 사용하여 ECS Task Definition 생성 로직 구현
-        AmazonECS ecsClient = AmazonECSClientBuilder.standard()
-                .withRegion(Regions.AP_NORTHEAST_2)
-                .build();
-
-        // 생성된 Task Definition의 ARN을 반환
-        return "arn:aws:ecs:region:account:task-definition/taskName";
-    }
-
-    private boolean runEcsTask(String taskDefinitionArn, Long memberId, Long projectId) {
-        // AWS SDK를 사용하여 ECS Task 실행 로직 구현
-        // 성공적으로 실행되면 true 반환
-        return true;
-    }
-
-
-
-
-
     //프로젝트 List를 ProjectCreateResponseDto List로 변환
     private static List<ProjectCreateResponseDto> toProjectCreateResponseDtoList(List<Project> projects) {
         List<ProjectCreateResponseDto> projectList = projects.stream().map(project -> {
