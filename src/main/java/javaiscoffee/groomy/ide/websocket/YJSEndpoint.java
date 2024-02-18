@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.websocket;
 
+import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
 import javaiscoffee.groomy.ide.project.ProjectService;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
@@ -11,13 +12,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.server.standard.SpringConfigurator;
-import jakarta.websocket.OnClose;
-import jakarta.websocket.OnMessage;
-import jakarta.websocket.OnOpen;
-import jakarta.websocket.Session;
 import jakarta.websocket.server.PathParam;
 import java.io.IOException;
 import java.net.URI;
@@ -29,10 +27,9 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-@Component
+@Service
 @RequiredArgsConstructor
-@EnableWebSocketMessageBroker
-@ServerEndpoint(value = "/YJS/{projectId}", configurator = SpringConfigurator.class)
+@ServerEndpoint(value = "/YJS/{projectId}", configurator = ServerEndpointConfigurator.class)
 public class YJSEndpoint {
     private final JwtTokenProvider jwtTokenProvider;
     private final ProjectService projectService;
@@ -91,6 +88,16 @@ public class YJSEndpoint {
             if (s.isOpen()) {
                 s.getBasicRemote().sendText(message);
             }
+        }
+    }
+
+    @OnError
+    public void onError(Session session, @PathParam("projectId") String projectId) {
+        log.error("YJS 오류 : {}",session);
+        Set<Session> sessions = projectSessionsMap.getOrDefault(projectId, ConcurrentHashMap.newKeySet());
+        sessions.remove(session);
+        if (sessions.isEmpty()) {
+            projectSessionsMap.remove(projectId);
         }
     }
 
