@@ -45,6 +45,16 @@ public class JwtTokenProvider {
                 .collect(Collectors.joining(","));
         long now = (new Date().getTime());
 
+        Object principal = authentication.getPrincipal();
+        Long memberId;
+        if (principal instanceof CustomUserDetails) {
+            memberId = ((CustomUserDetails)principal).getMemberId();
+        } else if (principal instanceof CustomOAuthUser) {
+            memberId = ((CustomOAuthUser)principal).getMemberId();
+        } else {
+            throw new IllegalArgumentException("Unsupported principal type");
+        }
+
         //Access Token 생성 30분
         Date accessTokenExpiresIn = new Date(now + (1000*60*30));
         String accessToken = Jwts.builder()

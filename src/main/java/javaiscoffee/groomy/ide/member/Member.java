@@ -7,6 +7,7 @@ import javaiscoffee.groomy.ide.comment.Comment;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import javaiscoffee.groomy.ide.chat.ProjectChat;
+import javaiscoffee.groomy.ide.oauth.SocialType;
 import javaiscoffee.groomy.ide.project.ProjectMember;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -29,6 +30,7 @@ import java.util.Set;
         generator = ObjectIdGenerators.PropertyGenerator.class,
         property = "memberId"
 )
+@Builder
 public class Member implements UserDetails {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_id")
@@ -62,6 +64,9 @@ public class Member implements UserDetails {
 
     @NotNull @OneToMany(mappedBy = "member")
     private List<ProjectChat> projectChat = new ArrayList<>();
+
+    @Enumerated(EnumType.STRING)
+    private SocialType socialType;  // GOOGLE
 
     @PrePersist
     public void PrePersist() {

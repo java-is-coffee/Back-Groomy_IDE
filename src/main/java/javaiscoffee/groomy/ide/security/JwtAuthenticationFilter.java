@@ -1,6 +1,5 @@
 package javaiscoffee.groomy.ide.security;
 
-import javaiscoffee.groomy.ide.response.MyResponse;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
 import com.fasterxml.jackson.databind.ObjectMapper;

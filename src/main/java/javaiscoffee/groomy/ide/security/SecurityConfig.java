@@ -1,6 +1,11 @@
 package javaiscoffee.groomy.ide.security;
 
 
+import javaiscoffee.groomy.ide.oauth.handler.OAuthLoginFailureHandler;
+import javaiscoffee.groomy.ide.oauth.handler.OAuthLoginSuccessHandler;
+import javaiscoffee.groomy.ide.oauth.service.CustomOAuthUserService;
+import javaiscoffee.groomy.ide.security.JwtAuthenticationFilter;
+import javaiscoffee.groomy.ide.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
@@ -23,6 +28,9 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @Slf4j
 public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
+    private final OAuthLoginSuccessHandler oAuthLoginSuccessHandler;
+    private final OAuthLoginFailureHandler oAuthLoginFailureHandler;
+    private final CustomOAuthUserService customOAuthUserService;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -33,6 +41,7 @@ public class SecurityConfig {
                 .csrf().disable()
                 //JWT를 사용하기 때문에 세션을 사용하지 않는다는 설정
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+
                 .and()
                 .authorizeRequests()
                 //로그인과 회원가입은 모든 요청을 허가
@@ -43,8 +52,14 @@ public class SecurityConfig {
                 //그 외 나머지 요청은 전부 인증이 필요
                 .anyRequest().authenticated()
                 .and()
+                .oauth2Login()
+                .successHandler(oAuthLoginSuccessHandler) // 동의하고 계속하기를 눌렀을 때 Handler 설정
+                .failureHandler(oAuthLoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
+                .userInfoEndpoint().userService(customOAuthUserService) // customUserService 설정
+                .and();
                 //JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행하겠다는 설정
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+                http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
