@@ -12,7 +12,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.handler.AbstractWebSocketHandler;
@@ -34,10 +33,9 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
-        log.info("YJS 연결");
         // projectId 추출
         String projectId = getProjectId(session);
-        log.info("YJS 연결 프로젝트 = {}",projectId);
+        log.info("YJS 메시지 전달 projectId = {}",projectId);
 
         // 같은 프로젝트의 모든 세션에 메시지 브로드캐스트
         broadcastMessageToProject(projectId, message);
@@ -125,9 +123,14 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         // 세션 종료 처리
         String projectId = getProjectId(session);
         Long memberId = (Long) session.getAttributes().get("memberId");
+        log.debug("세션 종료 memberId = {}, projectId = {}",memberId,projectId);
         // 세션 종료 및 구독 해제 처리
         if (memberId != null) {
-            subscriptionManager.unsubscribe(memberId, Long.parseLong(projectId)); // 구독 해제
+            try {
+                subscriptionManager.unsubscribe(memberId, Long.parseLong(projectId)); // 구독 해제
+            } catch (BaseException ignored) {
+
+            }
         }
         Map<String, WebSocketSession> sessions = projectSessionsMap.get(projectId);
         if (sessions != null) {
