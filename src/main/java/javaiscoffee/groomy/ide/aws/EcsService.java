@@ -70,8 +70,8 @@ public class EcsService {
     //네트워크 설정
     private static NetworkConfiguration networkConfiguration = NetworkConfiguration.builder()
             .awsvpcConfiguration(AwsVpcConfiguration.builder()
-                    .subnets("subnet-0de27c63915bd0893") // 여기에 실제 서브넷 ID 입력
-                    .securityGroups("sg-0f620b9f8f44807e3") // 여기에 실제 보안 그룹 ID 입력
+                    .subnets("subnet-022f342f048f88510", "subnet-00b9d0644567f65d9", "subnet-0de27c63915bd0893", "subnet-0f340ba196d215df6" ) // 여기에 실제 서브넷 ID 입력
+                    .securityGroups("sg-0271e53debeb22431") // 여기에 실제 보안 그룹 ID 입력
                     .assignPublicIp(AssignPublicIp.DISABLED) // 필요에 따라 변경
                     .build())
             .build();
