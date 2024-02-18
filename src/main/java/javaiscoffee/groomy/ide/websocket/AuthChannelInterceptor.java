@@ -50,6 +50,7 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
 
             // YJS 경로에 대한 요청인 경우, 토큰 검증 로직을 건너뛴다
             if (destination != null && destination.startsWith("/YJS")) {
+                log.debug("YJS 요청은 인터셉터 패스");
                 return message; // 인증 처리를 건너뛰고 메시지 처리를 계속 진행
             }
 
