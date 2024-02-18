@@ -11,6 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
+import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.server.standard.SpringConfigurator;
 import jakarta.websocket.OnClose;
 import jakarta.websocket.OnMessage;
@@ -29,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Slf4j
 @Component
 @RequiredArgsConstructor
+@EnableWebSocketMessageBroker
 @ServerEndpoint(value = "/YJS/{projectId}", configurator = SpringConfigurator.class)
 public class YJSEndpoint {
     private final JwtTokenProvider jwtTokenProvider;
