@@ -71,6 +71,7 @@ public class YjsWebSocketHandler extends TextWebSocketHandler {
         if (token != null) {
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
+            log.info("YJS 연결 성공 successful for session: {}", session.getId());
             if (auth.getPrincipal() instanceof CustomUserDetails) {
                 log.debug("YJS 정보 객체 찾음");
                 CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
@@ -109,7 +110,7 @@ public class YjsWebSocketHandler extends TextWebSocketHandler {
         }
         //토큰 검증 실패
         else {
-            log.error("YJS 토큰 검증 실패 or 토큰 없음 = {}",token);
+            log.error("YJS 토큰 검증 실패 for session: {}. Token: {}", session.getId(), token);
             try {
                 session.close(new CloseStatus(4000, "Invalid token"));
             } catch (IOException e) {
