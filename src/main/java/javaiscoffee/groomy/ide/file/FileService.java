@@ -6,7 +6,7 @@ import javaiscoffee.groomy.ide.project.JpaProjectRepository;
 import javaiscoffee.groomy.ide.project.Project;
 import javaiscoffee.groomy.ide.project.ProjectMemberId;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
-import javaiscoffee.groomy.ide.security.MemberNotFoundException;
+import javaiscoffee.groomy.ide.security.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,7 +52,7 @@ public class FileService {
             log.info("파일 생성 성공 = {}",fullPath);
         } catch (IOException e) {
             log.error("파일 생성 예외 발생 = {}",data.getFileName());
-            throw new MemberNotFoundException(ResponseStatus.SAVE_FAILED.getMessage());
+            throw new BaseException(ResponseStatus.SAVE_FAILED.getMessage());
         }
     }
 
@@ -70,7 +70,7 @@ public class FileService {
             Files.move(oldFullPath, newFullPath, StandardCopyOption.REPLACE_EXISTING); // 기존 파일/폴더를 새 경로(이름)로 이동
         } catch (IOException e) {
             log.error("파일 수정 예외 발생 = {}",data.getOldPath());
-            throw new MemberNotFoundException(ResponseStatus.SAVE_FAILED.getMessage());
+            throw new BaseException(ResponseStatus.SAVE_FAILED.getMessage());
         }
     }
     /**
@@ -97,7 +97,7 @@ public class FileService {
             });
         } catch (IOException e) {
             log.error("프로젝트 파일 목록 조회 예외 발생 = {}", projectPath);
-            throw new MemberNotFoundException(ResponseStatus.READ_FAILED.getMessage());
+            throw new BaseException(ResponseStatus.READ_FAILED.getMessage());
         }
 
         // 파일과 디렉토리 리스트를 합쳐서 반환
@@ -121,7 +121,7 @@ public class FileService {
             return content;
         } catch (IOException e) {
             log.error("파일 읽기 예외 발생 = {}",data.getOldPath());
-            throw new MemberNotFoundException(ResponseStatus.NOT_FOUND.getMessage());
+            throw new BaseException(ResponseStatus.NOT_FOUND.getMessage());
         }
     }
 
@@ -139,7 +139,7 @@ public class FileService {
             Files.deleteIfExists(fullPath);
         } catch (IOException e) {
             log.error("파일 삭제 예외 발생 = {}",data.getOldPath());
-            throw new MemberNotFoundException(ResponseStatus.DELETE_FAILED.getMessage());
+            throw new BaseException(ResponseStatus.DELETE_FAILED.getMessage());
         }
     }
 
@@ -147,15 +147,15 @@ public class FileService {
      * 멤버가 프로젝트에 참가하고 있는지 검사
      */
     private void isParticipated(Long projectId, Long memberId) {
-        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new MemberNotFoundException(ResponseStatus.NOT_FOUND.getMessage()));
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
         Project project = projectRepository.getProjectByProjectId(projectId);
         //멤버가 없으면, 프로젝트가 없으면, 프로젝트가 삭제되면 예외처리
         if(member == null || project == null || project.getDeleted()) {
-            throw new MemberNotFoundException(ResponseStatus.NOT_FOUND.getMessage());
+            throw new BaseException(ResponseStatus.NOT_FOUND.getMessage());
         }
         ProjectMemberId projectMemberId = new ProjectMemberId(project.getProjectId(), member.getMemberId());
         if(!projectRepository.isParticipated(projectMemberId)) {
-            throw new MemberNotFoundException(ResponseStatus.FORBIDDEN.getMessage());
+            throw new BaseException(ResponseStatus.FORBIDDEN.getMessage());
         }
     }
 

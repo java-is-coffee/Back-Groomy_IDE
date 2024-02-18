@@ -1,8 +1,11 @@
 package javaiscoffee.groomy.ide.login;
 
+import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.member.MemberRepository;
 import javaiscoffee.groomy.ide.member.MemberRole;
+import javaiscoffee.groomy.ide.oauth.OAuthAttributes;
+import javaiscoffee.groomy.ide.oauth.SocialType;
 import javaiscoffee.groomy.ide.response.MyResponse;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
@@ -25,7 +28,7 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class LoginService {
-    private final MemberRepository memberRepository;
+    private final JpaMemberRepository memberRepository;
     private final PasswordEncoder bCryptPasswordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
@@ -96,5 +99,15 @@ public class LoginService {
             log.error("토큰 갱신 실패: {}", e.getMessage());
             return null;
         }
+    }
+
+    /**
+     * OAuthAttributes의 toEntity() 메소드를 통해 빌더로 User 객체 생성 후 반환
+     * 생성된 User 객체를 DB에 저장
+     */
+    public Member saveUser(OAuthAttributes attributes, SocialType socialType) {
+        Member createdMember = attributes.toEntity(socialType, attributes.getOauthUserInfo());
+        createdMember.hashPassword(bCryptPasswordEncoder);
+        return memberRepository.saveOAuthUser(createdMember);
     }
 }

@@ -49,6 +49,7 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/api/member/register")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/member/register/email-check")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/member/refresh")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/auth")).permitAll()
                 //그 외 나머지 요청은 전부 인증이 필요
                 .anyRequest().authenticated()
                 .and()
