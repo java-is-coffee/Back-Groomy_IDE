@@ -68,7 +68,7 @@ public class YjsWebSocketHandler extends TextWebSocketHandler {
         log.debug("YJS 연결 성공 = {}",projectId);
         String token = extractQueryParam(session.getUri(), "tempToken");
         //토큰 검증 성공
-        if (token != null && jwtTokenProvider.validateToken(token)) {
+        if (token != null) {
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
             if (auth.getPrincipal() instanceof CustomUserDetails) {
@@ -84,7 +84,7 @@ public class YjsWebSocketHandler extends TextWebSocketHandler {
                 if(!projectService.isParticipated(memberId,Long.parseLong(projectId))) {
                     log.error("YJS 프로젝트 참여하지 않음 memberId = {} projectId={}",memberId,projectId);
                     try {
-                        session.close(new CloseStatus(4000, "not Authorization"));
+                        session.close(new CloseStatus(4000, "not Participated"));
                         return;
                     } catch (IOException e) {
                         throw new BaseException(ResponseStatus.UNAUTHORIZED.getMessage());
