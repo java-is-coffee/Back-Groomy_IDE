@@ -83,7 +83,7 @@ public class YjsWebSocketHandler extends TextWebSocketHandler {
                 if(!projectService.isParticipated(memberId,Long.parseLong(projectId))) {
                     log.error("YJS 프로젝트 참여하지 않음 memberId = {} projectId={}",memberId,projectId);
                     try {
-                        session.close();
+                        session.close(new CloseStatus(4000, "not Authorization"));
                         return;
                     } catch (IOException e) {
                         throw new BaseException(ResponseStatus.UNAUTHORIZED.getMessage());
@@ -98,7 +98,7 @@ public class YjsWebSocketHandler extends TextWebSocketHandler {
                     //구독 실패했을 경우
                     catch (BaseException e) {
                         log.error("");
-                        session.close();
+                        session.close(new CloseStatus(4000, "failed subscription"));
                         return;
                     }
                 }
@@ -110,8 +110,7 @@ public class YjsWebSocketHandler extends TextWebSocketHandler {
         else {
             log.error("YJS 토큰 검증 실패 or 토큰 없음 = {}",token);
             try {
-                session.close();
-                return;
+                session.close(new CloseStatus(4000, "Invalid token"));
             } catch (IOException e) {
                 throw new BaseException(ResponseStatus.UNAUTHORIZED.getMessage());
             }
