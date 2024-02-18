@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
+import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import java.io.IOException;
@@ -22,6 +23,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
+@EnableWebSocket
 @RequiredArgsConstructor
 public class YjsWebSocketHandler extends TextWebSocketHandler {
     private final JwtTokenProvider jwtTokenProvider;
@@ -35,7 +37,6 @@ public class YjsWebSocketHandler extends TextWebSocketHandler {
         // projectId 추출
         String projectId = getProjectId(session);
         log.info("YJS 연결 프로젝트 = {}",projectId);
-        // 여기서 access token 검증 로직 추가 (생략)
 
         // 같은 프로젝트의 모든 세션에 메시지 브로드캐스트
         broadcastMessageToProject(projectId, message);
