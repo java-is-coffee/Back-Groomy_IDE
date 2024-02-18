@@ -38,15 +38,16 @@ public class YJSEndpoint {
 
     @OnOpen
     public void onOpen(Session session, @PathParam("projectId") String projectId) {
-        log.debug("YJS 연결 시작");
+        log.info("YJS 연결 시작");
         // URL 쿼리 파라미터에서 인증 토큰 추출
         String token = getQueryParam(session, "tempToken");
 
         if (jwtTokenProvider.validateToken(token)) {
-            log.debug("YJS 토근 검증 성공");
+            log.info("YJS 토근 검증 성공");
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
             if (auth.getPrincipal() instanceof CustomUserDetails) {
+                log.info("YJS 정보 객체 찾음");
                 CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
                 Long memberId = userDetails.getMemberId();
                 if(!projectService.isParticipated(memberId,Long.parseLong(projectId))) {
