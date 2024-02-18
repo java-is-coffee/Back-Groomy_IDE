@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 
 @Entity
@@ -39,6 +40,7 @@ public class Comment {
 
 
     @NotNull @Setter
+    @Column(columnDefinition = "TINYTEXT")
     private String content;
     @NotNull @Setter
     private String nickname;
@@ -53,7 +55,7 @@ public class Comment {
     // 저장 전 실행되는 메서드
     @PrePersist
     public void PrePersist() {
-        this.createdTime = LocalDateTime.now();
+        this.createdTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         this.commentStatus = CommentStatus.ACTIVE;
         this.helpNumber = 0;
     }

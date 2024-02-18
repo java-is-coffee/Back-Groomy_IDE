@@ -11,6 +11,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +41,7 @@ public class Board {
     @NotNull @Setter
     private String title;
     @NotNull @Setter
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     @NotNull @Column(name = "created_time")
@@ -70,7 +72,7 @@ public class Board {
 
     @PrePersist
     public void PrePersist() {
-        this.createdTime = LocalDateTime.now();
+        this.createdTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
         this.viewNumber = 0;
         this.commentNumber = 0;
         this.scrapNumber = 0;
