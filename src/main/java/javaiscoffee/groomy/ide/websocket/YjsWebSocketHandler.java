@@ -10,11 +10,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.BinaryMessage;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
-import org.springframework.web.socket.handler.TextWebSocketHandler;
+import org.springframework.web.socket.handler.AbstractWebSocketHandler;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,14 +26,14 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 @EnableWebSocket
 @RequiredArgsConstructor
-public class YjsWebSocketHandler extends TextWebSocketHandler {
+public class YjsWebSocketHandler extends AbstractWebSocketHandler {
     private final JwtTokenProvider jwtTokenProvider;
     private final ProjectService projectService;
     private final SubscriptionManager subscriptionManager; // SubscriptionManager 추가
     private final Map<String, Map<String, WebSocketSession>> projectSessionsMap = new ConcurrentHashMap<>();
 
     @Override
-    protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
+    protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
         log.info("YJS 연결");
         // projectId 추출
         String projectId = getProjectId(session);
@@ -48,7 +49,7 @@ public class YjsWebSocketHandler extends TextWebSocketHandler {
         return path.substring(path.lastIndexOf('/') + 1);
     }
 
-    private void broadcastMessageToProject(String projectId, TextMessage message) {
+    private void broadcastMessageToProject(String projectId, BinaryMessage message) {
         Map<String, WebSocketSession> sessions = projectSessionsMap.getOrDefault(projectId, new ConcurrentHashMap<>());
         for (WebSocketSession session : sessions.values()) {
             if (session.isOpen()) {
