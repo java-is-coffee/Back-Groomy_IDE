@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 @AllArgsConstructor
 @Data
@@ -15,11 +16,12 @@ public class ResponseBoardDto {
     private String nickname;
     private String title;
     private String content;
-    private LocalDateTime createdTime;
+    private ZonedDateTime createdTime;
     private int viewNumber;
     private int commentNumber;
     private int scrapNumber;
     private int helpNumber;
     private BoardStatus boardStatus;
     private boolean isCompleted;
+    private Boolean memberScraped;
 }

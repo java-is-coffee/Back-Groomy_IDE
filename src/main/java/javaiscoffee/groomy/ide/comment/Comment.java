@@ -9,6 +9,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 
 @Entity
@@ -47,7 +48,7 @@ public class Comment {
     @NotNull @Setter
     private int helpNumber;
     @NotNull
-    private LocalDateTime createdTime;
+    private ZonedDateTime createdTime;
     @NotNull @Setter @Enumerated(EnumType.STRING)
     private CommentStatus commentStatus;
 
@@ -55,7 +56,7 @@ public class Comment {
     // 저장 전 실행되는 메서드
     @PrePersist
     public void PrePersist() {
-        this.createdTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        this.createdTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
         this.commentStatus = CommentStatus.ACTIVE;
         this.helpNumber = 0;
     }

@@ -5,6 +5,7 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
+import javaiscoffee.groomy.ide.oauth.userInfo.CustomOAuthUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,19 +40,39 @@ public class JwtTokenProvider {
                 .collect(Collectors.joining(","));
         long now = (new Date().getTime());
 
+        Object principal = authentication.getPrincipal();
+
         //Access Token 생성 30분
         Date accessTokenExpiresIn = new Date(now + (1000*60*30));
-        String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("auth", authorities)
-                .claim("memberId", ((CustomUserDetails)authentication.getPrincipal()).getMemberId()) // memberId 정보 추가
-                .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+        Long memberId;
+        String accessToken;
+
+        if (principal instanceof CustomUserDetails) {
+            memberId = ((CustomUserDetails)principal).getMemberId();
+            accessToken = Jwts.builder()
+                    .setSubject(authentication.getName())
+                    .claim("auth", authorities)
+                    .claim("memberId", memberId) // memberId 정보 추가
+                    .setExpiration(accessTokenExpiresIn)
+                    .signWith(key, SignatureAlgorithm.HS256)
+                    .compact();
+        } else if (principal instanceof CustomOAuthUser) {
+            memberId = ((CustomOAuthUser)principal).getMemberId();
+            String email = ((CustomOAuthUser)principal).getEmail();
+            accessToken = Jwts.builder()
+                    .setSubject(email)
+                    .claim("auth", authorities)
+                    .claim("memberId", memberId) // memberId 정보 추가
+                    .setExpiration(accessTokenExpiresIn)
+                    .signWith(key, SignatureAlgorithm.HS256)
+                    .compact();
+        } else {
+            throw new IllegalArgumentException("Unsupported principal type");
+        }
 
         //Refresh Token 생성 1주일
         String refreshToken = Jwts.builder()
-                .claim("memberId", ((CustomUserDetails)authentication.getPrincipal()).getMemberId())
+                .claim("memberId", memberId)
                 .setExpiration(new Date(now + (1000 * 60 * 60 * 24 * 7)))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();

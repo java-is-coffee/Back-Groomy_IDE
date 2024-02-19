@@ -1,5 +1,7 @@
 package javaiscoffee.groomy.ide.member;
 
+import javaiscoffee.groomy.ide.oauth.SocialType;
+
 import java.util.Optional;
 
 public interface MemberRepository {
@@ -10,6 +12,7 @@ public interface MemberRepository {
     Optional<Member> findByMemberId(Long memberId);
 
     public void save(Member newMember);
+
 }
 
 
