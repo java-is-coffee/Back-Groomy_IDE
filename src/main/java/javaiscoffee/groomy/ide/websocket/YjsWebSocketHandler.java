@@ -34,17 +34,10 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
         // projectFileId 추출
-        String projectFileId = getProjectFileId(session);
+        String projectFileId = (String) session.getAttributes().get("projectFileId");
 //        log.info("YJS 메시지 전달 projectId = {}",projectId);
-
         // 같은 프로젝트의 모든 세션에 메시지 브로드캐스트
         broadcastMessageToProject(projectFileId, message);
-    }
-
-    private String getProjectId(WebSocketSession session) {
-        // URI에서 projectId 추출
-        String path = session.getUri().getPath();
-        return path.substring(path.lastIndexOf('/') + 1);
     }
 
     private void broadcastMessageToProject(String projectFileId, BinaryMessage message) {
@@ -64,8 +57,14 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         // 연결된 세션을 projectId에 따라 관리
         String projectId = getProjectId(session);
+        if(projectId==null) {
+            try {
+                session.close(new CloseStatus(400, "Invalid projectId"));
+            } catch (IOException e) {
+                throw new BaseException(ResponseStatus.UNAUTHORIZED.getMessage());
+            }
+        }
         String projectFileId = getProjectFileId(session);
-        log.debug("YJS 연결 성공 projectFileId = {}", projectFileId);
         String token = extractQueryParam(session.getUri(), "tempToken");
         //토큰 검증 성공
         if (token != null) {
@@ -79,10 +78,11 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
 
                 // memberId와 projectId를 세션 속성으로 추가
                 session.getAttributes().put("memberId", memberId);
-                session.getAttributes().put("projectId", projectId);
+                session.getAttributes().put("projectId", Long.parseLong(projectId));
+                session.getAttributes().put("projectFileId",projectFileId);
 
                 //프로젝트에 참가하지 않을 경우 세션 종료
-                if(!projectService.isParticipated(memberId,Long.parseLong(projectFileId))) {
+                if(!projectService.isParticipated(memberId,Long.parseLong(projectId))) {
 //                    log.error("YJS 프로젝트 참여하지 않음 memberId = {} projectId={}",memberId,projectId);
                     try {
                         session.close(new CloseStatus(4000, "not Participated"));
@@ -122,14 +122,14 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         // 세션 종료 처리
-        String projectId = getProjectId(session);
-        String projectFileId = getProjectFileId(session);
+        Long projectId = (Long) session.getAttributes().get("projectId");
+        String projectFileId = (String) session.getAttributes().get("projectFileId");
         Long memberId = (Long) session.getAttributes().get("memberId");
         log.debug("세션 종료 memberId = {}, projectId = {}",memberId,projectFileId);
         // 세션 종료 및 구독 해제 처리
         if (memberId != null) {
             try {
-                subscriptionManager.unsubscribe(memberId, Long.parseLong(projectId)); // 구독 해제
+                subscriptionManager.unsubscribe(memberId, projectId); // 구독 해제
             } catch (BaseException ignored) {
 
             }
@@ -155,6 +155,18 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
             }
         }
         return null; // 파라미터가 없는 경우
+    }
+
+    private String getProjectId(WebSocketSession session) {
+        String path = session.getUri().getPath();
+        String[] segments = path.split("/");
+        // 예제 URI: /YJS/123/456?tempToken=어쩌구
+        // segments 배열은 ["", "YJS", "123", "456.txt"]
+        if (segments.length > 2) { // 세그먼트 길이 검증
+            return segments[2]; // 실제 projectId 위치에 따라 인덱스 조정 필요
+        }
+        // 적절한 projectId를 찾을 수 없는 경우
+        return null;
     }
 
     private String getProjectFileId(WebSocketSession session) {
