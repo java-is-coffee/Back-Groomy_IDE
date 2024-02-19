@@ -35,7 +35,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
         // projectId 추출
         String projectId = getProjectId(session);
-        log.info("YJS 메시지 전달 projectId = {}",projectId);
+//        log.info("YJS 메시지 전달 projectId = {}",projectId);
 
         // 같은 프로젝트의 모든 세션에 메시지 브로드캐스트
         broadcastMessageToProject(projectId, message);
@@ -54,7 +54,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
                 try {
                     session.sendMessage(message);
                 } catch (Exception e) {
-                    log.error("YJS 메세지 전송 실패");
+                    log.error("YJS 메세지 전송 실패 session = {}, projectId = {}",session, projectId);
                 }
             }
         }
