@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.member;
 
+import javaiscoffee.groomy.ide.oauth.SocialType;
 import lombok.Data;
 
 /**
@@ -13,5 +14,5 @@ public class MemberInformationResponseDto {
     private String nickname;
     private Long helpNumber;
     private MemberRole role;
-    private String socialType;
+    private SocialType socialType;
 }

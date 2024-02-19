@@ -73,7 +73,7 @@ public class CustomOAuthUserService implements OAuth2UserService<OAuth2UserReque
         log.info("extractAttributes = {}",extractAttributes.getNameAttributeKey());
 
         Member oauthMember = getUser(extractAttributes, socialType);
-        log.info("extractAttributes.getNameAttributeKey() = {}",extractAttributes.getNameAttributeKey());
+        log.info("oauthMember = {}",oauthMember);
 
         // DefaultOAuth2User를 구현한 CustomOAuth2User 객체를 생성해서 반환
         CustomOAuthUser customOAuthUser = new CustomOAuthUser(

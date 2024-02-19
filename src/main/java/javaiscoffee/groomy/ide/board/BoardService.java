@@ -34,6 +34,8 @@ public class BoardService {
         Board newBoard = new Board();
         BeanUtils.copyProperties(requestBoardDto.getData(), newBoard);
         Member creatorMember = memberRepository.findByMemberId(memberId).get();
+        log.info("멤버 id = {}, 게시글 정보 = {}",memberId,requestBoardDto);
+        log.info("생성하려는 게시글 = {}",newBoard);
 
         if(Objects.equals(memberId, requestBoardDto.getData().getMemberId()) && creatorMember != null) {
             newBoard.setMember(creatorMember);
