@@ -12,6 +12,7 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class Board {
     private String content;
 
     @NotNull @Column(name = "created_time")
-    private LocalDateTime createdTime;
+    private ZonedDateTime createdTime;
 
     @NotNull @Setter @Column(name = "view_number")
     private int viewNumber;
@@ -72,7 +73,7 @@ public class Board {
 
     @PrePersist
     public void PrePersist() {
-        this.createdTime = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        this.createdTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
         this.viewNumber = 0;
         this.commentNumber = 0;
         this.scrapNumber = 0;
