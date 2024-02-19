@@ -82,7 +82,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
 
                 //프로젝트에 참가하지 않을 경우 세션 종료
                 if(!projectService.isParticipated(memberId,Long.parseLong(projectId))) {
-                    log.error("YJS 프로젝트 참여하지 않음 memberId = {} projectId={}",memberId,projectId);
+//                    log.error("YJS 프로젝트 참여하지 않음 memberId = {} projectId={}",memberId,projectId);
                     try {
                         session.close(new CloseStatus(4000, "not Participated"));
                         return;

@@ -13,4 +13,5 @@ public class MemberInformationResponseDto {
     private String nickname;
     private Long helpNumber;
     private MemberRole role;
+    private String socialType;
 }
