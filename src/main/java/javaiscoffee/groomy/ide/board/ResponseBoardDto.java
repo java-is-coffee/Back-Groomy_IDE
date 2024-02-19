@@ -16,7 +16,7 @@ public class ResponseBoardDto {
     private String nickname;
     private String title;
     private String content;
-    private ZonedDateTime createdTime;
+    private LocalDateTime createdTime;
     private int viewNumber;
     private int commentNumber;
     private int scrapNumber;

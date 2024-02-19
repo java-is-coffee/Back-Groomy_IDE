@@ -46,7 +46,7 @@ public class Board {
     private String content;
 
     @NotNull @Column(name = "created_time")
-    private ZonedDateTime createdTime;
+    private LocalDateTime createdTime;
 
     @NotNull @Setter @Column(name = "view_number")
     private int viewNumber;
@@ -73,7 +73,7 @@ public class Board {
 
     @PrePersist
     public void PrePersist() {
-        this.createdTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        this.createdTime = LocalDateTime.now();
         this.viewNumber = 0;
         this.commentNumber = 0;
         this.scrapNumber = 0;
