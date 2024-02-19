@@ -34,11 +34,11 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
         // projectId 추출
-        String projectId = getProjectId(session);
+        String projectFileId = getProjectFileId(session);
 //        log.info("YJS 메시지 전달 projectId = {}",projectId);
 
         // 같은 프로젝트의 모든 세션에 메시지 브로드캐스트
-        broadcastMessageToProject(projectId, message);
+        broadcastMessageToProject(projectFileId, message);
     }
 
     private String getProjectId(WebSocketSession session) {
@@ -47,14 +47,14 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         return path.substring(path.lastIndexOf('/') + 1);
     }
 
-    private void broadcastMessageToProject(String projectId, BinaryMessage message) {
-        Map<String, WebSocketSession> sessions = projectSessionsMap.getOrDefault(projectId, new ConcurrentHashMap<>());
+    private void broadcastMessageToProject(String projectFileId, BinaryMessage message) {
+        Map<String, WebSocketSession> sessions = projectSessionsMap.getOrDefault(projectFileId, new ConcurrentHashMap<>());
         for (WebSocketSession session : sessions.values()) {
             if (session.isOpen()) {
                 try {
                     session.sendMessage(message);
                 } catch (Exception e) {
-                    log.error("YJS 메세지 전송 실패 session = {}, projectId = {}",session, projectId);
+                    log.error("YJS 메세지 전송 실패 projectFileId = {}, session = {}", projectFileId, session);
                 }
             }
         }
@@ -63,8 +63,8 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         // 연결된 세션을 projectId에 따라 관리
-        String projectId = getProjectId(session);
-        log.debug("YJS 연결 성공 = {}",projectId);
+        String projectFileId = getProjectFileId(session);
+        log.debug("YJS 연결 성공 projectFileId = {}", projectFileId);
         String token = extractQueryParam(session.getUri(), "tempToken");
         //토큰 검증 성공
         if (token != null) {
@@ -81,7 +81,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
                 session.getAttributes().put("projectId", projectId);
 
                 //프로젝트에 참가하지 않을 경우 세션 종료
-                if(!projectService.isParticipated(memberId,Long.parseLong(projectId))) {
+                if(!projectService.isParticipated(memberId,Long.parseLong(projectFileId))) {
 //                    log.error("YJS 프로젝트 참여하지 않음 memberId = {} projectId={}",memberId,projectId);
                     try {
                         session.close(new CloseStatus(4000, "not Participated"));
@@ -94,7 +94,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
                 //프로젝트에 참가해서 세션 연결을 생성
                 else {
                     try {
-                        subscriptionManager.subscribe(memberId, Long.parseLong(projectId)); // 구독 추가
+                        subscriptionManager.subscribe(memberId, Long.parseLong(projectFileId)); // 구독 추가
                     }
                     //구독 실패했을 경우
                     catch (BaseException e) {
@@ -103,8 +103,8 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
                         return;
                     }
                 }
-                log.debug("프로젝트에 참가함  memberId = {} projectId={}",memberId,projectId);
-                projectSessionsMap.computeIfAbsent(projectId, k -> new ConcurrentHashMap<>()).put(session.getId(), session);
+                log.debug("프로젝트에 참가함  memberId = {} projectFileId={}",memberId,projectFileId);
+                projectSessionsMap.computeIfAbsent(projectFileId, k -> new ConcurrentHashMap<>()).put(session.getId(), session);
             }
         }
         //토큰 검증 실패
@@ -121,22 +121,22 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         // 세션 종료 처리
-        String projectId = getProjectId(session);
+        String projectFileId = getProjectFileId(session);
         Long memberId = (Long) session.getAttributes().get("memberId");
-        log.debug("세션 종료 memberId = {}, projectId = {}",memberId,projectId);
+        log.debug("세션 종료 memberId = {}, projectId = {}",memberId,projectFileId);
         // 세션 종료 및 구독 해제 처리
         if (memberId != null) {
             try {
-                subscriptionManager.unsubscribe(memberId, Long.parseLong(projectId)); // 구독 해제
+                subscriptionManager.unsubscribe(memberId, Long.parseLong(projectFileId)); // 구독 해제
             } catch (BaseException ignored) {
 
             }
         }
-        Map<String, WebSocketSession> sessions = projectSessionsMap.get(projectId);
+        Map<String, WebSocketSession> sessions = projectSessionsMap.get(projectFileId);
         if (sessions != null) {
             sessions.remove(session.getId());
             if (sessions.isEmpty()) {
-                projectSessionsMap.remove(projectId);
+                projectSessionsMap.remove(projectFileId);
             }
         }
     }
@@ -153,6 +153,14 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
             }
         }
         return null; // 파라미터가 없는 경우
+    }
+
+    private String getProjectFileId(WebSocketSession session) {
+        String path = session.getUri().getPath();
+        String[] segments = path.split("/");
+        String projectId = segments[segments.length - 2];
+        String fileId = segments[segments.length - 1];
+        return projectId + ";" + fileId; // projectId와 fileId 결합
     }
 }
 

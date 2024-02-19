@@ -22,7 +22,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer, WebSoc
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(yjsWebSocketHandler, "/YJS/{projectId}")
+        registry.addHandler(yjsWebSocketHandler, "/YJS/{projectId}/{fileId}")
                 .setAllowedOrigins("*"); // CORS 정책에 따라 수정
     }
 

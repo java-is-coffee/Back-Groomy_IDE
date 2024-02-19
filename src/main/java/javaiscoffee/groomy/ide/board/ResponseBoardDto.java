@@ -22,4 +22,5 @@ public class ResponseBoardDto {
     private int helpNumber;
     private BoardStatus boardStatus;
     private boolean isCompleted;
+    private Boolean memberScraped;
 }

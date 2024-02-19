@@ -34,8 +34,9 @@ public class BoardController {
     }
 
     @GetMapping("/content/{boardId}")
-    public ResponseEntity<?> getBoardById(@PathVariable Long boardId) {
-        ResponseBoardDto foundBoard = boardService.getBoardById(boardId);
+    public ResponseEntity<?> getBoardById(@PathVariable Long boardId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        ResponseBoardDto foundBoard = boardService.getBoardById(boardId, memberId);
 
         if(foundBoard == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
@@ -69,8 +70,9 @@ public class BoardController {
 
 
     @GetMapping("/{paging}")
-    public ResponseEntity<?> getBoardByPaging(@PathVariable int paging) {
-        List<ResponseBoardDto> boardByPaging = boardService.getBoardByPaging(paging);
+    public ResponseEntity<?> getBoardByPaging(@PathVariable int paging, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        List<ResponseBoardDto> boardByPaging = boardService.getBoardByPaging(paging, memberId);
 
         if(boardByPaging == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
@@ -139,8 +141,9 @@ public class BoardController {
     }
 
     @GetMapping("/search/{paging}")
-    public ResponseEntity<?> searchBoardByPaging(@PathVariable int paging, @RequestParam(name="search_keyword") String searchKeyword, @RequestParam(name="completed", required = false) Boolean completed) {
-        List<ResponseBoardDto> searchBoard = boardService.searchBoardByPaging(paging, searchKeyword, completed);
+    public ResponseEntity<?> searchBoardByPaging(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable int paging, @RequestParam(name="search_keyword") String searchKeyword, @RequestParam(name="completed", required = false) Boolean completed) {
+        Long memberId = userDetails.getMemberId();
+        List<ResponseBoardDto> searchBoard = boardService.searchBoardByPaging(memberId, paging, searchKeyword, completed);
 
         if(searchBoard == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new Status(ResponseStatus.NOT_FOUND));
