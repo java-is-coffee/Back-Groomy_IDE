@@ -9,6 +9,7 @@ import software.amazon.awssdk.services.ecs.EcsClient;
 import software.amazon.awssdk.services.ecs.model.*;
 
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -29,7 +30,7 @@ public class EcsService {
     public RunTaskResponse createAndRunTask(Long memberId, Long projectId, ProjectLanguage language) {
         log.info("태스크 실행 시작");
         Volume volume = createVolume(memberId, projectId);
-        ContainerDefinition containerDefinition = createContainerDefinition(selectContainerImageByLanguage(language));
+        ContainerDefinition containerDefinition = createContainerDefinition(selectContainerImageByLanguage(language), createLogConfiguration());
         RegisterTaskDefinitionResponse registerTaskDefinitionResponse = registerTaskDefinition(volume, containerDefinition);
         RunTaskResponse runTaskResponse = runTask(registerTaskDefinitionResponse.taskDefinition().taskDefinitionArn());
         log.info("태스크 실행 결과 = {}",runTaskResponse.toString());
@@ -60,7 +61,6 @@ public class EcsService {
         return ecsClient.runTask(RunTaskRequest.builder()
                 .cluster(CLUSTER_NAME)
                 .taskDefinition(taskDefinitionArn)
-                .count(1)
                 .networkConfiguration(networkConfiguration)
                 .enableExecuteCommand(true)
                 .launchType(LaunchType.EC2)
@@ -70,7 +70,7 @@ public class EcsService {
     //네트워크 설정
     private static NetworkConfiguration networkConfiguration = NetworkConfiguration.builder()
             .awsvpcConfiguration(AwsVpcConfiguration.builder()
-                    .subnets("subnet-022f342f048f88510", "subnet-00b9d0644567f65d9", "subnet-0de27c63915bd0893", "subnet-0f340ba196d215df6" ) // 여기에 실제 서브넷 ID 입력
+                    .subnets("subnet-0de27c63915bd0893") // 여기에 실제 서브넷 ID 입력
                     .securityGroups("sg-0271e53debeb22431") // 여기에 실제 보안 그룹 ID 입력
                     .assignPublicIp(AssignPublicIp.DISABLED) // 필요에 따라 변경
                     .build())
@@ -87,18 +87,31 @@ public class EcsService {
                 .build();
     }
 
+    private LogConfiguration createLogConfiguration() {
+        return LogConfiguration.builder()
+                .logDriver(LogDriver.AWSLOGS)
+                .options(Map.of(
+                        "awslogs-group", "/ecs/", // CloudWatch 로그 그룹 지정
+                        "awslogs-region", "ap-northeast-2", // 로그 그룹이 위치한 리전
+                        "awslogs-stream-prefix", "ecs" // 로그 스트림 접두사
+                ))
+                .build();
+    }
+
     /**
      * 컨테이너 정의 생성
      */
-    private ContainerDefinition createContainerDefinition(String containerImage) {
+    private ContainerDefinition createContainerDefinition(String containerImage, LogConfiguration logConfiguration) {
         return ContainerDefinition.builder()
                 .name("project-container")
                 .image(containerImage)
                 .cpu(256)
                 .memory(300)
+                .memoryReservation(300)
                 .command("/bin/sh", "-c", "while true; do echo hello; sleep infinity; done")
                 .essential(true)
-                .mountPoints(MountPoint.builder().sourceVolume("project-volume").containerPath("/project").readOnly(false).build())
+                .logConfiguration(logConfiguration)
+                .mountPoints(MountPoint.builder().sourceVolume("project-volume").containerPath("/home/projects").readOnly(false).build())
 //                .linuxParameters(linux -> linux.initProcessEnabled(true))
                 .build();
     }
