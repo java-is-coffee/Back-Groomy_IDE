@@ -128,6 +128,7 @@ public class BoardController {
 
     @GetMapping("/scrap/list/{paging}")
     public ResponseEntity<?> getGoodListByPaging(@PathVariable int paging, @AuthenticationPrincipal CustomUserDetails userDetails) {
+        log.info("스크랩 게시물 목록 조회 요청");
         Long memberId = userDetails.getMemberId();
         List<ResponseBoardDto> goodByPaging = boardService.getHelpBoardByPaging(paging, memberId);
         if(goodByPaging == null) {

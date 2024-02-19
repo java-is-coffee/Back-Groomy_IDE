@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.Table;
 import jakarta.persistence.TypedQuery;
+import javaiscoffee.groomy.ide.oauth.SocialType;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -66,4 +67,10 @@ public class JpaMemberRepository implements MemberRepository {
                 .setParameter("invitedMemberIds", invitedMemberIds)
                 .getResultList();
     }
+
+    public Member saveOAuthUser(Member member) {
+        em.persist(member);
+        return member;
+    }
+
 }
