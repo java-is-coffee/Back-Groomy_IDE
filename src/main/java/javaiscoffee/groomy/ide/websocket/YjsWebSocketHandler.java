@@ -33,7 +33,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
 
     @Override
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
-        // projectId 추출
+        // projectFileId 추출
         String projectFileId = getProjectFileId(session);
 //        log.info("YJS 메시지 전달 projectId = {}",projectId);
 
