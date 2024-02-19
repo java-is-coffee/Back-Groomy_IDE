@@ -41,24 +41,34 @@ public class JwtTokenProvider {
         long now = (new Date().getTime());
 
         Object principal = authentication.getPrincipal();
-        Long memberId;
-        if (principal instanceof CustomUserDetails) {
-            memberId = ((CustomUserDetails)principal).getMemberId();
-        } else if (principal instanceof CustomOAuthUser) {
-            memberId = ((CustomOAuthUser)principal).getMemberId();
-        } else {
-            throw new IllegalArgumentException("Unsupported principal type");
-        }
 
         //Access Token 생성 30분
         Date accessTokenExpiresIn = new Date(now + (1000*60*30));
-        String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim("auth", authorities)
-                .claim("memberId", memberId) // memberId 정보 추가
-                .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+        Long memberId;
+        String accessToken;
+
+        if (principal instanceof CustomUserDetails) {
+            memberId = ((CustomUserDetails)principal).getMemberId();
+            accessToken = Jwts.builder()
+                    .setSubject(authentication.getName())
+                    .claim("auth", authorities)
+                    .claim("memberId", memberId) // memberId 정보 추가
+                    .setExpiration(accessTokenExpiresIn)
+                    .signWith(key, SignatureAlgorithm.HS256)
+                    .compact();
+        } else if (principal instanceof CustomOAuthUser) {
+            memberId = ((CustomOAuthUser)principal).getMemberId();
+            String email = ((CustomOAuthUser)principal).getEmail();
+            accessToken = Jwts.builder()
+                    .setSubject(email)
+                    .claim("auth", authorities)
+                    .claim("memberId", memberId) // memberId 정보 추가
+                    .setExpiration(accessTokenExpiresIn)
+                    .signWith(key, SignatureAlgorithm.HS256)
+                    .compact();
+        } else {
+            throw new IllegalArgumentException("Unsupported principal type");
+        }
 
         //Refresh Token 생성 1주일
         String refreshToken = Jwts.builder()
