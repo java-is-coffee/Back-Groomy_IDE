@@ -38,7 +38,7 @@ public class BoardService {
         if(Objects.equals(memberId, requestBoardDto.getData().getMemberId()) && creatorMember != null) {
             newBoard.setMember(creatorMember);
             Board savedBoard = boardRepository.saveBoard(newBoard);
-            ResponseBoardDto responseBoardDto = responseBoardDto(savedBoard);
+            ResponseBoardDto responseBoardDto = responseBoardDto(savedBoard, memberId);
 
             return responseBoardDto;
         } else {
@@ -53,13 +53,13 @@ public class BoardService {
      * @return
      */
     @Transactional
-    public ResponseBoardDto getBoardById(Long boardId) {
+    public ResponseBoardDto getBoardById(Long boardId, Long memberId) {
         Board findBoard = boardRepository.findByBoardId(boardId).get();
 
         if(findBoard != null && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
             findBoard.setViewNumber(findBoard.getViewNumber() + 1);
             Board updatedFindBoard = boardRepository.updateBoard(findBoard);
-            ResponseBoardDto responseBoardDto = responseBoardDto(updatedFindBoard);
+            ResponseBoardDto responseBoardDto = responseBoardDto(updatedFindBoard, memberId);
 
             return responseBoardDto;
         } else {
@@ -82,7 +82,7 @@ public class BoardService {
                 findBoard != null && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
             BeanUtils.copyProperties(requestBoardDto.getData(), findBoard);
             Board editedBoard = boardRepository.updateBoard(findBoard);
-            ResponseBoardDto responseBoardDto = responseBoardDto(editedBoard);
+            ResponseBoardDto responseBoardDto = responseBoardDto(editedBoard,memberId);
 
             return responseBoardDto;
         } else {
@@ -122,7 +122,7 @@ public class BoardService {
      * @param paging
      * @return
      */
-    public List<ResponseBoardDto> getBoardByPaging(int paging) {
+    public List<ResponseBoardDto> getBoardByPaging(int paging, Long memberId) {
         List<Board> boardList = boardRepository.findBoardByPaging(paging, 10, BoardStatus.ACTIVE);
 
         if(!boardList.isEmpty()) {
@@ -132,7 +132,7 @@ public class BoardService {
                 Board boardListIndex = boardList.get(i);
 
                 if(boardListIndex.getBoardStatus() == BoardStatus.ACTIVE) {
-                    ResponseBoardDto responseBoardDto = responseBoardDto(boardListIndex);
+                    ResponseBoardDto responseBoardDto = responseBoardDto(boardListIndex, memberId);
                     responseBoardDtoList.add(responseBoardDto);
                 }
             }
@@ -168,7 +168,7 @@ public class BoardService {
                 Board boardListIndex = boardList.get(i);
 
                 if(member.equals(boardListIndex.getMember()) && boardListIndex.getBoardStatus() == BoardStatus.ACTIVE) {
-                    ResponseBoardDto responseBoardDto = responseBoardDto(boardListIndex);
+                    ResponseBoardDto responseBoardDto = responseBoardDto(boardListIndex, memberId);
                     responseBoardDtoList.add(responseBoardDto);
                 }
             }
@@ -213,7 +213,7 @@ public class BoardService {
                 findBoard = boardRepository.updateBoard(findBoard);
                 log.info("게시글 추천 취소");
             }
-            return responseBoardDto(findBoard);
+            return responseBoardDto(findBoard, memberId);
         } else {
             log.info("게시글 추천 예외 발생 = {}",memberId);
             return null;
@@ -250,7 +250,7 @@ public class BoardService {
                 board.setScrapNumber(board.getScrapNumber() - 1);
                 board = boardRepository.updateBoard(board);
             }
-            return responseBoardDto(board);
+            return responseBoardDto(board, memberId);
         }
         else {
             return null;
@@ -272,7 +272,7 @@ public class BoardService {
 
             for(Scrap scrap : helpBoardList) {
                 Board board = scrap.getBoardId();
-                ResponseBoardDto responseBoardDto = responseBoardDto(board);
+                ResponseBoardDto responseBoardDto = responseBoardDto(board, memberId);
                 responseBoardDtoList.add(responseBoardDto);
             }
             return responseBoardDtoList;
@@ -286,7 +286,7 @@ public class BoardService {
      * @param paging
      * @return
      */
-    public List<ResponseBoardDto> searchBoardByPaging(int paging, String searchKeyword, Boolean completed) {
+    public List<ResponseBoardDto> searchBoardByPaging(Long memberId, int paging, String searchKeyword, Boolean completed) {
         List<Board> boardList = boardRepository.searchBoardByPaging(paging, searchKeyword, completed, 10, BoardStatus.ACTIVE);
 
         if(!boardList.isEmpty()) {
@@ -296,7 +296,7 @@ public class BoardService {
                 Board boardListIndex = boardList.get(i);
 
                 if(boardListIndex.getBoardStatus() == BoardStatus.ACTIVE) {
-                    ResponseBoardDto responseBoardDto = responseBoardDto(boardListIndex);
+                    ResponseBoardDto responseBoardDto = responseBoardDto(boardListIndex, memberId);
                     responseBoardDtoList.add(responseBoardDto);
                 }
             }
@@ -325,7 +325,7 @@ public class BoardService {
         return boardRepository.findBoardByMemberId(member);
     }
 
-    public ResponseBoardDto responseBoardDto(Board board) {
+    public ResponseBoardDto responseBoardDto(Board board,Long memberId) {
         return new ResponseBoardDto(
                 board.getBoardId(),
                 board.getMember().getMemberId(),
@@ -338,7 +338,8 @@ public class BoardService {
                 board.getScrapNumber(),
                 board.getHelpNumber(),
                 board.getBoardStatus(),
-                board.isCompleted()
+                board.isCompleted(),
+                boardRepository.findBoardScrap(new ScrapId(memberId, board.getBoardId())) != null
         );
     }
 }

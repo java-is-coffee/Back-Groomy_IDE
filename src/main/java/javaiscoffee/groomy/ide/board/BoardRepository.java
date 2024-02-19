@@ -17,6 +17,7 @@ public interface BoardRepository {
     public List<Board> searchBoardByPaging(int paging, String searchKeyword, Boolean completed, int pagingNumber, BoardStatus status);
     public long countBoardsByStatus(BoardStatus status);
     public long countBoardsBySearch(BoardStatus status, String searchKeyword, Boolean completed);
+    public Scrap findBoardScrap(ScrapId id);
 }
 
 
