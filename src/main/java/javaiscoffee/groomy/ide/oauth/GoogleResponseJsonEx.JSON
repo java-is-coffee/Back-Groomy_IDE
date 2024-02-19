@@ -1,10 +1,10 @@
-{
-   "sub": "식별값",
-   "name": "name",   // 사용자의 전체 이름
-   "given_name": "given_name", // 사용자의 이름
-   "family_name": "family_name", // 사용자의 성
-   "picture": "https//lh3.googleusercontent.com/~~",
-   "email": "email"
-}
+//{
+//   "sub": "식별값",
+//   "name": "name",   // 사용자의 전체 이름
+//   "given_name": "given_name", // 사용자의 이름
+//   "family_name": "family_name", // 사용자의 성
+//   "picture": "https//lh3.googleusercontent.com/~~",
+//   "email": "email"
+//}
 // 구글 OAuth의 사용자 정보는 중첩 구조가 아니며 단일 객체(단일 JSON)로 전달된다.
 // => 단일 클래스로 해당 데이터를 매핑하거나 처리하는 것이 일반적이다.
