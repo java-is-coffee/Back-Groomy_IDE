@@ -48,7 +48,7 @@ public class Comment {
     @NotNull @Setter
     private int helpNumber;
     @NotNull
-    private ZonedDateTime createdTime;
+    private LocalDateTime createdTime;
     @NotNull @Setter @Enumerated(EnumType.STRING)
     private CommentStatus commentStatus;
 
@@ -56,7 +56,7 @@ public class Comment {
     // 저장 전 실행되는 메서드
     @PrePersist
     public void PrePersist() {
-        this.createdTime = ZonedDateTime.now(ZoneId.of("Asia/Seoul"));
+        this.createdTime = LocalDateTime.now();
         this.commentStatus = CommentStatus.ACTIVE;
         this.helpNumber = 0;
     }

@@ -15,6 +15,6 @@ public class ResponseCommentDto {
     private Long originComment;
     private Long commentId;
     private int helpNumber;
-    private ZonedDateTime createdTime;
+    private LocalDateTime createdTime;
     private CommentStatus commentStatus;
 }
