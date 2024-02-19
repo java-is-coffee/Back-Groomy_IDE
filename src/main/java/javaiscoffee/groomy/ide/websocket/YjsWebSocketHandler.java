@@ -46,9 +46,13 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
             if (session.isOpen()) {
                 try {
                     session.sendMessage(message);
+                    log.info("YJS 메시지 전달 projectId = {} => 세션 ID = {}",projectFileId, session);
                 } catch (Exception e) {
                     log.error("YJS 메세지 전송 실패 projectFileId = {}, session = {}", projectFileId, session);
                 }
+            }
+            else {
+                log.error("YJS 세션 끊겨서 못 보냄 세션 ID = {}",session);
             }
         }
     }
