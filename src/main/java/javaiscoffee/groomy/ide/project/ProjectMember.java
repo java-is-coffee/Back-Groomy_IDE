@@ -1,8 +1,11 @@
 package javaiscoffee.groomy.ide.project;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import javaiscoffee.groomy.ide.member.Member;
 import lombok.*;
+
+import java.time.LocalDate;
 
 /**
  * 프로젝트 참가 인원을 저장하는 테이블
@@ -27,10 +30,20 @@ public class ProjectMember {
     @Column(nullable = false)
     private Boolean participated;   //초대된 상태(false)인지 프로젝트에 참가했는지(true) 저장
 
+    private LocalDate createdDate;
+
+    public ProjectMember(ProjectMemberId id, Project project, Member member, Boolean participated) {
+        this.id = id;
+        this.project = project;
+        this.member = member;
+        this.participated = participated;
+    }
+
     public ProjectMember(Member projectCreator, Project createdProject, boolean participated) {
         this.member = projectCreator;
         this.project = createdProject;
         this.participated = participated;
+        this.createdDate = LocalDate.now();
     }
 }
 

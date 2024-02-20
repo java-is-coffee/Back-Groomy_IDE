@@ -35,7 +35,6 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
     protected void handleBinaryMessage(WebSocketSession session, BinaryMessage message) throws Exception {
         // projectFileId 추출
         String projectFileId = (String) session.getAttributes().get("projectFileId");
-//        log.info("YJS 메시지 전달 projectId = {}",projectId);
         // 같은 프로젝트의 모든 세션에 메시지 브로드캐스트
         broadcastMessageToProject(projectFileId, message);
     }
@@ -46,13 +45,13 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
             if (session.isOpen()) {
                 try {
                     session.sendMessage(message);
-                    log.info("YJS 메시지 전달 projectId = {} => 세션 ID = {}",projectFileId, session);
+//                    log.info("YJS 메시지 전달 projectId = {} => 세션 ID = {}",projectFileId, session);
                 } catch (Exception e) {
-                    log.error("YJS 메세지 전송 실패 projectFileId = {}, session = {}", projectFileId, session);
+//                    log.error("YJS 메세지 전송 실패 projectFileId = {}, session = {}", projectFileId, session);
                 }
             }
             else {
-                log.error("YJS 세션 끊겨서 못 보냄 세션 ID = {}",session);
+//                log.error("YJS 세션 끊겨서 못 보냄 세션 ID = {}",session);
             }
         }
     }
@@ -74,7 +73,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         if (token != null) {
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
-            log.info("YJS 연결 성공 successful for session: {}", session.getId());
+            log.debug("YJS 연결 성공 successful for session: {}", session.getId());
             if (auth.getPrincipal() instanceof CustomUserDetails) {
                 log.debug("YJS 정보 객체 찾음");
                 CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();

@@ -15,6 +15,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -67,6 +68,12 @@ public class Member implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     private SocialType socialType;  // GOOGLE
+    //생성일, 수정일
+    @Column(name = "created_date")
+    private LocalDate createdDate;
+    @Setter
+    @Column(name = "updated_date")
+    private LocalDate updatedDate;
 
     @PrePersist
     public void PrePersist() {
@@ -75,6 +82,8 @@ public class Member implements UserDetails {
         this.board = new ArrayList<>();
         this.comment = new ArrayList<>();
         this.projectChat = new ArrayList<>();
+        this.createdDate = LocalDate.now();
+        this.updatedDate = LocalDate.now();
     }
 
 

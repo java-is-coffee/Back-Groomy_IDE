@@ -209,12 +209,12 @@ public class FileService {
     public void deleteFileOrFolder(Long memberId, FileRenameRequestDto requestDto) {
         FileRenameRequestDto.RequestData data = requestDto.getData();
         //권한이 있는지 검사
-        isParticipated(data.getProjectId(), memberId);
-        Path fullPath = getFileFullPath(memberId, data.getProjectId(), data.getOldPath());
+        Project project = projectRepository.getProjectByProjectId(data.getProjectId());
+        Path fullPath = getFileFullPath(project.getMemberId().getMemberId(), data.getProjectId(), data.getOldPath());
         try {
-            Files.deleteIfExists(fullPath);
+            deleteDirectoryRecursively(fullPath);
         } catch (IOException e) {
-            log.error("파일 삭제 예외 발생 = {}",data.getOldPath());
+            log.error("파일 삭제 예외 발생 = {}",fullPath);
             throw new BaseException(ResponseStatus.DELETE_FAILED.getMessage());
         }
     }
@@ -225,20 +225,42 @@ public class FileService {
      */
     public FileWebsocketResponseDto websocketDelete(FileWebsocketRequestDto.RequestData data, Long memberId, Long projectId) {
         FileWebsocketResponseDto responseDto = new FileWebsocketResponseDto();
-        Path fullPath = getFileFullPath(memberId, projectId, data.getPath());
+        isParticipated(projectId, memberId);
+        Project project = projectRepository.getProjectByProjectId(projectId);
+        Path fullPath = getFileFullPath(project.getMemberId().getMemberId(), projectId, data.getPath());
         try {
             //응답 DTO 내용 초기화
             BasicFileAttributes attrs = Files.readAttributes(fullPath, BasicFileAttributes.class);
             responseDto.setItemId(attrs.creationTime().toString() + data.getName());
             BeanUtils.copyProperties(data,responseDto);
             //파일 및 폴더 삭제
-            Files.deleteIfExists(fullPath);
+            deleteDirectoryRecursively(fullPath);
 
             return responseDto;
         } catch (IOException e) {
             log.error("파일 삭제 예외 발생 = {}",fullPath);
             throw new BaseException(ResponseStatus.DELETE_FAILED.getMessage());
         }
+    }
+
+    /**
+     * 파일 삭제 메서드에서 사용되는 재귀삭제 메서드
+     * 만약 폴더를 삭제하려는 경우 재귀적으로 돌면서 폴더 내용물을 전부 삭제한다.
+     */
+    private static void deleteDirectoryRecursively(Path dir) throws IOException {
+        Files.walkFileTree(dir, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+                Files.delete(file); // 파일 삭제
+                return FileVisitResult.CONTINUE;
+            }
+
+            @Override
+            public FileVisitResult postVisitDirectory(Path dir, IOException exc) throws IOException {
+                Files.delete(dir); // 디렉토리 삭제
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 
     /**

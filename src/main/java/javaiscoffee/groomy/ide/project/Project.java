@@ -37,6 +37,8 @@ public class Project {
     @Column(nullable = false)
     private LocalDate createdDate;  //생성날짜는 Setter 필요 없음
     @Setter
+    private LocalDate updatedDate;  //수정일은 Setter 필요함
+    @Setter
     @Column(nullable = false)
     private Boolean deleted;    //현재 댓글이 지워졌는지 남아있는지 표시
     @Lob @Setter
@@ -53,6 +55,7 @@ public class Project {
     @PrePersist
     public void PrePersist() {
         this.createdDate = LocalDate.now();
+        this.updatedDate = LocalDate.now();
         this.deleted = false;
     }
 }
