@@ -1,13 +1,11 @@
 package javaiscoffee.groomy.ide.login;
 
+import javaiscoffee.groomy.ide.validator.EmailCheck;
 import lombok.Data;
 
 @Data
 public class ResetPasswordRequestDto {
-    private EmailCheckDto.Data data;
-    @lombok.Data
-    public static class Data {
-        private String name;
-        private String email;
-    }
+    private String name;
+    @EmailCheck
+    private String email;
 }

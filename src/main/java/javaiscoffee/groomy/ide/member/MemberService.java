@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -63,6 +64,8 @@ public class MemberService {
         //멤버 정보 수정
         member.setName(memberInformationDto.getData().getName());
         member.setNickname(memberInformationDto.getData().getNickname());
+        //수정일 업데이트
+        member.setUpdatedDate(LocalDate.now());
 
         //새로운 멤버로 response 생성
         MemberInformationResponseDto updatedDto = new MemberInformationResponseDto();

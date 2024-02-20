@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.login;
 
+import jakarta.validation.Valid;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
@@ -7,11 +8,18 @@ import javaiscoffee.groomy.ide.response.Status;
 import javaiscoffee.groomy.ide.security.JwtTokenProvider;
 import javaiscoffee.groomy.ide.security.RefreshTokenDto;
 import javaiscoffee.groomy.ide.security.TokenDto;
+import javaiscoffee.groomy.ide.wrapper.RequestWrapperDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+
+/**
+ * 나중에 정식 배포하기 전에
+ * 컨트롤러 파라미터에 검증해야하는 DTO에 @Valid 추가하기
+ */
 
 @Slf4j
 @RestController
@@ -23,7 +31,8 @@ public class LoginController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<?> login(@RequestBody RequestWrapperDto<LoginDto> requestDto) {
+        LoginDto loginDto = requestDto.getData();
         log.info("로그인 요청");
         TokenDto tokenDto = loginService.login(loginDto);
         //로그인 실패했을 경우 실패 Response 반환
@@ -34,7 +43,8 @@ public class LoginController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody RegisterDto registerDto) {
+    public ResponseEntity<?> register(@RequestBody RequestWrapperDto<RegisterDto> requestDto) {
+        RegisterDto registerDto = requestDto.getData();
         log.info("registerDto = {}", registerDto);
         Member registerdMember = loginService.register(registerDto);
         if(registerdMember==null) {
@@ -75,9 +85,10 @@ public class LoginController {
     }
 
     @PostMapping("/register/email-check")
-    public ResponseEntity<Boolean> emailCheck(@RequestBody EmailCheckDto emailCheckDto) {
-        log.info("이메일 체크 진입 = {}", emailCheckDto.getData().getEmail());
-        return ResponseEntity.ok(memberRepository.existsByEmail(emailCheckDto.getData().getEmail()));
+    public ResponseEntity<Boolean> emailCheck( @RequestBody RequestWrapperDto<EmailCheckDto> requestDto) {
+        EmailCheckDto emailCheckDto = requestDto.getData();
+        log.info("이메일 체크 진입 = {}", emailCheckDto.getEmail());
+        return ResponseEntity.ok(memberRepository.existsByEmail(emailCheckDto.getEmail()));
     }
 
 }

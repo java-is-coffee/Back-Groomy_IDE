@@ -1,8 +1,11 @@
 package javaiscoffee.groomy.ide.board;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import javaiscoffee.groomy.ide.member.Member;
 import lombok.*;
+
+import java.time.LocalDateTime;
 
 /**
  * 게시글 추천 저장하는 테이블
@@ -27,4 +30,17 @@ public class HelpBoard {
     @ManyToOne
     @JoinColumn(name = "board_id")
     private Board boardId;
+
+    private LocalDateTime createdTime;
+
+    public HelpBoard(HelpBoardId id, Member member, Board boardId) {
+        this.id = id;
+        this.member = member;
+        this.boardId = boardId;
+    }
+
+    @PrePersist
+    public void PrePersist() {
+        this.createdTime = LocalDateTime.now();
+    }
 }

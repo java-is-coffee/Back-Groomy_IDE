@@ -42,7 +42,7 @@ public class LoginService {
         log.info("로그인 검사 시작 loginDto={}",loginDto);
         // 1. Login ID/PW 를 기반으로 Authentication 객체 생성
         // 이때 authentication 는 인증 여부를 확인하는 authenticated 값이 false
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDto.getData().getEmail(), loginDto.getData().getPassword());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());
         log.info("authenticationToken = {}",authenticationToken);
         // 2. 실제 검증 (사용자 비밀번호 체크)이 이루어지는 부분
         // authenticate 매서드가 실행될 때 CustomUserDetailsService 에서 만든 loadUserByUsername 메서드가 실행
@@ -61,14 +61,13 @@ public class LoginService {
 
     @Transactional
     public Member register(RegisterDto registerDto) {
-        RegisterDto.Data data = registerDto.getData();
         //이미 중복된 이메일이 존재
-        if(memberRepository.findByEmail(data.getEmail()).isPresent()) {
+        if(memberRepository.findByEmail(registerDto.getEmail()).isPresent()) {
             log.info("중복 회원가입 실패 처리");
             return null;
         }
         //중복이 없으면 회원가입 진행
-        Member newMember = new Member(data.getEmail(), data.getPassword(), data.getName(), data.getNickname(),0L, MemberRole.USER);
+        Member newMember = new Member(registerDto.getEmail(), registerDto.getPassword(), registerDto.getName(), registerDto.getNickname(),0L, MemberRole.USER);
         newMember.hashPassword(bCryptPasswordEncoder);
         log.info("save하려는 멤버 = {}",newMember);
         memberRepository.save(newMember);

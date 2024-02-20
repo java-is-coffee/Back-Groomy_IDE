@@ -1,9 +1,12 @@
 package javaiscoffee.groomy.ide.comment;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import javaiscoffee.groomy.ide.member.Member;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 
 /**
@@ -28,5 +31,15 @@ public class CommentHelpNumber {
     @JoinColumn(name = "comment_id")
     private Comment commentId;
 
+    private LocalDateTime createdTime;
 
+    public CommentHelpNumber(CommentHelpNumberId id, Member member, Comment commentId) {
+        this.id = id;
+        this.member = member;
+        this.commentId = commentId;
+    }
+    @PrePersist
+    public void PrePersist() {
+        this.createdTime = LocalDateTime.now();
+    }
 }

@@ -11,6 +11,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,6 +110,7 @@ public class CommentService {
         // 댓글 수정
         oldComment.setNickname(requestDto.getData().getNickname());
         oldComment.setContent(requestDto.getData().getContent());
+        oldComment.setUpdatedTime(LocalDateTime.now());
         log.info("수정된 댓글 = {}",oldComment);
         Comment updatedComment = commentRepository.updateComment(oldComment);
         return toResponseCommentDto(updatedComment);

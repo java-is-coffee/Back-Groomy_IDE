@@ -49,6 +49,9 @@ public class Comment {
     private int helpNumber;
     @NotNull
     private LocalDateTime createdTime;
+    @Setter
+    @Column(name = "updated_time")
+    private LocalDateTime updatedTime;
     @NotNull @Setter @Enumerated(EnumType.STRING)
     private CommentStatus commentStatus;
 
@@ -57,6 +60,7 @@ public class Comment {
     @PrePersist
     public void PrePersist() {
         this.createdTime = LocalDateTime.now();
+        this.updatedTime = LocalDateTime.now();
         this.commentStatus = CommentStatus.ACTIVE;
         this.helpNumber = 0;
     }

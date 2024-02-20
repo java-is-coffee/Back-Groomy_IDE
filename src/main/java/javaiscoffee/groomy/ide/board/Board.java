@@ -47,6 +47,9 @@ public class Board {
 
     @NotNull @Column(name = "created_time")
     private LocalDateTime createdTime;
+    @Setter
+    @Column(name = "updated_time")
+    private LocalDateTime updatedTime;
 
     @NotNull @Setter @Column(name = "view_number")
     private int viewNumber;
@@ -74,6 +77,7 @@ public class Board {
     @PrePersist
     public void PrePersist() {
         this.createdTime = LocalDateTime.now();
+        this.updatedTime = LocalDateTime.now();
         this.viewNumber = 0;
         this.commentNumber = 0;
         this.scrapNumber = 0;

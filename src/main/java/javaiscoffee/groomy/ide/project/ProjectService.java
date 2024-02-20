@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -186,6 +187,7 @@ public class ProjectService {
         ProjectCreateRequestDto.Data data = requestDto.getData();
         oldProject.setProjectName(data.getProjectName());
         oldProject.setDescription(data.getDescription());
+        oldProject.setUpdatedDate(LocalDate.now());
 
         //응답 객체 매핑
         Project updatedProject = projectRepository.update(oldProject);

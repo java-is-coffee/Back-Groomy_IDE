@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -83,6 +84,7 @@ public class BoardService {
         if(member != null && member.equals(findBoard.getMember()) &&
                 findBoard != null && findBoard.getBoardStatus() == BoardStatus.ACTIVE) {
             BeanUtils.copyProperties(requestBoardDto.getData(), findBoard);
+            findBoard.setUpdatedTime(LocalDateTime.now());
             Board editedBoard = boardRepository.updateBoard(findBoard);
             ResponseBoardDto responseBoardDto = responseBoardDto(editedBoard,memberId);
 

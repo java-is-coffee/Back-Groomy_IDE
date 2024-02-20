@@ -1,14 +1,13 @@
 package javaiscoffee.groomy.ide.login;
 
+import javaiscoffee.groomy.ide.validator.EmailCheck;
+import javaiscoffee.groomy.ide.validator.PasswordCheck;
 import lombok.Data;
 
 @Data
 public class LoginDto {
-
-    private Data data;
-    @lombok.Data
-    public static class Data {
-        private String email;
-        private String password;
-    }
+    @EmailCheck
+    private String email;
+    @PasswordCheck
+    private String password;
 }

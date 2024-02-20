@@ -3,6 +3,11 @@ package javaiscoffee.groomy.ide.validator;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
+/**
+ * 이메일 검사
+ * 이메일 형태에 맞아야 함
+ */
+
 public class EmailValidator implements ConstraintValidator<EmailCheck, String> {
 
     @Override
