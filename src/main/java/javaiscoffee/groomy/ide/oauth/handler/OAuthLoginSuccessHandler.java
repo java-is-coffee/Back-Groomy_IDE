@@ -20,6 +20,9 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtTokenProvider jwtTokenProvider;
+//    private String accessHeader;
+//
+//    private String refreshHeader;
 
     // 사용자가 인증되면서 요청이 성공하면 호출되는 메서드
     @Override
@@ -33,6 +36,13 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
 
             TokenDto tokenDto = jwtTokenProvider.generateToken(authentication);
             log.info("OAuth tokenDto = {}", tokenDto);
+
+            // Bearer + 토큰
+            String accessToken = tokenDto.getAccessToken();
+            String refreshToken = tokenDto.getRefreshToken();
+//            response.sendRedirect("http://groomy-ide-front.s3-website.ap-northeast-2.amazonaws.com?access_token="+accessToken+"&refresh_token="+refreshToken);
+
+            response.sendRedirect("http://localhost:3000?access_token="+accessToken+"&refresh_token="+refreshToken);
 
             //HTTP 응답에 토큰 정보를 포함하여 클라이언트에게 전송
             response.setContentType("application/json");  //HTTP 응답의 콘텐츠 유형을 JSON 형식으로 설정한다는 것을 의미
