@@ -112,6 +112,14 @@ public class JpaProjectRepository {
         return true;
     }
 
+    public boolean isInvited(ProjectMemberId projectMemberId) {
+        ProjectMember projectMember = em.find(ProjectMember.class, projectMemberId);
+        if(projectMember == null || projectMember.getParticipated() == true) {
+            return false;
+        }
+        return true;
+    }
+
     /**
      * 프로젝트 정보 수정
      */

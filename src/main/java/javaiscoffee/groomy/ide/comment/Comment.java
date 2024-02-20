@@ -41,7 +41,7 @@ public class Comment {
 
 
     @NotNull @Setter
-    @Column(columnDefinition = "TINYTEXT")
+    @Column(length = 10000)
     private String content;
     @NotNull @Setter
     private String nickname;

@@ -43,6 +43,10 @@ public class ProjectMember {
         this.member = projectCreator;
         this.project = createdProject;
         this.participated = participated;
+    }
+
+    @PrePersist
+    public void PrePersist() {
         this.createdDate = LocalDate.now();
     }
 }
