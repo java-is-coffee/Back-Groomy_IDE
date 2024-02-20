@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 //응답을 위한 커스텀 리스폰스 클래스
+// 사용 안하기로 결정
 @Getter @Setter
 public class MyResponse<T> {
     private Status status;

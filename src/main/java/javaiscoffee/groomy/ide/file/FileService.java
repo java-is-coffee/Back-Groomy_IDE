@@ -179,7 +179,7 @@ public class FileService {
 
     /**
      * 파일 내용 조회
-     * oldPath = 전체 상대 경로 => /home/projects/1/9/ 제외
+     * oldPath = 상대 경로 => /home/projects/1/9/ 기준으로 상대 경로
      * newName = null 사용 안함
      * 반환 데이터 = 전체 코드를 String으로 반환
      */
