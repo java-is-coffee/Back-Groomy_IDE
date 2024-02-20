@@ -28,6 +28,8 @@ jobs:
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> $GITHUB_ENV
           echo "OAUTH_CLIENT_ID=${{ secrets.OAUTH_CLIENT_ID }}" >> $GITHUB_ENV
           echo "OAUTH_CLIENT_SECRET=${{ secrets.OAUTH_CLIENT_SECRET }}" >> $GITHUB_ENV
+          echo "MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}" >> $GITHUB_ENV
+          echo "MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}" >> $GITHUB_ENV
           # 테스트 할 때 필요한 다른 필요한 환경 변수를 여기에 추가하면 됩니다.
 
       - name: Grant execute permission for gradlew
@@ -37,6 +39,10 @@ jobs:
         run: ./gradlew test
         env:
           JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+          OAUTH_CLIENT_ID: ${{ secrets.OAUTH_CLIENT_ID }}
+          OAUTH_CLIENT_SECRET: ${{ secrets.OAUTH_CLIENT_SECRET }}
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v1
@@ -55,6 +61,8 @@ jobs:
             JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}
             OAUTH_CLIENT_ID=${{ secrets.OAUTH_CLIENT_ID }}
             OAUTH_CLIENT_SECRET=${{ secrets.OAUTH_CLIENT_SECRET }}
+            MAIL_USERNAME=${{ secrets.MAIL_USERNAME }}
+            MAIL_PASSWORD=${{ secrets.MAIL_PASSWORD }}
 
       - name: Login to EC2 instance
         uses: appleboy/ssh-action@master
@@ -80,6 +88,8 @@ jobs:
             echo 'export JWT_SECRET_KEY="${{ secrets.JWT_SECRET_KEY }}"' | sudo tee -a /etc/environment
             echo 'export OAUTH_CLIENT_ID="${{ secrets.OAUTH_CLIENT_ID }}"' | sudo tee -a /etc/environment
             echo 'export OAUTH_CLIENT_SECRET="${{ secrets.OAUTH_CLIENT_SECRET }}"' | sudo tee -a /etc/environment
+            echo 'export MAIL_USERNAME="${{ secrets.MAIL_USERNAME }}"' | sudo tee -a /etc/environment
+            echo 'export MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}"' | sudo tee -a /etc/environment
             # 적용을 위해 SSH 세션 내에서 환경 변수 로드
             source /etc/environment
 
