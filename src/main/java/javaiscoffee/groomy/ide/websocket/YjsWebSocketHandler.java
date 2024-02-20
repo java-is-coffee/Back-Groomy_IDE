@@ -70,7 +70,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         String projectFileId = getProjectFileId(session);
         String token = extractQueryParam(session.getUri(), "tempToken");
         //토큰 검증 성공
-        if (token != null) {
+        if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
             log.debug("YJS 연결 성공 successful for session: {}", session.getId());

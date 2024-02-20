@@ -90,8 +90,8 @@ public class ProjectService {
         createProjectFolder(memberId, createdProject.getProjectId());
 
         //프로젝트 태스크 정의 생성 및 태스크 실행
-        RunTaskResponse taskResponse = ecsService.createAndRunTask(memberId, createdProject.getProjectId(), createdProject.getLanguage());
-        log.info("태스크 생성 및 실행 = {}",taskResponse);
+//        RunTaskResponse taskResponse = ecsService.createAndRunTask(memberId, createdProject.getProjectId(), createdProject.getLanguage());
+//        log.info("태스크 생성 및 실행 = {}",taskResponse);
 
         return responseDto;
     }
