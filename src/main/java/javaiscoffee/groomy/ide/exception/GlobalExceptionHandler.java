@@ -1,4 +1,4 @@
-package javaiscoffee.groomy.ide.spring;
+package javaiscoffee.groomy.ide.exception;
 
 import jakarta.validation.ConstraintViolationException;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
