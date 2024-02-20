@@ -1,6 +1,7 @@
 package javaiscoffee.groomy.ide.security;
 
 
+import javaiscoffee.groomy.ide.exception.CustomAuthenticationEntryPoint;
 import javaiscoffee.groomy.ide.oauth.handler.OAuthLoginFailureHandler;
 import javaiscoffee.groomy.ide.oauth.handler.OAuthLoginSuccessHandler;
 import javaiscoffee.groomy.ide.oauth.service.CustomOAuthUserService;
@@ -63,8 +64,12 @@ public class SecurityConfig {
                 .failureHandler(oAuthLoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
                 .userInfoEndpoint().userService(customOAuthUserService) // customUserService 설정
                 .and();
+                // /error 엔트리 포인트 진입했을 경우 에러 응답을 반환하도록 커스텀 핸들러 추가
                 //JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행하겠다는 설정
-                http.addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+                http.exceptionHandling()
+                        .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
+                        .and()
+                        .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

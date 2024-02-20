@@ -63,7 +63,7 @@ public class JpaMemberRepository implements MemberRepository {
 
     public List<Member> findInvitedMembers (List<Long> invitedMemberIds) {
         return em.createQuery(
-                        "SELECT m FROM Member m JOIN FETCH m.projectMembers pm JOIN FETCH pm.project WHERE m.memberId IN :invitedMemberIds", Member.class)
+                        "SELECT m FROM Member m WHERE m.memberId IN :invitedMemberIds", Member.class)
                 .setParameter("invitedMemberIds", invitedMemberIds)
                 .getResultList();
     }

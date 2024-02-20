@@ -104,7 +104,7 @@ public class ProjectService {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
         Project project = projectRepository.getProjectByProjectId(projectId);
         //프로젝트가 없거나 생성자랑 초대를 요청한 멤버가 다르면 예외 처리
-        if (project == null || !Objects.equals(project.getMemberId().getMemberId(), member.getMemberId())) {  throw new BaseException(ResponseStatus.NOT_FOUND.getMessage()); }
+        if (project == null || !Objects.equals(project.getMemberId().getMemberId(), member.getMemberId())) { throw new BaseException(ResponseStatus.NOT_FOUND.getMessage()); }
 
         ProjectCreateRequestDto.Data requestDtoData = requestDto.getData();
         //비어 있으면 그냥 무효
@@ -123,8 +123,10 @@ public class ProjectService {
      */
     private void inviteProject(Project createdProject, Member projectCreator, boolean participated) {
         ProjectMemberId projectMemberId = new ProjectMemberId(createdProject.getProjectId(), projectCreator.getMemberId());
-        //이미 참여하고 있는 멤버면 초대하지 않음
-        if (projectRepository.isParticipated(projectMemberId)) return;
+        //이미 참여하고 있거나 초대된 멤버면 초대하지 않음
+        if (projectRepository.isParticipated(projectMemberId) || projectRepository.isInvited(projectMemberId)) {
+            return;
+        }
         //참여 안하고 있으면 생성
         ProjectMember projectMember = new ProjectMember(projectMemberId, createdProject, projectCreator,participated);
         projectRepository.participateProject(projectMember);
