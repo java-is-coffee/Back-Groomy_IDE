@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.spring;
 
+import jakarta.validation.ConstraintViolationException;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.response.Status;
 import javaiscoffee.groomy.ide.security.BaseException;
@@ -73,6 +74,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BaseException.class)
     public ResponseEntity<Object> handleMemberNotFoundException(BaseException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<Object> handleConstraintViolationException(ConstraintViolationException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage());
     }
 
