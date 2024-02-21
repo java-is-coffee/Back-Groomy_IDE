@@ -3,8 +3,6 @@ package javaiscoffee.groomy.ide.login.emailAuthentication;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Table;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -33,7 +31,9 @@ public class JpaEmailCertificationRepository implements EmailCertificationReposi
     // 삭제
     @Override
     public void removeEmailVerificationNumber(String email) {
-        em.remove(email);
+        // 이메일 객체를 찾아서 주입해서 삭제
+        EmailVerification emailVerification = findEmailVerificationByEmail(email);
+        em.remove(emailVerification);
     }
 
     // 인증 완료로 변경
