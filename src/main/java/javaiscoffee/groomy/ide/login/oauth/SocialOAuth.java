@@ -1,4 +1,4 @@
-package javaiscoffee.groomy.ide.oauth;
+package javaiscoffee.groomy.ide.login.oauth;
 
 public interface SocialOAuth {
     /**

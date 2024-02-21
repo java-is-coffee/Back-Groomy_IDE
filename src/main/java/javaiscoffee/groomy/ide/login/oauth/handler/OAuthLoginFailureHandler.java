@@ -1,4 +1,4 @@
-package javaiscoffee.groomy.ide.oauth.handler;
+package javaiscoffee.groomy.ide.login.oauth.handler;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;

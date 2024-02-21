@@ -1,6 +1,6 @@
 package javaiscoffee.groomy.ide.member;
 
-import javaiscoffee.groomy.ide.oauth.SocialType;
+import javaiscoffee.groomy.ide.login.oauth.SocialType;
 import lombok.Data;
 
 /**

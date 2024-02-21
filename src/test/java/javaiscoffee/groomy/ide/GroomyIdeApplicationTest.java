@@ -11,7 +11,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @TestPropertySource(properties = {
         "jwt.secret=3123758a0d7ef02a46cba8bdd3f898dec8afc9f8470341af789d59f3695093be",
         "spring.security.oauth2.client.registration.google.client-id=test-client-id",
-        "spring.security.oauth2.client.registration.google.client-secret=test-client-secret"
+        "spring.security.oauth2.client.registration.google.client-secret=test-client-secret",
+        "spring.mail.username=EMAIL_USERNAME",
+        "spring.mail.password=EMAIL_PASSWORD"
 })
 public class GroomyIdeApplicationTest {
 

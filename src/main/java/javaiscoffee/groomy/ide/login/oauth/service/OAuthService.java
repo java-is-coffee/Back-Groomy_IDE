@@ -1,9 +1,9 @@
-package javaiscoffee.groomy.ide.oauth.service;
+package javaiscoffee.groomy.ide.login.oauth.service;
 
 import jakarta.servlet.http.HttpServletResponse;
-import javaiscoffee.groomy.ide.oauth.GoogleOAuth;
-import javaiscoffee.groomy.ide.oauth.SocialOAuth;
-import javaiscoffee.groomy.ide.oauth.SocialType;
+import javaiscoffee.groomy.ide.login.oauth.GoogleOAuth;
+import javaiscoffee.groomy.ide.login.oauth.SocialOAuth;
+import javaiscoffee.groomy.ide.login.oauth.SocialType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

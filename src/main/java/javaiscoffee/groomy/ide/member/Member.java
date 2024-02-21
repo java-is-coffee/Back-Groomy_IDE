@@ -7,7 +7,7 @@ import javaiscoffee.groomy.ide.comment.Comment;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import javaiscoffee.groomy.ide.chat.ProjectChat;
-import javaiscoffee.groomy.ide.oauth.SocialType;
+import javaiscoffee.groomy.ide.login.oauth.SocialType;
 import javaiscoffee.groomy.ide.project.ProjectMember;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;

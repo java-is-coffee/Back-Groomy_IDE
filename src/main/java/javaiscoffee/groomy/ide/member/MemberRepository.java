@@ -1,7 +1,5 @@
 package javaiscoffee.groomy.ide.member;
 
-import javaiscoffee.groomy.ide.oauth.SocialType;
-
 import java.util.Optional;
 
 public interface MemberRepository {
