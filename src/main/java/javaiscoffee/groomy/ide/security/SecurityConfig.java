@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .authorizeRequests()
                 //로그인과 회원가입은 모든 요청을 허가
                 .requestMatchers(new AntPathRequestMatcher("/api/member/login")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/member/login/reset-password")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/member/register")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/member/register/email-check")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/member/refresh")).permitAll()

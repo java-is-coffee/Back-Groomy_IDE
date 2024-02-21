@@ -91,4 +91,11 @@ public class LoginController {
         return ResponseEntity.ok(memberRepository.existsByEmail(emailCheckDto.getEmail()));
     }
 
+    @PostMapping("/login/reset-password")
+    public ResponseEntity<Boolean> resetPassword(@RequestBody RequestWrapperDto<ResetPasswordRequestDto> wrapperDto) {
+        ResetPasswordRequestDto requestDto = wrapperDto.getData();
+        loginService.resetPassword(requestDto);
+        return ResponseEntity.ok(null);
+    }
+
 }
