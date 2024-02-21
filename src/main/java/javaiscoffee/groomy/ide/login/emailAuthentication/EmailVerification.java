@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "email_certification")
-@NoArgsConstructor
 public class EmailVerification {
 
     @Id
