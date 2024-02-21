@@ -1,4 +1,4 @@
-package javaiscoffee.groomy.ide.oauth.userInfo;
+package javaiscoffee.groomy.ide.login.oauth.userInfo;
 
 import java.util.Map;
 

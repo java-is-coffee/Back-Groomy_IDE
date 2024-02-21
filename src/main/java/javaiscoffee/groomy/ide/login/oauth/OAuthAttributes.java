@@ -1,9 +1,9 @@
-package javaiscoffee.groomy.ide.oauth;
+package javaiscoffee.groomy.ide.login.oauth;
 
+import javaiscoffee.groomy.ide.login.oauth.userInfo.GoogleUserInfo;
+import javaiscoffee.groomy.ide.login.oauth.userInfo.OAuthUserInfo;
 import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.member.MemberRole;
-import javaiscoffee.groomy.ide.oauth.userInfo.GoogleUserInfo;
-import javaiscoffee.groomy.ide.oauth.userInfo.OAuthUserInfo;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;

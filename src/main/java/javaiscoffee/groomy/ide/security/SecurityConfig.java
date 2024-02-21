@@ -2,19 +2,15 @@ package javaiscoffee.groomy.ide.security;
 
 
 import javaiscoffee.groomy.ide.exception.CustomAuthenticationEntryPoint;
-import javaiscoffee.groomy.ide.oauth.handler.OAuthLoginFailureHandler;
-import javaiscoffee.groomy.ide.oauth.handler.OAuthLoginSuccessHandler;
-import javaiscoffee.groomy.ide.oauth.service.CustomOAuthUserService;
-import javaiscoffee.groomy.ide.security.JwtAuthenticationFilter;
-import javaiscoffee.groomy.ide.security.JwtTokenProvider;
+import javaiscoffee.groomy.ide.login.oauth.handler.OAuthLoginFailureHandler;
+import javaiscoffee.groomy.ide.login.oauth.handler.OAuthLoginSuccessHandler;
+import javaiscoffee.groomy.ide.login.oauth.service.CustomOAuthUserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -56,6 +52,7 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/ws/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/YJS/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/auth")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/api/email/**")).permitAll()
                 //그 외 나머지 요청은 전부 인증이 필요
                 .anyRequest().authenticated()
                 .and()

@@ -14,5 +14,6 @@ public class RegisterDto {
     private String name;
     @NicknameCheck
     private String nickname;
+    private String certificationNumber;
 }
 

@@ -1,7 +1,7 @@
-package javaiscoffee.groomy.ide.oauth.controller;
+package javaiscoffee.groomy.ide.login.oauth.controller;
 
-import javaiscoffee.groomy.ide.oauth.SocialType;
-import javaiscoffee.groomy.ide.oauth.service.OAuthService;
+import javaiscoffee.groomy.ide.login.oauth.SocialType;
+import javaiscoffee.groomy.ide.login.oauth.service.OAuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;

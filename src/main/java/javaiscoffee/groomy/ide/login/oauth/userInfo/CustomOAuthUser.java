@@ -1,4 +1,4 @@
-package javaiscoffee.groomy.ide.oauth.userInfo;
+package javaiscoffee.groomy.ide.login.oauth.userInfo;
 
 import javaiscoffee.groomy.ide.member.MemberRole;
 import lombok.Getter;

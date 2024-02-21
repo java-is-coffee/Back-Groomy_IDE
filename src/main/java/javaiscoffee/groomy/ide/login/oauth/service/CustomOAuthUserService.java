@@ -1,11 +1,11 @@
-package javaiscoffee.groomy.ide.oauth.service;
+package javaiscoffee.groomy.ide.login.oauth.service;
 
 import javaiscoffee.groomy.ide.login.LoginService;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
-import javaiscoffee.groomy.ide.oauth.userInfo.CustomOAuthUser;
-import javaiscoffee.groomy.ide.oauth.OAuthAttributes;
-import javaiscoffee.groomy.ide.oauth.SocialType;
+import javaiscoffee.groomy.ide.login.oauth.userInfo.CustomOAuthUser;
+import javaiscoffee.groomy.ide.login.oauth.OAuthAttributes;
+import javaiscoffee.groomy.ide.login.oauth.SocialType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;

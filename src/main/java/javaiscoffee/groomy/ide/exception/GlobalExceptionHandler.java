@@ -83,4 +83,6 @@ public class GlobalExceptionHandler {
     }
 
     // 다른 예외 유형을 처리하는 핸들러를 추가할 수 있습니다.
+
+
 }

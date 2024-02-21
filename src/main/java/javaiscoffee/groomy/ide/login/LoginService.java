@@ -1,18 +1,15 @@
 package javaiscoffee.groomy.ide.login;
 
+import javaiscoffee.groomy.ide.login.emailAuthentication.JpaEmailCertificationRepository;
+import javaiscoffee.groomy.ide.login.emailAuthentication.MailVerifyService;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
-import javaiscoffee.groomy.ide.member.MemberRepository;
 import javaiscoffee.groomy.ide.member.MemberRole;
-import javaiscoffee.groomy.ide.oauth.OAuthAttributes;
-import javaiscoffee.groomy.ide.oauth.SocialType;
-import javaiscoffee.groomy.ide.response.MyResponse;
-import javaiscoffee.groomy.ide.response.ResponseStatus;
-import javaiscoffee.groomy.ide.response.Status;
+import javaiscoffee.groomy.ide.login.oauth.OAuthAttributes;
+import javaiscoffee.groomy.ide.login.oauth.SocialType;
 import javaiscoffee.groomy.ide.security.JwtTokenProvider;
 import javaiscoffee.groomy.ide.security.TokenDto;
 import io.jsonwebtoken.JwtException;
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -32,6 +29,8 @@ public class LoginService {
     private final PasswordEncoder bCryptPasswordEncoder;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final MailVerifyService mailVerifyService;
+    private final JpaEmailCertificationRepository emailCertificationRepository;
 
     /**
      * 1. 로그인 요청으로 들어온 memberId, password를 기반으로 Authentication 객체를 생성한다.
@@ -66,6 +65,14 @@ public class LoginService {
             log.info("중복 회원가입 실패 처리");
             return null;
         }
+
+        //이메일 인증한 적이 없으면 예외처리
+        if (!mailVerifyService.isVerified(registerDto.getEmail(), registerDto.getCertificationNumber())) {
+            log.info("이메일 인증을 하지 않았습니다.");
+            return null;
+        }
+
+
         //중복이 없으면 회원가입 진행
         Member newMember = new Member(registerDto.getEmail(), registerDto.getPassword(), registerDto.getName(), registerDto.getNickname(),0L, MemberRole.USER);
         newMember.hashPassword(bCryptPasswordEncoder);
@@ -74,6 +81,7 @@ public class LoginService {
         Optional<Member> savedMember = memberRepository.findByEmail(newMember.getEmail());
         if(savedMember.isPresent()) {
             log.info("회원가입 성공 = {}",savedMember.get());
+            emailCertificationRepository.removeEmailVerificationNumber(registerDto.getEmail());
             return savedMember.get();
         }
         return null;

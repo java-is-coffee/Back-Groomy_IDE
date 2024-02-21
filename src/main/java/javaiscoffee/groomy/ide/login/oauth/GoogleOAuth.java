@@ -1,4 +1,4 @@
-package javaiscoffee.groomy.ide.oauth;
+package javaiscoffee.groomy.ide.login.oauth;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
