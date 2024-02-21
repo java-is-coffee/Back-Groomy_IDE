@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.redis.core.RedisHash;
 
 import java.time.LocalDateTime;
 
@@ -18,12 +17,14 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "email_certification")
+@NoArgsConstructor
 public class EmailVerification {
 
     @Id
     private String email;
     private String certificationNumber;
     private Boolean certificated;
+    private LocalDateTime createdTime;
     private LocalDateTime expirationTime;
 
     public EmailVerification(String email, String certificationNumber, LocalDateTime time) {
@@ -31,6 +32,7 @@ public class EmailVerification {
         this.certificationNumber = certificationNumber;
         this.certificated = false;
         this.expirationTime = time;
+        this.createdTime = LocalDateTime.now();
     }
 
 }

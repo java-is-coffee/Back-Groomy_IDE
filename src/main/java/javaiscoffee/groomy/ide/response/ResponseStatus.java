@@ -11,6 +11,7 @@ public enum ResponseStatus {
     DELETE_FAILED("삭제에 실패했습니다."),
     READ_FAILED("조회에 실패했습니다."),
     FORBIDDEN("권한이 없습니다."),
+    BAD_REQUEST("잘못된 요청입니다."),
     NOT_FOUND("찾을 수 없음"),
     ERROR("서버 오류");
     // 기타 상태 코드
