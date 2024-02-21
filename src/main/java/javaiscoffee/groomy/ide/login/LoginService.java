@@ -37,6 +37,7 @@ public class LoginService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     private final MailVerifyService mailVerifyService;
+    private final JpaEmailCertificationRepository emailCertificationRepository;
 
     /**
      * 1. 로그인 요청으로 들어온 memberId, password를 기반으로 Authentication 객체를 생성한다.
@@ -88,6 +89,7 @@ public class LoginService {
         Optional<Member> savedMember = memberRepository.findByEmail(newMember.getEmail());
         if(savedMember.isPresent()) {
             log.info("회원가입 성공 = {}",savedMember.get());
+            emailCertificationRepository.removeEmailVerificationNumber(data.getEmail());
             return savedMember.get();
         }
         return null;

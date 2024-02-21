@@ -21,13 +21,10 @@ public class MailVerifyService {
         if (!isVerify(email, certificationNumber)) {
             return false;
         }
-        // 회원가입 시 필요한 인증 생성
-        emailCertificationRepository.saveCertification(email + certificationNumber,"true",1800);
         // 해당 이메일 인증 여부 true로 설정
         emailCertificationRepository.certificateSuccess(email);
         return true;
     }
-
 
     /**
      * 사용자의 이메일, 입력한 인증 번호 가져와서 처리
@@ -47,6 +44,14 @@ public class MailVerifyService {
         EmailVerification keyExists = emailCertificationRepository.findCertificationNumberByEmail(email);
         // 인증 번호가 null이 아니고, 입력된 인증 번호와 저장된 인증 번호가 같으면 true 반환
         return keyExists != null && keyExists.equals(keyExists);
+    }
+
+    /**
+     * 유효 시간 지났으면 true 반환
+     * 유효 시간 안지나서 가입 가능하면 false 반환
+     */
+    private boolean isTimeout(LocalDateTime expirationTime) {
+        return expirationTime.isBefore(LocalDateTime.now());
     }
 
 }

@@ -1,5 +1,6 @@
 package javaiscoffee.groomy.ide.login.emailAuthentication;
 
+import jakarta.mail.IllegalWriteException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
@@ -30,11 +31,10 @@ public class MailSendService {
         String certificationNumber = generator.createCertificationNumber();
 
         // String.format() 사용해서 인증 번호를 포함한 본문 생성.
-        String content = String.format("%s의 인증 메일입니다. 인증 번호 : %s 를 입력칸에 입력해주세요. 유효 시간은 5분입니다.",email,certificationNumber);
-//        String content = String.format("이메일 인증 메일입니다.   %s/api/mail/users/verify?certificationNumber=%s&email=%s    링크 유효 시간은 5분입니다.", DOMAIN_NAME, certificationNumber, email);
+        String content = String.format("%s의 이메일 인증을 위해 발송된 메일입니다.%n인증 번호는   :   %s%n인증 번호를 입력칸에 입력해주세요.%n 인증 번호는 10분 후 만료됩니다.",email,certificationNumber);
 
-        // 나중에 인증을 확인할 수 있도록 생성된 인증 번호 저장. => email + certificationNumber 이렇게 저장할까?
-        emailCertificationRepository.saveCertification(email, certificationNumber, 300);
+        // 유효 시간 10분
+        emailCertificationRepository.saveCertification(email, certificationNumber, 10);
 
         log.info("이메일 = {}, 인증번호 = {}",email,certificationNumber);
 
@@ -53,5 +53,6 @@ public class MailSendService {
         helper.setSubject(MAIL_TITLE_CERTIFICATION);    // 이메일 제목
         helper.setText(content);    // 이메일 본문 내용
         mailSender.send(mimeMailMessage);   // JavaMailSender를 이용하여 이메일 전송. send()를 호출해서 이메일을 전송하면, 이메일이 수신자에게 발송된다.
+        //예외처리 추가
     }
 }

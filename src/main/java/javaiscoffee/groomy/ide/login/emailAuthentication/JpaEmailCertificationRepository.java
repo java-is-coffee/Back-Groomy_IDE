@@ -24,16 +24,19 @@ public class JpaEmailCertificationRepository implements EmailCertificationReposi
         em.persist(emailVerification);
     }
 
+    // 이메일
     @Override
     public EmailVerification findCertificationNumberByEmail(String email) {
         return em.find(EmailVerification.class,email);
     }
 
+    // 삭제
     @Override
     public void removeCertificationNumber(String email) {
         em.remove(email);
     }
 
+    // 인증 완료로 변경
     @Override
     public void certificateSuccess(String email) {
         EmailVerification verification = em.find(EmailVerification.class,email);
