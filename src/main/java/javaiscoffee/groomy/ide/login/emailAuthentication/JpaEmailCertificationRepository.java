@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 @Table(name = "email_certification")
@@ -42,4 +43,20 @@ public class JpaEmailCertificationRepository implements EmailCertificationReposi
         verification.setCertificated(true);
     }
 
+    @Override
+    public List<EmailVerification> findByTimeBeforeAndCertificatedIsFalse() {
+        return em.createQuery("SELECT e FROM EmailVerification e WHERE e.expirationTime < :time", EmailVerification.class)
+                .setParameter("time", LocalDateTime.now())
+                .getResultList();
+    }
+
+    @Override
+    public void deleteAll(List<EmailVerification> verifications) {
+        for (EmailVerification verification : verifications) {
+            EmailVerification attachedEntity = em.find(EmailVerification.class, verification.getEmail());
+            if (attachedEntity != null) {
+                em.remove(attachedEntity);
+            }
+        }
+    }
 }

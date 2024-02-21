@@ -1,12 +1,16 @@
 package javaiscoffee.groomy.ide.login.emailAuthentication;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 // 사용자가 링크 클릭 후 이메일에 대한 인증 코드가 일치하는지 확인하는 클래스
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -58,6 +62,19 @@ public class MailVerifyService {
      */
     private boolean isTimeout(LocalDateTime expirationTime) {
         return expirationTime.isBefore(LocalDateTime.now());
+    }
+
+    /**
+     * 30분마다 유효 시간이 지난 이메일 인증 기록들을 삭제하는 스케줄 메서드
+     */
+    @Transactional
+    @Scheduled(fixedRate = 1800000)
+    public void deleteExpiredEmailVerifications() {
+        // 10분 이상 지난 미인증 이메일 데이터를 찾음
+        List<EmailVerification> expiredVerifications = emailCertificationRepository.findByTimeBeforeAndCertificatedIsFalse();
+        log.info("이메일 인증 정리 = {}건 정리",expiredVerifications.size());
+        // 찾은 데이터를 삭제
+        emailCertificationRepository.deleteAll(expiredVerifications);
     }
 
 }

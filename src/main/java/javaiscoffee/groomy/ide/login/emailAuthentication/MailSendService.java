@@ -11,6 +11,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -24,7 +25,7 @@ public class MailSendService {
     private final JpaEmailCertificationRepository emailCertificationRepository;
     private static final String MAIL_TITLE_CERTIFICATION = "Groomy IDE 인증 번호 발송 메일입니다."; //수정할것
 
-
+    @Transactional
     public void sendEmailForCertification(String email) throws NoSuchAlgorithmException, MessagingException {
 
         // 이메일 인증을 위한 랜덤 인증 번호 생성 => 사용자가 인증 링크를 클릭할 때 확인하는 용도로 사용
