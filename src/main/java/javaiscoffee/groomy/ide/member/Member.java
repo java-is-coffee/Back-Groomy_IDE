@@ -2,6 +2,8 @@ package javaiscoffee.groomy.ide.member;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import javaiscoffee.groomy.ide.board.Board;
 import javaiscoffee.groomy.ide.comment.Comment;
 import jakarta.persistence.*;

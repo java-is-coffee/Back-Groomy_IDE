@@ -12,6 +12,7 @@ public class RegisterDto {
         private String password;
         private String name;
         private String nickname;
+        private String certificationNumber;
     }
 }
 
