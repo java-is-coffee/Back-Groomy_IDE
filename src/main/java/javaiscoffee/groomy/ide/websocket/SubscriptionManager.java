@@ -23,6 +23,7 @@ public class SubscriptionManager {
         Long existingProjectId = subscriptions.get(memberId);
         //이미 구독중인 프로젝트와 다른 프로젝트를 같이 구독하려하면 예외처리
         if(existingProjectId != null && !existingProjectId.equals(projectId)) {
+            log.info("구독중인 projectId = {}, 구독하려는 projectId = {}",existingProjectId,projectId);
             throw new BaseException("다른 프로젝트를 이미 구독 중입니다.");
         }
         subscriptions.put(memberId,projectId);
@@ -49,4 +50,5 @@ public class SubscriptionManager {
         log.info("커넥션 연결 해제 memberId = {}",memberId);
         subscriptions.remove(memberId);
     }
+
 }
