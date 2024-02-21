@@ -32,7 +32,7 @@ public class SubscriptionManager {
     public synchronized void unsubscribe(Long memberId, Long projectId) {
         Long existingProjectId = subscriptions.get(memberId);
         //구독 중인 프로젝트가 있을 경우에만 삭제
-        if (existingProjectId != null && existingProjectId.equals(projectId)) {
+        if (existingProjectId != null) {
             subscriptions.remove(memberId);
         }
     }
