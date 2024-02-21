@@ -132,7 +132,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         // 세션 종료 및 구독 해제 처리
         if (memberId != null) {
             try {
-                subscriptionManager.unsubscribe(memberId, projectId); // 구독 해제
+                subscriptionManager.disconnect(memberId); // 구독 해제
             } catch (BaseException ignored) {
 
             }
