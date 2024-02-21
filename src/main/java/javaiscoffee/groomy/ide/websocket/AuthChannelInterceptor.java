@@ -103,6 +103,23 @@ public class AuthChannelInterceptor implements ChannelInterceptor {
             //세션 속성에 프로젝트 ID 저장
             accessor.getSessionAttributes().put("projectId",projectId.toString());
         }
+        //구독 끊기
+        else if(StompCommand.UNSUBSCRIBE.equals(accessor.getCommand()) || StompCommand.DISCONNECT.equals(accessor.getCommand())) {
+            log.info("웹소켓 구독 해지 요청 시작");
+            // 세션 속성에서 memberId 추출
+            String memberIdStr = (String) accessor.getSessionAttributes().get("memberId");
+            if(memberIdStr != null) {
+                Long memberId = Long.parseLong(memberIdStr);
+                log.info("웹소켓 연결 끊김 커맨드 =>> 멤버ID = {}", memberId);
+                // 세션 속성에서 projectId 추출
+//            String projectIdStr = (String) accessor.getSessionAttributes().get("memberId");
+//            Long projectId = Long.parseLong(projectIdStr);
+//            log.info("웹소켓 구독 해지 정보 =>> 프로젝트ID = {}",projectId);
+
+                // SubscriptionManager를 사용하여 구독 해제
+                subscriptionManager.disconnect(memberId);
+            };
+        }
         return message;
     }
 
