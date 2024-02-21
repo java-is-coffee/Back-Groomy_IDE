@@ -1,9 +1,11 @@
 package javaiscoffee.groomy.ide.login.emailAuthentication;
 
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 
 // 사용자가 링크 클릭 후 이메일에 대한 인증 코드가 일치하는지 확인하는 클래스
@@ -12,6 +14,7 @@ import java.time.LocalDateTime;
 @Transactional(readOnly = true)
 public class MailVerifyService {
     private final JpaEmailCertificationRepository emailCertificationRepository;
+    private final MailSendService mailSendService;
 
 
     /**
@@ -25,6 +28,7 @@ public class MailVerifyService {
         }
         // 해당 이메일 인증 여부 true로 설정
         emailCertificationRepository.certificateSuccess(email);
+
         return true;
     }
 
@@ -38,7 +42,7 @@ public class MailVerifyService {
         if (verification == null || !verification.getCertificated() || isTimeout(verification.getExpirationTime())) {
             return false;
         }
-        emailCertificationRepository.removeEmailVerificationNumber(email);
+//        emailCertificationRepository.removeEmailVerificationNumber(email);
         return true;
     }
 

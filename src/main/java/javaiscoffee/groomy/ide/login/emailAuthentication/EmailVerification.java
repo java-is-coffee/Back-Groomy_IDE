@@ -2,8 +2,8 @@ package javaiscoffee.groomy.ide.login.emailAuthentication;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.redis.core.RedisHash;
 
 import java.time.LocalDateTime;
 
@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "email_certification")
+@NoArgsConstructor
 public class EmailVerification {
 
     @Id
@@ -27,6 +28,7 @@ public class EmailVerification {
         this.certificationNumber = certificationNumber;
         this.certificated = false;
         this.expirationTime = time;
+        this.createdTime = LocalDateTime.now();
     }
 
 }
