@@ -20,7 +20,6 @@ import java.security.NoSuchAlgorithmException;
 @RequiredArgsConstructor
 public class MailSendService {
     private final JavaMailSender mailSender;
-    private final CertificationNumberDao certificationNumberDao;
     private final CertificationGenerator generator;
     private final JpaEmailCertificationRepository emailCertificationRepository;
     private static final String MAIL_TITLE_CERTIFICATION = "Groomy IDE 인증 번호 발송 메일입니다."; //수정할것
