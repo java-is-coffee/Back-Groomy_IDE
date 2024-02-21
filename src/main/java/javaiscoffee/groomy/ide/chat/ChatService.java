@@ -76,7 +76,7 @@ public class ChatService {
 
         //프로젝트가 존재하지 않는 경우
         Project project = projectRepository.getProjectByProjectId(projectId);
-        if (project != null) {
+        if (project == null) {
             throw new BaseException("입력 값이 잘못되었습니다.");
         }
 
