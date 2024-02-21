@@ -1,24 +1,17 @@
 package javaiscoffee.groomy.ide.login;
 
-import javaiscoffee.groomy.ide.login.emailAuthentication.EmailVerification;
 import javaiscoffee.groomy.ide.login.emailAuthentication.JpaEmailCertificationRepository;
 import javaiscoffee.groomy.ide.login.emailAuthentication.MailVerifyService;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
-import javaiscoffee.groomy.ide.member.MemberRepository;
 import javaiscoffee.groomy.ide.member.MemberRole;
 import javaiscoffee.groomy.ide.oauth.OAuthAttributes;
 import javaiscoffee.groomy.ide.oauth.SocialType;
-import javaiscoffee.groomy.ide.response.MyResponse;
-import javaiscoffee.groomy.ide.response.ResponseStatus;
-import javaiscoffee.groomy.ide.response.Status;
 import javaiscoffee.groomy.ide.security.JwtTokenProvider;
 import javaiscoffee.groomy.ide.security.TokenDto;
 import io.jsonwebtoken.JwtException;
-import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -75,7 +68,7 @@ public class LoginService {
         }
 
         //이메일 인증한 적이 없으면 예외처리
-        if (!mailVerifyService.isVerify(data.getEmail() + data.getCertificationNumber(), "true")) {
+        if (!mailVerifyService.isVerified(data.getEmail(), data.getCertificationNumber())) {
             log.info("이메일 인증을 하지 않았습니다.");
             return null;
         }

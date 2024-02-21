@@ -9,7 +9,6 @@ import java.time.LocalDateTime;
 
 @Repository
 @Table(name = "email_certification")
-@Transactional
 public class JpaEmailCertificationRepository implements EmailCertificationRepository{
     private final EntityManager em;
     public JpaEmailCertificationRepository(EntityManager em) {
@@ -26,13 +25,13 @@ public class JpaEmailCertificationRepository implements EmailCertificationReposi
 
     // 이메일
     @Override
-    public EmailVerification findCertificationNumberByEmail(String email) {
+    public EmailVerification findEmailVerificationByEmail(String email) {
         return em.find(EmailVerification.class,email);
     }
 
     // 삭제
     @Override
-    public void removeCertificationNumber(String email) {
+    public void removeEmailVerificationNumber(String email) {
         em.remove(email);
     }
 

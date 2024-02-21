@@ -41,7 +41,7 @@ public class EmailController {
             return ResponseEntity.ok("이메일 인증이 완료되었습니다.");
         }
         else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증 코드가 일치하지 않습니다.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("인증에 실패하였습니다.");
         }
     }
 }

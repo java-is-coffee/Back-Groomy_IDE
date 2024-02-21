@@ -19,14 +19,14 @@ public class EmailVerification {
     @Id
     private String email;
     private String certificationNumber;
-    private boolean certificated;
-    private LocalDateTime time;
+    private Boolean certificated;
+    private LocalDateTime expirationTime;
 
     public EmailVerification(String email, String certificationNumber, LocalDateTime time) {
         this.email = email;
         this.certificationNumber = certificationNumber;
         this.certificated = false;
-        this.time = LocalDateTime.now().withNano(0);
+        this.expirationTime = time;
     }
 
 }
