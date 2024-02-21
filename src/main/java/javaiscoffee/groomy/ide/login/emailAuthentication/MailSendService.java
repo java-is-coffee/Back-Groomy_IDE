@@ -68,7 +68,7 @@ public class MailSendService {
      * 이메일을 보내는 메서드 구현
      * JavaMailSender를 사용하여 MimeMessage 객체 생성 => 이메일을 나타내는 객체로, 이메일의 헤더, 본문, 첨부 파일 등을 포함할 수 있다.
      */
-    private void sendMail(String email, String content) throws jakarta.mail.MessagingException {
+    public void sendMail(String email, String content) throws jakarta.mail.MessagingException {
         MimeMessage mimeMailMessage = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMailMessage);
         helper.setTo(email);    // 이메일 수신자

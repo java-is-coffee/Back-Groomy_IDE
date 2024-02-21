@@ -1,12 +1,17 @@
 package javaiscoffee.groomy.ide.login;
 
+import jakarta.mail.MessagingException;
+import javaiscoffee.groomy.ide.login.emailAuthentication.CertificationGenerator;
 import javaiscoffee.groomy.ide.login.emailAuthentication.JpaEmailCertificationRepository;
+import javaiscoffee.groomy.ide.login.emailAuthentication.MailSendService;
 import javaiscoffee.groomy.ide.login.emailAuthentication.MailVerifyService;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.member.MemberRole;
 import javaiscoffee.groomy.ide.login.oauth.OAuthAttributes;
 import javaiscoffee.groomy.ide.login.oauth.SocialType;
+import javaiscoffee.groomy.ide.response.ResponseStatus;
+import javaiscoffee.groomy.ide.security.BaseException;
 import javaiscoffee.groomy.ide.security.JwtTokenProvider;
 import javaiscoffee.groomy.ide.security.TokenDto;
 import io.jsonwebtoken.JwtException;
@@ -19,6 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.NoSuchAlgorithmException;
+import java.util.Objects;
 import java.util.Optional;
 @Slf4j
 @Service
@@ -31,6 +38,8 @@ public class LoginService {
     private final JwtTokenProvider jwtTokenProvider;
     private final MailVerifyService mailVerifyService;
     private final JpaEmailCertificationRepository emailCertificationRepository;
+    private final CertificationGenerator certificationGenerator;
+    private final MailSendService mailSendService;
 
     /**
      * 1. 로그인 요청으로 들어온 memberId, password를 기반으로 Authentication 객체를 생성한다.
@@ -129,5 +138,35 @@ public class LoginService {
         Member createdMember = attributes.toEntity(socialType, attributes.getOauthUserInfo());
         createdMember.hashPassword(bCryptPasswordEncoder);
         return memberRepository.saveOAuthUser(createdMember);
+    }
+
+    /**
+     * 로그인 페이지 비밀번호 리셋
+     */
+    @Transactional
+    public void resetPassword(ResetPasswordRequestDto requestDto){
+        Member member = memberRepository.findByEmail(requestDto.getEmail()).orElseThrow(() -> new BaseException(ResponseStatus.BAD_REQUEST.getMessage()));
+        if(!Objects.equals(member.getName(), requestDto.getName())) {
+            log.error("비밀번호 리셋 이름 틀림");
+            throw new BaseException(ResponseStatus.BAD_REQUEST.getMessage());
+        }
+
+        String tempPassword;
+        try {
+            tempPassword = certificationGenerator.createCertificationNumber();
+        } catch (NoSuchAlgorithmException e) {
+            log.error("임시 비밀번호 발급 실패");
+            throw new BaseException(ResponseStatus.ERROR.getMessage());
+        }
+        member.setPassword(tempPassword);
+        member.hashPassword(bCryptPasswordEncoder);
+
+        String mailContent = String.format("%s의 비밀번호 리셋을 위해 발송된 메일입니다.%n임시 비밀번호는   :   %s%n임시 비밀번호를 사용하여 로그인해주세요.%n로그인하고 비밀번호 변경 부탁드립니다.",requestDto.getEmail(),tempPassword);
+
+        try {
+            mailSendService.sendMail(member.getEmail(),mailContent);
+        } catch (MessagingException e) {
+            throw new BaseException(ResponseStatus.ERROR.getMessage());
+        }
     }
 }
