@@ -1,6 +1,7 @@
 package javaiscoffee.groomy.ide.websocket;
 
 import javaiscoffee.groomy.ide.security.BaseException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -9,6 +10,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * 각 멤버의 구독 정보를 저장하는 클래스
  * 현재 구독하고 있는 프로젝트가 있는데 다른 프로젝트를 구독하려 하면 예외 처리
  */
+@Slf4j
 @Component
 public class SubscriptionManager {
     private final ConcurrentHashMap<Long, Long> subscriptions = new ConcurrentHashMap<>();
@@ -17,6 +19,7 @@ public class SubscriptionManager {
      * 사용자가 어떤 프로젝트를 구독할 때 사용
      */
     public void subscribe(Long memberId, Long projectId) {
+        log.info("커넥션 연결 memberId = {}, projectId = {}",memberId,projectId);
         Long existingProjectId = subscriptions.get(memberId);
         //이미 구독중인 프로젝트와 다른 프로젝트를 같이 구독하려하면 예외처리
         if(existingProjectId != null && !existingProjectId.equals(projectId)) {
@@ -43,6 +46,7 @@ public class SubscriptionManager {
      * 완전히 세션이 종료될 때 disconnect 사용
      */
     public synchronized void disconnect(Long memberId) {
+        log.info("커넥션 연결 해제 memberId = {}",memberId);
         subscriptions.remove(memberId);
     }
 }
