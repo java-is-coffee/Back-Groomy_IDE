@@ -4,6 +4,8 @@ import jakarta.mail.IllegalWriteException;
 import jakarta.mail.MessagingException;
 import jakarta.mail.Session;
 import jakarta.mail.internet.MimeMessage;
+import javaiscoffee.groomy.ide.response.ResponseStatus;
+import javaiscoffee.groomy.ide.security.BaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
 
 @Slf4j
 @Service
@@ -41,8 +44,19 @@ public class MailSendService {
         // String.format() 사용해서 인증 번호를 포함한 본문 생성.
         String content = String.format("%s의 이메일 인증을 위해 발송된 메일입니다.%n인증 번호는   :   %s%n인증 번호를 입력칸에 입력해주세요.%n 인증 번호는 10분 후 만료됩니다.",email,certificationNumber);
 
-        // 유효 시간 10분
-        emailCertificationRepository.saveCertification(email, certificationNumber, 10);
+        // 이미 이메일 인증 신청 기록이 존재할 경우 새로 인증 번호 생성, expirationTime 업데이트, 인증 번호 새로 발급, 인증 유무 false로
+        //이메일 인증 요청이 존재하는 경우 새로 발급하고 기존 데이터 업데이트, 인증 유무 false로
+        if (emailVerification != null) {
+            emailVerification.setCertificated(false);
+            emailVerification.setCertificationNumber(certificationNumber);
+            emailVerification.setCreatedTime(LocalDateTime.now());
+            emailVerification.setExpirationTime(LocalDateTime.now().plusMinutes(10));
+        }
+
+        //이메일 인증 요청이 존재하지 않는 경우 새로 발급하고
+        if (emailVerification == null) {
+            emailCertificationRepository.saveCertification(email, certificationNumber, 10);
+        }
 
         log.info("이메일 = {}, 인증번호 = {}",email,certificationNumber);
 

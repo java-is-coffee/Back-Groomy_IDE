@@ -21,6 +21,7 @@ public class EmailVerification {
     private String email;
     private String certificationNumber;
     private Boolean certificated;
+    private LocalDateTime createdTime;
     private LocalDateTime expirationTime;
 
     public EmailVerification(String email, String certificationNumber, LocalDateTime time) {
