@@ -32,7 +32,7 @@ public class OAuthController {
      * @param code
      * @return
      */
-    @GetMapping("/login/oauth2/code/{socialType}")
+    @GetMapping("/login/oauth2/{socialType}")
     public String callback(@PathVariable(name = "socialType") SocialType socialType, @RequestParam(name = "code") String code) {
         // OAuth 콜백에서 전달된 인증 코드를 사용하여 엑세스 토큰 요청
         // 엑세스 토큰 요청 및 사용 후 응답 처리
