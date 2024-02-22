@@ -234,10 +234,12 @@ public class ProjectService {
     public void kickProjectMember (Long memberId, Long projectId, Long kickMemberId) {
         Project project = projectRepository.getProjectByProjectId(projectId);
         Member kickMember = memberRepository.findByMemberId(kickMemberId).orElseThrow(() -> new BaseException("존재하지 않는 사용자입니다."));
+        ProjectMemberId projectMemberId = new ProjectMemberId(projectId, kickMemberId);
+        ProjectMember projectMember = projectRepository.getProjectMember(projectMemberId);
         //프로젝트가 없거나, 프로젝트 생성자가 아니거나,
         // 추방하려는 멤버가 생성자이거나, 추방하려는 멤버가 프로젝트에 참가하고 있지 않을 경우 예외처리
         if(project == null || !project.getMemberId().getMemberId().equals(memberId) ||
-                memberId.equals(kickMemberId) || !isParticipated(kickMemberId, projectId)) {
+                memberId.equals(kickMemberId) || projectMember==null) {
             log.error("잘못된 추방 요청 memberId = {}, projectId = {}, kickMemberId = {}",memberId,projectId,kickMemberId);
             throw new BaseException(ResponseStatus.DELETE_FAILED.getMessage());
         }
