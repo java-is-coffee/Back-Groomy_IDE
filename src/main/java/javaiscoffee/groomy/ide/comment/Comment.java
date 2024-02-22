@@ -56,7 +56,7 @@ public class Comment {
     private CommentStatus commentStatus;
 
 
-    // 저장 전 실행되는 메서드
+    // 저장 전 실행되는 메서드임
     @PrePersist
     public void PrePersist() {
         this.createdTime = LocalDateTime.now();

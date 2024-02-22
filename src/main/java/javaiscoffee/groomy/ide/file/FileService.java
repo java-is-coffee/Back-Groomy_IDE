@@ -244,7 +244,7 @@ public class FileService {
     }
 
     /**
-     * 파일 삭제 메서드에서 사용되는 재귀삭제 메서드
+     * 파일 삭제 메서드에서 사용되는 dfs 탐색 삭제 메서드
      * 만약 폴더를 삭제하려는 경우 재귀적으로 돌면서 폴더 내용물을 전부 삭제한다.
      */
     private static void deleteDirectoryRecursively(Path dir) throws IOException {
@@ -265,6 +265,7 @@ public class FileService {
 
     /**
      * 멤버가 프로젝트에 참가하고 있는지 검사
+     * 참여하고 있지 않으면 에러 던짐
      */
     private void isParticipated(Long projectId, Long memberId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
@@ -280,11 +281,16 @@ public class FileService {
         }
     }
 
-
+    /**
+     * 파일 상대 경로를 가지고 파일 절대 경로 반환
+     */
     public Path getFileFullPath (Long memberId, Long projectId, String filePath) {
         return Paths.get(projectBasePath + memberId + "/" + projectId + "/" + filePath);
     }
 
+    /**
+     * 파일 ID 반환
+     */
     public String getFileId (String filePath,Long memberId, Long projectId) {
         try {
             Path fileFullPath = getFileFullPath(memberId, projectId, filePath);
