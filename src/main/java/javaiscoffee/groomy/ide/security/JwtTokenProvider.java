@@ -3,6 +3,7 @@ package javaiscoffee.groomy.ide.security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.Nullable;
 import javaiscoffee.groomy.ide.member.JpaMemberRepository;
 import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.login.oauth.userInfo.CustomOAuthUser;
@@ -12,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -56,9 +58,62 @@ public class JwtTokenProvider {
                     .setExpiration(accessTokenExpiresIn)
                     .signWith(key, SignatureAlgorithm.HS256)
                     .compact();
-        } else if (principal instanceof CustomOAuthUser) {
-            memberId = ((CustomOAuthUser)principal).getMemberId();
-            String email = ((CustomOAuthUser)principal).getEmail();
+        } else if (principal instanceof OAuth2User) {
+            OAuth2User oAuth2User = (OAuth2User) principal;
+            // memberId를 attributes에서 가져오기
+            memberId = oAuth2User.getAttribute("memberId");
+            log.info("토큰 생성 memberId = {}",memberId);
+            accessToken = Jwts.builder()
+                    .setSubject(oAuth2User.getAttribute("email"))
+                    .claim("auth", authorities)
+                    .claim("memberId", memberId) // memberId 정보 추가
+                    .setExpiration(accessTokenExpiresIn)
+                    .signWith(key, SignatureAlgorithm.HS256)
+                    .compact();
+        } else {
+            throw new IllegalArgumentException("Unsupported principal type");
+        }
+
+        //Refresh Token 생성 1주일
+        String refreshToken = Jwts.builder()
+                .claim("memberId", memberId)
+                .setExpiration(new Date(now + (1000 * 60 * 60 * 24 * 7)))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        return TokenDto.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    //OAuth 멤버 정보로 토큰 발급
+    public TokenDto generateToken(Authentication authentication, Long memberId, String email) {
+        //권한 가져오기
+        String authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
+        long now = (new Date().getTime());
+
+        Object principal = authentication.getPrincipal();
+
+        //Access Token 생성 30분
+        Date accessTokenExpiresIn = new Date(now + (1000*60*30));
+        String accessToken;
+
+        if (principal instanceof CustomUserDetails) {
+            accessToken = Jwts.builder()
+                    .setSubject(authentication.getName())
+                    .claim("auth", authorities)
+                    .claim("memberId", memberId) // memberId 정보 추가
+                    .setExpiration(accessTokenExpiresIn)
+                    .signWith(key, SignatureAlgorithm.HS256)
+                    .compact();
+        } else if (principal instanceof OAuth2User) {
+            OAuth2User oAuth2User = (OAuth2User) principal;
+            // memberId를 attributes에서 가져오기
+            log.info("토큰 생성 memberId = {}",memberId);
             accessToken = Jwts.builder()
                     .setSubject(email)
                     .claim("auth", authorities)

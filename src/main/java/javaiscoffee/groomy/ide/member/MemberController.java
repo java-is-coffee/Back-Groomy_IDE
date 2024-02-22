@@ -29,7 +29,8 @@ public class MemberController {
     public ResponseEntity<?> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         if (userDetails != null) {
             String email = userDetails.getUsername(); //이메일
-            log.info("내 정보를 확인하려는 email = {}", email);
+            Long memberId = userDetails.getMemberId();
+            log.info("내 정보를 확인하려는 email = {}, memberId = {}", email,memberId);
             // 여기서 email 변수를 사용하여 필요한 로직을 수행
             MemberInformationResponseDto memberInformation = memberService.getMemberInformation(email);
             return ResponseEntity.ok(memberInformation);
