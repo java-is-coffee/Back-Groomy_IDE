@@ -24,6 +24,10 @@ public class ChatService {
     private final JpaProjectRepository projectRepository;
     private final JpaMemberRepository memberRepository;
 
+    /**
+     * 채팅 로그 불러오기
+     * 멤버랑 프로젝트가 존재하는지 검사 + 프로젝트에 참여하고 있는지 검사
+     */
     public List<ChatMessageDto> getChatLogs(Long memberId, Long projectId, int paging, int pagingNumber) {
         Member findMember = memberRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException("멤버를 찾을 수 없습니다."));
         Project findProject = projectRepository.getProjectByProjectId(projectId);
@@ -38,7 +42,10 @@ public class ChatService {
         return convertToChatLogResponseDtoList(projectChatLogs);
     }
 
-    // ProjectChat 리스트를 ChatLogResponseDto List로 변환
+    /**
+     * 프로젝트 채팅 데이터를 가지고 프론트 응답용 데이터로 변환
+     * ProjectChat 리스트를 ChatLogResponseDto List로 변환
+     */
     public List<ChatMessageDto> convertToChatLogResponseDtoList(List<ProjectChat> projectChats) {
         return projectChats.stream().map(chat -> {
             ChatMessageDto dto = new ChatMessageDto();
@@ -104,6 +111,7 @@ public class ChatService {
 
     /**
      * 채팅 추가 테스트
+     * 고정된 채팅 데이터 저장
      */
     @Transactional
     public ChatMessageDto writeChatTest(Long projectId, Long memberId) {

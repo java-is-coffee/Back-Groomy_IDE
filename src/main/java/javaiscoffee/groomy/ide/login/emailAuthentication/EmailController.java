@@ -25,6 +25,7 @@ public class EmailController {
     @PostMapping("/send-certification")
     public ResponseEntity<?> sendCertificationNumber(@Validated @RequestBody RequestWrapperDto<EmailCertificationRequest> requestDto) throws MessagingException, NoSuchAlgorithmException {
         EmailCertificationRequest request = requestDto.getData();
+
         log.info(">> 사용자의 이메일 인증 요청");
         mailSendService.sendEmailForCertification(request.getEmail());
         return ResponseEntity.ok(null);
