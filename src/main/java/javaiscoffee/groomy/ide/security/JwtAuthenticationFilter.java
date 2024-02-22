@@ -39,7 +39,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (requestURI.startsWith("/api/member/login") || "/api/member/register".equals(requestURI)
                 || "/api/member/refresh".equals(requestURI) || "/api/member/register/email-check".equals(requestURI)
                 || requestURI.startsWith("/ws") || requestURI.startsWith("/YJS")
-                || requestURI.startsWith("/auth") || requestURI.startsWith("/api/email")) {
+                || requestURI.startsWith("/auth") || requestURI.startsWith("/api/email")
+                || requestURI.startsWith("/login/oauth2/")) {
             filterChain.doFilter(request, response);
             return;
         }
