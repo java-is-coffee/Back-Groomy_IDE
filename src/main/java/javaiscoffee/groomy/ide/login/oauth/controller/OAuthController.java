@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @CrossOrigin
-@RequestMapping("/auth")
+@RequestMapping
 public class OAuthController {
     private final OAuthService oAuthService;
 
@@ -19,7 +19,7 @@ public class OAuthController {
      * 사용자로부터 소셜 로그인 요청을 SocialType을 받아서 처리
      * @param socialType
      */
-    @GetMapping("/{socialType}")
+    @GetMapping("/auth/{socialType}")
     public void socialLoginType(@PathVariable(name = "socialType") SocialType socialType) {
         log.info(">> 사용자로부터 소셜 로그인 요청을 받음 :: {} Social Login", socialType);
         oAuthService.request(socialType);
@@ -32,7 +32,7 @@ public class OAuthController {
      * @param code
      * @return
      */
-    @GetMapping("/login/oauth2/code/{socialType}")
+    @GetMapping("/login/oauth2/{socialType}")
     public String callback(@PathVariable(name = "socialType") SocialType socialType, @RequestParam(name = "code") String code) {
         // OAuth 콜백에서 전달된 인증 코드를 사용하여 엑세스 토큰 요청
         // 엑세스 토큰 요청 및 사용 후 응답 처리
