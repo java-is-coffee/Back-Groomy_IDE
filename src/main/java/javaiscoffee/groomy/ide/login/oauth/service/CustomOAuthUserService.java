@@ -35,7 +35,6 @@ public class CustomOAuthUserService implements OAuth2UserService<OAuth2UserReque
     public  CustomOAuthUserService (JpaMemberRepository memberRepository, @Lazy LoginService loginService) {
         this.memberRepository = memberRepository;
         this.loginService = loginService;
-
     }
 
     // DefaultOAuth2UserService = 내부에서 OAuth 서비스와의 통신이 이루어져 사용자 정보를 가져오는 로직이 수행된다.

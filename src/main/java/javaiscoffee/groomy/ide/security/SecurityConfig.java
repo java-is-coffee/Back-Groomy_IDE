@@ -59,9 +59,11 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
                 .and()
                 .oauth2Login()
+                .userInfoEndpoint().userService(customOAuthUserService) // customUserService 설정
+                .and()
                 .successHandler(oAuthLoginSuccessHandler) // 동의하고 계속하기를 눌렀을 때 Handler 설정
                 .failureHandler(oAuthLoginFailureHandler) // 소셜 로그인 실패 시 핸들러 설정
-                .userInfoEndpoint().userService(customOAuthUserService) // customUserService 설정
+
                 .and();
                 // /error 엔트리 포인트 진입했을 경우 에러 응답을 반환하도록 커스텀 핸들러 추가
                 //JWT 인증을 위하여 직접 구현한 필터를 UsernamePasswordAuthenticationFilter 전에 실행하겠다는 설정
