@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import javaiscoffee.groomy.ide.login.LoginService;
+import javaiscoffee.groomy.ide.login.oauth.OAuthAttributes;
+import javaiscoffee.groomy.ide.login.oauth.SocialType;
 import javaiscoffee.groomy.ide.login.oauth.userInfo.CustomOAuthUser;
 import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.member.MemberRepository;
@@ -14,24 +17,35 @@ import javaiscoffee.groomy.ide.security.JwtTokenProvider;
 import javaiscoffee.groomy.ide.security.TokenDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.Collection;
 
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberRepository memberRepository;
+    private final LoginService loginService;
+
+    @Autowired
+    public OAuthLoginSuccessHandler(JwtTokenProvider jwtTokenProvider, MemberRepository memberRepository, @Lazy LoginService loginService) {
+        this.memberRepository = memberRepository;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.loginService = loginService;
+    }
 
     // 사용자가 인증되면서 요청이 성공하면 호출되는 메서드
     @Override
+    @Transactional
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         log.info("OAuth 로그인 성공!!");
         try {
@@ -51,7 +65,15 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
             } else if (principal instanceof OAuth2User) {
                 OAuth2User oAuth2User = (OAuth2User) principal;
                 email = oAuth2User.getAttribute("email");
-                Member member = memberRepository.findByEmail(email).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
+                // DB에서 사용자 조회 또는 새로 생성
+                Member member = memberRepository.findByEmail(email)
+                        .orElseGet(() -> {
+                            // OAuth2User에서 OAuthAttributes를 생성하는 로직 필요
+                            // 아래의 toEntity 메서드는 예시일 뿐, OAuth2User의 정보를 바탕으로
+                            // 적절한 Member 객체를 생성하는 메서드를 구현해야 함
+                            OAuthAttributes attributes = OAuthAttributes.of(SocialType.GOOGLE,"sub",oAuth2User.getAttributes());
+                            return loginService.saveUser(attributes, SocialType.GOOGLE); // 적절한 SocialType 지정 필요
+                        });
                 log.info("찾은 로그인 멤버 = {}",member);
                 memberId = member.getMemberId();
             }
