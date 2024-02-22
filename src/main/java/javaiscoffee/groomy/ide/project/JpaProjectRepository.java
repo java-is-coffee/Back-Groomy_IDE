@@ -120,6 +120,10 @@ public class JpaProjectRepository {
         return true;
     }
 
+    public ProjectMember getProjectMember(ProjectMemberId projectMemberId) {
+        return em.find(ProjectMember.class,projectMemberId);
+    }
+
     /**
      * 프로젝트 정보 수정
      */
