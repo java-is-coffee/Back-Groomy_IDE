@@ -32,7 +32,7 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-mail'			// 구글 SMTP 서버를 이용한 이메일 인증을 하기 위해서 필요
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'	// 이메일 인증 시 redis에 저장할 목적으로 추가
-//	compile 'io.lettuce:lettuce-core:6.3.1.RELEASE'
+	implementation 'commons-validator:commons-validator:1.7'	// 이메일 유효성 검사를 위해 라이브러리 추가
 	implementation 'com.amazonaws:aws-java-sdk-ecs:1.12.661'
 	implementation 'software.amazon.awssdk:ecs:2.24.5'
 
