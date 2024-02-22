@@ -52,7 +52,7 @@ public class SecurityConfig {
                 .requestMatchers(new AntPathRequestMatcher("/api/member/refresh")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/ws/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/YJS/**")).permitAll()
-                .requestMatchers(new AntPathRequestMatcher("/auth")).permitAll()
+                .requestMatchers(new AntPathRequestMatcher("/auth/**")).permitAll()
                 .requestMatchers(new AntPathRequestMatcher("/api/email/**")).permitAll()
                 //그 외 나머지 요청은 전부 인증이 필요
                 .anyRequest().authenticated()
