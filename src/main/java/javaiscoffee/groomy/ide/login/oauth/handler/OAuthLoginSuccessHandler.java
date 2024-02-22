@@ -37,7 +37,7 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
             // Bearer + 토큰
             String accessToken = tokenDto.getAccessToken();
             String refreshToken = tokenDto.getRefreshToken();
-            response.sendRedirect("http://groomy-ide-front.s3-website.ap-northeast-2.amazonaws.com?access_token="+accessToken+"&refresh_token="+refreshToken);
+            response.sendRedirect("http://localhost:3000?access_token="+accessToken+"&refresh_token="+refreshToken);
 
 //            response.sendRedirect("http://localhost:3000?access_token="+accessToken+"&refresh_token="+refreshToken);
 
