@@ -25,7 +25,6 @@ public class JpaMemberRepository implements MemberRepository {
 
     public void delete(Member member) {
         em.remove(member);
-        return;
     }
 
     public Optional<Member> findById(Long id) {
