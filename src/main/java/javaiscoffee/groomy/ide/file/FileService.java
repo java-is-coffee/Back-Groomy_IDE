@@ -33,9 +33,13 @@ public class FileService {
     public void createAndSave (FileRequestDto requestDto, Long memberId) {
         FileRequestDto.RequestData data = requestDto.getData();
         //멤버가 존재하는지, 프로젝트가 존재하는지, 멤버가 프로젝트에 참가하는지 검증
-        isParticipated(data.getProjectId(), memberId);
+        Project project = projectRepository.getProjectByProjectId(data.getProjectId());
+        if(project == null) {
+            throw new BaseException(ResponseStatus.NOT_FOUND.getMessage());
+        }
+        isParticipated(project.getProjectId(), memberId);
 
-        Path fullPath = getFileFullPath(memberId, data.getProjectId(), data.getFilePath());
+        Path fullPath = getFileFullPath(project.getMemberId().getMemberId(), data.getProjectId(), data.getFilePath());
         try {
             //파일 생성 API
             if(data.getType() == FileType.FILE) {
@@ -61,7 +65,12 @@ public class FileService {
      * 파일 내용 수정까지 포함
      */
     public FileWebsocketResponseDto websocketSave (FileWebsocketRequestDto.RequestData data, Long memberId, Long projectId) {
-        Path fullPath = getFileFullPath(memberId, projectId, data.getPath());
+        Project project = projectRepository.getProjectByProjectId(projectId);
+        if(project == null) {
+            throw new BaseException(ResponseStatus.NOT_FOUND.getMessage());
+        }
+        isParticipated(project.getProjectId(), memberId);
+        Path fullPath = getFileFullPath(project.getMemberId().getMemberId(), projectId, data.getPath());
         FileWebsocketResponseDto responseDto = new FileWebsocketResponseDto();
         log.info("웹소켓 파일 및 폴더 저장 = {}",fullPath);
         try {
@@ -96,11 +105,15 @@ public class FileService {
      */
     public void renameFileOrFolder(Long memberId, FileRenameRequestDto requestDto) {
         FileRenameRequestDto.RequestData data = requestDto.getData();
+        Project project = projectRepository.getProjectByProjectId(data.getProjectId());
+        if(project == null) {
+            throw new BaseException(ResponseStatus.NOT_FOUND.getMessage());
+        }
         //권한이 있는지 검사
-        isParticipated(data.getProjectId(), memberId);
+        isParticipated(project.getProjectId(), memberId);
 
         try{
-            Path oldFullPath = Paths.get(projectBasePath + memberId + "/" + data.getProjectId() + "/" + data.getOldPath());
+            Path oldFullPath = Paths.get(projectBasePath + project.getMemberId().getMemberId() + "/" + data.getProjectId() + "/" + data.getOldPath());
             Path newFullPath = oldFullPath.resolveSibling(data.getNewName()); // 같은 부모 디렉토리 내에서 새 이름으로 경로 생성
             Files.move(oldFullPath, newFullPath, StandardCopyOption.REPLACE_EXISTING); // 기존 파일/폴더를 새 경로(이름)로 이동
         } catch (IOException e) {
@@ -113,9 +126,14 @@ public class FileService {
      * 웹소켓 통신 메시지를 받고 파일 및 폴더 이름을 변경하고 메세지 전송
      */
     public FileWebsocketResponseDto websocketRename(FileWebsocketRequestDto.RequestData data, Long memberId, Long projectId) {
+        Project project = projectRepository.getProjectByProjectId(projectId);
+        if(project == null) {
+            throw new BaseException(ResponseStatus.NOT_FOUND.getMessage());
+        }
+        isParticipated(project.getProjectId(), memberId);
         FileWebsocketResponseDto responseDto = new FileWebsocketResponseDto();
         try{
-            Path oldFullPath = Paths.get(projectBasePath + memberId + "/" + projectId + "/" + data.getPath());
+            Path oldFullPath = Paths.get(projectBasePath + project.getMemberId().getMemberId() + "/" + projectId + "/" + data.getPath());
             Path newFullPath = oldFullPath.resolveSibling(data.getName()); // 같은 부모 디렉토리 내에서 새 이름으로 경로 생성
             Files.move(oldFullPath, newFullPath, StandardCopyOption.REPLACE_EXISTING); // 기존 파일/폴더를 새 경로(이름)로 이동
 
