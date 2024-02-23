@@ -333,6 +333,7 @@ public class BoardService {
         return new ResponseBoardDto(
                 board.getBoardId(),
                 board.getMember().getMemberId(),
+                board.getMember().getHelpNumber(),
                 board.getNickname(),
                 board.getTitle(),
                 board.getContent(),

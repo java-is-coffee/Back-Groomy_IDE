@@ -10,6 +10,7 @@ import java.time.ZonedDateTime;
 public class ResponseCommentDto {
     private Long boardId;
     private Long memberId;
+    private Long memberHelpNumber;
     private String nickname;
     private String content;
     private Long originComment;
