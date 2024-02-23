@@ -239,6 +239,7 @@ public class CommentService {
         responseCommentDto.setHelpNumber(comment.getHelpNumber());
         responseCommentDto.setCreatedTime(comment.getCreatedTime());
         responseCommentDto.setCommentStatus(comment.getCommentStatus());
+        responseCommentDto.setMemberHelpNumber(comment.getMember().getHelpNumber());
 
         return responseCommentDto;
     }

@@ -13,6 +13,7 @@ import java.time.ZonedDateTime;
 public class ResponseBoardDto {
     private Long boardId;
     private Long memberId;
+    private Long memberHelpNumber;
     private String nickname;
     private String title;
     private String content;
