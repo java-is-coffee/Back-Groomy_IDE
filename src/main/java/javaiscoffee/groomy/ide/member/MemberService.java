@@ -106,4 +106,14 @@ public class MemberService {
         BeanUtils.copyProperties(optionalMember.get(),responseDto);
         return responseDto;
     }
+
+    /**
+     * 회원 탈퇴 하는 메서드
+     * 토큰값에서 꺼낸 memberId
+     */
+    @Transactional
+    public void deleteAccount(Long memberId) {
+        Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
+        memberRepository.delete(member);
+    }
 }

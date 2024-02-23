@@ -74,6 +74,18 @@ public class MemberController {
     }
 
     /**
+     * 마이페이지에서 회원탈퇴해서 멤버 삭제
+     */
+    @GetMapping("/my/delete-account")
+    public ResponseEntity<?> deleteAccount(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long memberId = userDetails.getMemberId();
+        log.info("회원탈퇴 하려는 memberId = {}",memberId);
+        memberService.deleteAccount(memberId);
+        log.info("회원 탈퇴 성공 memberId = {}",memberId);
+        return ResponseEntity.ok(null);
+    }
+
+    /**
      * 프로젝트 초대에서 이메일로 멤버 조회해서 초대할 때 사용하는 API
      * 요구 데이터 : 토큰과 이메일값만 사용가능
      * 반환 데이터 : memberId,memberName,memberEmail을 반환
