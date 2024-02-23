@@ -76,7 +76,7 @@ public class MemberController {
     /**
      * 마이페이지에서 회원탈퇴해서 멤버 삭제
      */
-    @GetMapping("/my/delete-account")
+    @DeleteMapping("/my/delete-account")
     public ResponseEntity<?> deleteAccount(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long memberId = userDetails.getMemberId();
         log.info("회원탈퇴 하려는 memberId = {}",memberId);
