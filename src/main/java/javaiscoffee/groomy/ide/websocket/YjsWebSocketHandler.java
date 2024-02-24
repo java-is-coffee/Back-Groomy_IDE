@@ -73,7 +73,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         if (token != null && jwtTokenProvider.validateToken(token)) {
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
-            log.debug("YJS 연결 성공 successful for session: {}", session.getId());
+            log.info("YJS 연결 성공 successful for session: {}", session.getId());
             if (auth.getPrincipal() instanceof CustomUserDetails) {
                 log.debug("YJS 정보 객체 찾음");
                 CustomUserDetails userDetails = (CustomUserDetails) auth.getPrincipal();
@@ -107,7 +107,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
                         return;
                     }
                 }
-                log.debug("프로젝트에 참가함  memberId = {} projectFileId={}",memberId,projectFileId);
+                log.info("프로젝트에 참가함  memberId = {} projectFileId={}",memberId,projectFileId);
                 projectSessionsMap.computeIfAbsent(projectFileId, k -> new ConcurrentHashMap<>()).put(session.getId(), session);
             }
         }
@@ -128,8 +128,8 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         Long projectId = (Long) session.getAttributes().get("projectId");
         String projectFileId = (String) session.getAttributes().get("projectFileId");
         Long memberId = (Long) session.getAttributes().get("memberId");
-        log.debug("==================================================================");
-        log.debug("YJS 세션 종료 memberId = {}, projectId = {}, projectFileId",memberId,projectId,projectFileId);
+        log.info("==================================================================");
+        log.info("YJS 세션 종료 memberId = {}, projectId = {}, projectFileId",memberId,projectId,projectFileId);
         // 세션 종료 및 구독 해제 처리
         if (memberId != null) {
             try {
@@ -141,7 +141,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         Map<String, WebSocketSession> sessions = projectSessionsMap.get(projectFileId);
         if (sessions != null) {
             sessions.remove(session.getId());
-            log.debug("YJS 세션 종료 끝");
+            log.info("YJS 세션 종료 끝");
             if (sessions.isEmpty()) {
                 projectSessionsMap.remove(projectFileId);
             }
