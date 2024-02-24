@@ -147,7 +147,7 @@ public class ProjectService {
         Project project = projectRepository.getProjectByProjectId(projectId);
         //프로젝트가 없으면 예외처리
         //프로젝트에 참가하고 있지 않으면 예외처리
-        if (project == null || isParticipated(memberId, projectId)) {
+        if (project == null || !isParticipated(memberId, projectId)) {
             throw new BaseException(ResponseStatus.FORBIDDEN.getMessage());
         }
         List<Member> projectMemberList = projectRepository.getProjectMemberList(projectId, memberId);
