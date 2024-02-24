@@ -13,6 +13,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+import java.io.EOFException;
+
 /**
  * 추가해야 할 수도 있는 파라미터 관련 예외
  * 파라미터 입력값과 관련하여 발생할 수 있는 예외는 다음과 같습니다:
@@ -86,6 +88,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalStateException.class)
     public ResponseEntity<Object> handleIllegalStateException(IllegalStateException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseStatus.SEND_FAILED);
+    }
+
+    @ExceptionHandler(EOFException.class)
+    public ResponseEntity<Object> handleEOFException(IllegalStateException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ResponseStatus.SESSION_CLOSED);
     }
 
     // 다른 예외 유형을 처리하는 핸들러를 추가할 수 있습니다.

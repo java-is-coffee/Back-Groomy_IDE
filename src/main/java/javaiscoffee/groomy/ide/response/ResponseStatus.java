@@ -14,6 +14,7 @@ public enum ResponseStatus {
     BAD_REQUEST("잘못된 요청입니다."),
     NOT_FOUND("찾을 수 없음"),
     SEND_FAILED("메세지를 전달할 수 없습니다."),
+    SESSION_CLOSED("연결이 종료되어 있어 실패했습니다."),
     ERROR("서버 오류");
     // 기타 상태 코드
 

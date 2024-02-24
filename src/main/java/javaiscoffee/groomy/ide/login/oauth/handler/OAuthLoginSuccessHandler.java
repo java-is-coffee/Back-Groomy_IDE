@@ -11,6 +11,7 @@ import javaiscoffee.groomy.ide.login.oauth.userInfo.CustomOAuthUser;
 import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.member.MemberRepository;
 import javaiscoffee.groomy.ide.member.MemberRole;
+import javaiscoffee.groomy.ide.member.MemberStatus;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.security.BaseException;
 import javaiscoffee.groomy.ide.security.JwtTokenProvider;
@@ -74,6 +75,9 @@ public class OAuthLoginSuccessHandler implements AuthenticationSuccessHandler {
                             OAuthAttributes attributes = OAuthAttributes.of(SocialType.GOOGLE,"sub",oAuth2User.getAttributes());
                             return loginService.saveUser(attributes, SocialType.GOOGLE); // 적절한 SocialType 지정 필요
                         });
+                if(member.getStatus() == MemberStatus.DELETED) {
+                    throw new BaseException(ResponseStatus.BAD_REQUEST.getMessage());
+                }
                 log.info("찾은 로그인 멤버 = {}",member);
                 memberId = member.getMemberId();
             }
