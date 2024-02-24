@@ -25,7 +25,7 @@ import java.util.Set;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"comment", "board"})
+@ToString(exclude = {"comment", "board", "projectMembers", "projectChat"})
 @Table(name = "member")
 @JsonIdentityInfo(
         generator = ObjectIdGenerators.PropertyGenerator.class,
