@@ -50,7 +50,9 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
             if (session.isOpen()) {
                 try {
                     session.sendMessage(message);
-//                    log.info("YJS 메시지 전달 projectId = {} => 세션 ID = {}",projectFileId, session);
+                    Map<String, Object> attributes = session.getAttributes();
+                    Long memberId = (Long) attributes.get("memberId");
+                    log.info("YJS 메시지 전달 => memberId = {}, projectId = {} => 세션 ID = {}",memberId, projectFileId, session);
                 } catch (Exception e) {
 //                    log.error("YJS 메세지 전송 실패 projectFileId = {}, session = {}", projectFileId, session);
                 }
