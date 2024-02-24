@@ -189,6 +189,7 @@ public class FileService {
                 fileDto.setName(path.getFileName().toString());
                 fileDto.setPath(rootPath.relativize(path).toString());
                 fileDto.setLastUpdatedTime(attrs.lastModifiedTime().toString());
+                log.info("탐색하는 파일 id = {}",fileDto.getId());
 
                 if (attrs.isDirectory()) {
                     fileDto.setType(FileType.FOLDER);
