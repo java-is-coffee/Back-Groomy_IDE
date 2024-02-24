@@ -29,6 +29,11 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
     private final JwtTokenProvider jwtTokenProvider;
     private final ProjectService projectService;
     private final SubscriptionManager subscriptionManager; // SubscriptionManager 추가
+
+    /**
+     * 첫 번째 String 키값 = projectFileId
+     * 두 번째 String 키값 = 세션ID
+     */
     private final Map<String, Map<String, WebSocketSession>> projectSessionsMap = new ConcurrentHashMap<>();
 
     @Override
@@ -70,7 +75,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         String projectFileId = getProjectFileId(session);
         String token = extractQueryParam(session.getUri(), "tempToken");
         //토큰 검증 성공
-        if (token != null && jwtTokenProvider.validateToken(token)) {
+        if (token != null) {
             Authentication auth = jwtTokenProvider.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(auth);
             log.info("YJS 연결 성공 successful for session: {}, projectFileId = {}", session.getId(),projectFileId);
