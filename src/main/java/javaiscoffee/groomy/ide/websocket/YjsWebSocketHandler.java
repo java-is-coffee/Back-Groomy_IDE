@@ -46,13 +46,15 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
 
     private void broadcastMessageToProject(String projectFileId, BinaryMessage message) {
         Map<String, WebSocketSession> sessions = projectSessionsMap.getOrDefault(projectFileId, new ConcurrentHashMap<>());
+        int count = 0;
         for (WebSocketSession session : sessions.values()) {
             if (session.isOpen()) {
                 try {
                     session.sendMessage(message);
                     Map<String, Object> attributes = session.getAttributes();
                     Long memberId = (Long) attributes.get("memberId");
-                    log.info("YJS 메시지 전달 => memberId = {}, projectId = {} => 세션 ID = {}",memberId, projectFileId, session);
+                    count++;
+//                    log.info("YJS 메시지 전달 => count = {} memberId = {}, projectId = {} => 세션 ID = {}",count++,memberId, projectFileId, session);
                 } catch (Exception e) {
 //                    log.error("YJS 메세지 전송 실패 projectFileId = {}, session = {}", projectFileId, session);
                 }
@@ -61,6 +63,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
 //                log.error("YJS 세션 끊겨서 못 보냄 세션 ID = {}",session);
             }
         }
+        log.info("YJS 메세지 전달 끝 = {}개의 세션",count);
     }
 
     @Override
