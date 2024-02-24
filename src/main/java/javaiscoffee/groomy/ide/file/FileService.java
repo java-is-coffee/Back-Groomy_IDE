@@ -79,7 +79,13 @@ public class FileService {
                 //디렉토리가 없으면 생성
                 Files.createDirectories(fullPath.getParent());
                 //파일에 내용쓰기
-                Files.writeString(fullPath, data.getContent(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                if(Files.exists(fullPath)) {
+                    // 기존 파일이 있으면 내용만 업데이트
+                    Files.writeString(fullPath, data.getContent(), StandardOpenOption.TRUNCATE_EXISTING);
+                } else {
+                    // 파일이 없는 경우, 새로 생성하고 내용 쓰기
+                    Files.writeString(fullPath, data.getContent(), StandardOpenOption.CREATE);
+                }
             }
             //폴더 생성
             else if (data.getType() == FileType.FOLDER) {
