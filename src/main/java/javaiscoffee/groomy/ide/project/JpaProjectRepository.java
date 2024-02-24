@@ -106,7 +106,7 @@ public class JpaProjectRepository {
      */
     public boolean isParticipated(ProjectMemberId projectMemberId) {
         ProjectMember projectMember = em.find(ProjectMember.class, projectMemberId);
-        if(projectMember == null || projectMember.getParticipated() == false) {
+        if(projectMember == null || !projectMember.getParticipated()) {
             return false;
         }
         return true;
@@ -114,7 +114,7 @@ public class JpaProjectRepository {
 
     public boolean isInvited(ProjectMemberId projectMemberId) {
         ProjectMember projectMember = em.find(ProjectMember.class, projectMemberId);
-        if(projectMember == null || projectMember.getParticipated() == true) {
+        if(projectMember == null || projectMember.getParticipated()) {
             return false;
         }
         return true;
