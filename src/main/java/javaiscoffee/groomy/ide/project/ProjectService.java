@@ -146,8 +146,8 @@ public class ProjectService {
     public List<FindMemberByEmailResponseDto> getProjectMemberList(Long memberId, Long projectId) {
         Project project = projectRepository.getProjectByProjectId(projectId);
         //프로젝트가 없으면 예외처리
-        //요청한 멤버가 프로젝트 생성자가 아니면 예외 처리 => 프로젝트에 참가하고 있는지도 같이 검사됨
-        if (project == null || !project.getMemberId().getMemberId().equals(memberId)) {
+        //프로젝트에 참가하고 있지 않으면 예외처리
+        if (project == null || isParticipated(memberId, projectId)) {
             throw new BaseException(ResponseStatus.FORBIDDEN.getMessage());
         }
         List<Member> projectMemberList = projectRepository.getProjectMemberList(projectId, memberId);
