@@ -128,7 +128,8 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         Long projectId = (Long) session.getAttributes().get("projectId");
         String projectFileId = (String) session.getAttributes().get("projectFileId");
         Long memberId = (Long) session.getAttributes().get("memberId");
-        log.debug("세션 종료 memberId = {}, projectId = {}",memberId,projectFileId);
+        log.debug("==================================================================");
+        log.debug("YJS 세션 종료 memberId = {}, projectId = {}, projectFileId",memberId,projectId,projectFileId);
         // 세션 종료 및 구독 해제 처리
         if (memberId != null) {
             try {
@@ -140,6 +141,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         Map<String, WebSocketSession> sessions = projectSessionsMap.get(projectFileId);
         if (sessions != null) {
             sessions.remove(session.getId());
+            log.debug("YJS 세션 종료 끝");
             if (sessions.isEmpty()) {
                 projectSessionsMap.remove(projectFileId);
             }
