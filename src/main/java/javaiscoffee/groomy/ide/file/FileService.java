@@ -185,7 +185,7 @@ public class FileService {
             for (Path path : stream) {
                 BasicFileAttributes attrs = Files.readAttributes(path, BasicFileAttributes.class);
                 FileResponseDto fileDto = new FileResponseDto();
-                fileDto.setId(attrs.creationTime().toString() + path.getFileName());
+                fileDto.setId(Files.getAttribute(path,"unix:ino").toString());
                 fileDto.setName(path.getFileName().toString());
                 fileDto.setPath(rootPath.relativize(path).toString());
                 fileDto.setLastUpdatedTime(attrs.lastModifiedTime().toString());
