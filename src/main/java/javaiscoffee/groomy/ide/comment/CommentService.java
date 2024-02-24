@@ -158,7 +158,7 @@ public class CommentService {
         Board getBoard = boardRepository.findByBoardId(boardId).get();
         // 가져온 board에 속한 ACTIVE 상태인 모든 댓글 가져옴
         List<Comment> commentList = commentRepository.findCommentByBoardId(getBoard, CommentStatus.ACTIVE);
-        log.info("해당 게시판에 딸린 모든 댓글들 = {}", commentList);
+//        log.info("해당 게시판에 딸린 모든 댓글들 = {}", commentList);
         return toResponseCommentDtoList(commentList);
     }
 
@@ -170,7 +170,7 @@ public class CommentService {
     public List<ResponseCommentDto> getCommentByMemberId(Long memberId) {
         Member getMember = memberRepository.findByMemberId(memberId).get();
         List<Comment> commentList = commentRepository.findCommentByMemberId(getMember, CommentStatus.ACTIVE);
-        log.info("해당 사용자가 작성한 모든 댓글들 = {}", commentList);
+//        log.info("해당 사용자가 작성한 모든 댓글들 = {}", commentList);
         return toResponseCommentDtoList(commentList);
     }
 

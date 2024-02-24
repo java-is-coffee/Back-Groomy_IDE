@@ -15,7 +15,7 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@ToString(exclude = {"projectMembers", "projectChat"})
 @Table(name = "project")
 public class Project {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
