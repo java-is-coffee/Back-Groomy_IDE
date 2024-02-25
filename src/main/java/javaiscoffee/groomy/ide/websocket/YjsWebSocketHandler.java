@@ -118,7 +118,18 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
                     }
                 }
                 log.info("프로젝트에 참가함  memberId = {} projectFileId={}",memberId,projectFileId);
-                projectSessionsMap.computeIfAbsent(projectFileId, k -> new ConcurrentHashMap<>()).put(session.getId(), session);
+                // 세션이 이미 등록되어 있으면 제외
+                Map<String, WebSocketSession> sessions = projectSessionsMap.get(projectFileId);
+                if (sessions == null) {
+                    sessions = new ConcurrentHashMap<>();
+                    sessions.put(session.getId(), session);
+                    projectSessionsMap.put(projectFileId, sessions);
+                } else {
+                    // If the session already exists, do not add it again
+                    if (!sessions.containsKey(session.getId())) {
+                        sessions.put(session.getId(), session);
+                    }
+                }
             }
         }
         //토큰 검증 실패
