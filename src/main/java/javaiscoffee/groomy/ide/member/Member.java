@@ -154,7 +154,7 @@ public class Member implements UserDetails {
 //        this.setName("삭제된 멤버");
 //        this.setNickname("삭제된 멤버");
         this.setUpdatedDate(LocalDate.now());
-//        this.email = "deletedMember"+memberId+"@groomy.com";
+        this.email = "deleted"+this.email;
     }
 
 
