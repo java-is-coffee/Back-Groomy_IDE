@@ -10,6 +10,7 @@ import javaiscoffee.groomy.ide.member.Member;
 import javaiscoffee.groomy.ide.member.MemberRole;
 import javaiscoffee.groomy.ide.login.oauth.OAuthAttributes;
 import javaiscoffee.groomy.ide.login.oauth.SocialType;
+import javaiscoffee.groomy.ide.member.MemberStatus;
 import javaiscoffee.groomy.ide.response.ResponseStatus;
 import javaiscoffee.groomy.ide.security.BaseException;
 import javaiscoffee.groomy.ide.security.JwtTokenProvider;
@@ -48,6 +49,8 @@ public class LoginService {
      */
     public TokenDto login(LoginDto loginDto) {
         log.info("로그인 검사 시작 loginDto={}",loginDto);
+        Member member = memberRepository.findByEmail(loginDto.getEmail()).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
+        if(member.getStatus() == MemberStatus.DELETED) throw new BaseException(ResponseStatus.NOT_FOUND.getMessage());
         // 1. Login ID/PW 를 기반으로 Authentication 객체 생성
         // 이때 authentication 는 인증 여부를 확인하는 authenticated 값이 false
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword());

@@ -30,9 +30,8 @@ public class MemberService {
      * 반환 데이터 : 이메일에 해당하는 MemberInformationDto
      */
     public MemberInformationResponseDto getMemberInformation(String email) {
-        Optional<Member> memberOptional = memberRepository.findByEmail(email);
-        if (memberOptional.isPresent()) {
-            Member member = memberOptional.get();
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
+        if (member.getStatus() != MemberStatus.DELETED) {
             log.info("정보 조회하려고 찾은 멤버 = {}", member);
 
             // MemberInformationDto의 내부 Data 객체를 생성하고 정보 복사
@@ -55,9 +54,9 @@ public class MemberService {
     public MemberInformationResponseDto updateMemberInformation(String email, MemberInformationDto memberInformationDto) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
 
-        //멤버 조회 실패했을 경우 (포스트맨으로 다르게 보내는 경우 등)
+        //멤버 조회 실패했을 경우 (포스트맨으로 다르게 보내는 경우 등), 멤버가 삭제된 멤버인 경우
         if(!Objects.equals(member.getMemberId(), memberInformationDto.getData().getMemberId())
-        || !member.getEmail().equals(memberInformationDto.getData().getEmail())) {
+        || !member.getEmail().equals(memberInformationDto.getData().getEmail()) || member.getStatus() == MemberStatus.DELETED) {
             return null;
         }
 
@@ -84,26 +83,25 @@ public class MemberService {
     @Transactional
     public Boolean resetPassword(String email, String password) {
         Member member = memberRepository.findByEmail(email).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
-
-        //멤버 조회 실패했을 경우 (포스트맨으로 다르게 보내는 경우 등)
+        if(member.getStatus() == MemberStatus.DELETED) {
+            return null;
+        }
 
         log.info("입력받은 비밀번호 = {}",password);
-
         member.setPassword(password);
         member.hashPassword(passwordEncoder);
-
         log.info("변경된 비밀번호를 담은 멤버 = {}",member);
 
         return true;
     }
 
     public FindMemberByEmailResponseDto findMemberByEmail(String email) {
-        Optional<Member> optionalMember = memberRepository.findByEmail(email);
-        if(optionalMember.isEmpty()) {
+        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
+        if(member.getStatus() == MemberStatus.DELETED) {
             return null;
         }
         FindMemberByEmailResponseDto responseDto = new FindMemberByEmailResponseDto();
-        BeanUtils.copyProperties(optionalMember.get(),responseDto);
+        BeanUtils.copyProperties(member,responseDto);
         return responseDto;
     }
 
@@ -114,6 +112,6 @@ public class MemberService {
     @Transactional
     public void deleteAccount(Long memberId) {
         Member member = memberRepository.findByMemberId(memberId).orElseThrow(() -> new BaseException(ResponseStatus.NOT_FOUND.getMessage()));
-        memberRepository.delete(member);
+        member.deleteMember();
     }
 }

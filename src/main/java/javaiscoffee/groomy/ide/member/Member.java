@@ -10,6 +10,7 @@ import javaiscoffee.groomy.ide.chat.ProjectChat;
 import javaiscoffee.groomy.ide.login.oauth.SocialType;
 import javaiscoffee.groomy.ide.project.ProjectMember;
 import lombok.*;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -74,6 +75,9 @@ public class Member implements UserDetails {
     @Setter
     @Column(name = "updated_date")
     private LocalDate updatedDate;
+    @Setter @NotNull
+    @Enumerated(EnumType.STRING)
+    private MemberStatus status;
 
     @PrePersist
     public void PrePersist() {
@@ -84,6 +88,7 @@ public class Member implements UserDetails {
         this.projectChat = new ArrayList<>();
         this.createdDate = LocalDate.now();
         this.updatedDate = LocalDate.now();
+        this.status = MemberStatus.ACTIVE;
     }
 
 
@@ -142,6 +147,14 @@ public class Member implements UserDetails {
      */
     public boolean checkPassword(String plainPassword, PasswordEncoder passwordEncoder) {
         return passwordEncoder.matches(plainPassword,this.password);
+    }
+
+    public void deleteMember() {
+        this.status = MemberStatus.DELETED;
+//        this.setName("삭제된 멤버");
+//        this.setNickname("삭제된 멤버");
+        this.setUpdatedDate(LocalDate.now());
+//        this.email = "deletedMember"+memberId+"@groomy.com";
     }
 
 
