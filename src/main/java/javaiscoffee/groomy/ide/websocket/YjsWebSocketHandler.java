@@ -54,7 +54,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
                     Map<String, Object> attributes = session.getAttributes();
                     Long memberId = (Long) attributes.get("memberId");
                     count++;
-//                    log.info("YJS 메시지 전달 => count = {} memberId = {}, projectId = {} => 세션 ID = {}",count++,memberId, projectFileId, session);
+//                    log.info("YJS 메시지 전달 => count = {} => 세션 ID = {}",count++, session);
                 } catch (Exception e) {
 //                    log.error("YJS 메세지 전송 실패 projectFileId = {}, session = {}", projectFileId, session);
                 }
@@ -118,18 +118,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
                     }
                 }
                 log.info("프로젝트에 참가함  memberId = {} projectFileId={}",memberId,projectFileId);
-                // 세션이 이미 등록되어 있으면 제외
-                Map<String, WebSocketSession> sessions = projectSessionsMap.get(projectFileId);
-                if (sessions == null) {
-                    sessions = new ConcurrentHashMap<>();
-                    sessions.put(session.getId(), session);
-                    projectSessionsMap.put(projectFileId, sessions);
-                } else {
-                    // If the session already exists, do not add it again
-                    if (!sessions.containsKey(session.getId())) {
-                        sessions.put(session.getId(), session);
-                    }
-                }
+                projectSessionsMap.computeIfAbsent(projectFileId, k -> new ConcurrentHashMap<>()).put(session.getId(), session);
             }
         }
         //토큰 검증 실패
@@ -161,7 +150,7 @@ public class YjsWebSocketHandler extends AbstractWebSocketHandler {
         Map<String, WebSocketSession> sessions = projectSessionsMap.get(projectFileId);
         if (sessions != null) {
             sessions.remove(session.getId());
-            log.info("YJS 세션 종료 끝");
+            log.info("YJS 세션 종료 끝 = {}",session.getId());
             if (sessions.isEmpty()) {
                 projectSessionsMap.remove(projectFileId);
             }
