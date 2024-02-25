@@ -189,6 +189,7 @@ public class ProjectService {
         ProjectCreateRequestDto.Data data = requestDto.getData();
         oldProject.setProjectName(data.getProjectName());
         oldProject.setDescription(data.getDescription());
+        oldProject.setLanguage(data.getLanguage());
         oldProject.setUpdatedDate(LocalDate.now());
 
         //응답 객체 매핑
